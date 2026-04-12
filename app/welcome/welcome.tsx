@@ -16,6 +16,7 @@ export function Welcome() {
               src={logoDark}
               alt="React Router"
               className="hidden w-full dark:block"
+              
             />
           </div>
         </header>
