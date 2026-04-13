@@ -1,13 +1,13 @@
 import type { Route } from "./+types/home";
-import { Welcome } from "../welcome/welcome";
-
+import ShopIndex from "./_shop.index";
 export function meta({}: Route.MetaArgs) {
   return [
-    { title: "New React Router App" },
-    { name: "description", content: "Welcome to React Router!" },
+    { title: "MatVic Store | Accesorios para Celulares" },
+    { name: "description", content: "La mejor tienda de accesorios para smartphones en Tacna." },
   ];
 }
 
 export default function Home() {
-  return <Welcome />;
+  // Aquí renderizamos el contenido de la tienda
+  return <ShopIndex />;
 }
