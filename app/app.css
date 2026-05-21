@@ -1,1 +1,46 @@
 @import "tailwindcss";
+
+@layer utilities {
+  /* ── BACKGROUND ─────────────────────────────────────────────── */
+  .bg-pickled-bluewood-50  { background-color: hsl(215, 46%, 95%); }
+  .bg-pickled-bluewood-100 { background-color: hsl(214, 47%, 87%); }
+  .bg-pickled-bluewood-200 { background-color: hsl(212, 48%, 76%); }
+  .bg-pickled-bluewood-300 { background-color: hsl(210, 48%, 65%); }
+  .bg-pickled-bluewood-400 { background-color: hsl(210, 32%, 55%); }
+  .bg-pickled-bluewood-500 { background-color: hsl(210, 27%, 45%); }
+  .bg-pickled-bluewood-600 { background-color: hsl(210, 28%, 37%); }
+  .bg-pickled-bluewood-700 { background-color: hsl(210, 29%, 29%); }
+  .bg-pickled-bluewood-800 { background-color: hsl(208, 43%,  7%); }
+  .bg-pickled-bluewood-900 { background-color: hsl(208, 50%,  4%); }
+
+  /* Hover backgrounds */
+  .hover\:bg-pickled-bluewood-50:hover  { background-color: hsl(215, 46%, 95%); }
+  .hover\:bg-pickled-bluewood-100:hover { background-color: hsl(214, 47%, 87%); }
+  .hover\:bg-pickled-bluewood-700:hover { background-color: hsl(210, 29%, 29%); }
+
+  /* ── TEXT ────────────────────────────────────────────────────── */
+  .text-pickled-bluewood-400 { color: hsl(210, 32%, 55%); }
+  .text-pickled-bluewood-500 { color: hsl(210, 27%, 45%); }
+  .text-pickled-bluewood-600 { color: hsl(210, 28%, 37%); }
+  .text-pickled-bluewood-700 { color: hsl(210, 29%, 29%); }
+  .text-pickled-bluewood-800 { color: hsl(208, 43%,  7%); }
+
+  /* ── BORDER ──────────────────────────────────────────────────── */
+  .border-pickled-bluewood-100 { border-color: hsl(214, 47%, 87%); }
+  .border-pickled-bluewood-200 { border-color: hsl(212, 48%, 76%); }
+  .border-pickled-bluewood-700 { border-color: hsl(210, 29%, 29%); }
+
+  /* ── RING / FOCUS ────────────────────────────────────────────── */
+  .ring-pickled-bluewood-600       { --tw-ring-color: hsl(210, 28%, 37%); }
+  .focus\:ring-pickled-bluewood-600:focus { --tw-ring-color: hsl(210, 28%, 37%); }
+
+  /* ── DIVIDE ──────────────────────────────────────────────────── */
+  .divide-pickled-bluewood-100 > * + * { border-color: hsl(214, 47%, 87%); }
+
+  /* ── GRADIENT stops ─────────────────────────────────────────── */
+  .from-pickled-bluewood-900\/50 { --tw-gradient-from: hsl(208, 50%, 4% / 0.5); }
+  .via-pickled-bluewood-800\/40  { --tw-gradient-via:  hsl(208, 43%, 7% / 0.4); }
+  .to-pickled-bluewood-900\/50   { --tw-gradient-to:   hsl(208, 50%, 4% / 0.5); }
+  .to-pickled-bluewood-600       { --tw-gradient-to:   hsl(210, 28%, 37%); }
+  .hover\:to-pickled-bluewood-700:hover { --tw-gradient-to: hsl(210, 29%, 29%); }
+}

@@ -1,138 +1,144 @@
-import { useState } from "react";
-import { useNavigate } from "react-router"; // Estándar de v7
-import { ExternalLink, Lock, User, Smartphone } from "lucide-react";
+import { useState, type SVGProps } from "react";
+import { useNavigate } from "react-router";
+import { useAuth } from "~/context/auth";
+
+function FacebookIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" {...props}>
+      <path d="M24 12.073C24 5.405 18.627 0 12 0S0 5.405 0 12.073C0 18.099 4.388 23.094 10.125 24v-8.437H7.078v-3.49h3.047V9.414c0-3.021 1.792-4.691 4.533-4.691 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.928-1.956 1.88v2.258h3.328l-.532 3.49h-2.796V24C19.612 23.094 24 18.099 24 12.073z" />
+    </svg>
+  );
+}
 
 export default function Login() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+
+  const { loginAdmin, loginCustomer } = useAuth();
   const navigate = useNavigate();
-  
-  const handleLogout = () => {
-    localStorage.removeItem("user");
-    localStorage.removeItem("token");
-    navigate("/login");
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+
+    if (!username.trim() || !password.trim()) {
+      setError("Por favor completa todos los campos.");
+      return;
+    }
+
     setIsLoading(true);
 
+    // Simular latencia de red
+    await new Promise((r) => setTimeout(r, 500));
+
     try {
-        setIsLoading(true);
-      
-        // Simulación de delay de red
-        await new Promise(resolve => setTimeout(resolve, 800));
-      
-        if (username === "admin" && password === "admin123") {
-          const mockResponse = {
-            user: { 
-              username: "admin", 
-              role: "dueño", // O "empleado" para probar esa vista
-              nombre: "Admin MatVic"
-            },
-            token: "fake-jwt-token-123"
-          };
-      
-          localStorage.setItem("user", JSON.stringify(mockResponse.user));
-          localStorage.setItem("token", mockResponse.token);
-      
-          // Redirección según el rol que definas arriba
-          if (mockResponse.user.role === "dueño") {
-            navigate("/admin");
-          } else {
-            navigate("/admin/ventas");
-          }
-        } else {
-          throw new Error("Usuario o contraseña incorrectos");
-        }
-      } catch (err: any) {
-        setError(err.message);
-      } finally {
-        setIsLoading(false);
+      // Primero intenta como admin
+      loginAdmin(username, password);
+      navigate("/admin");
+    } catch {
+      try {
+        // Luego intenta como cliente
+        loginCustomer(username, password);
+        navigate("/");
+      } catch {
+        setError("Usuario o contraseña incorrectos.");
       }
+    }
+
+    setIsLoading(false);
   };
 
   return (
-    <div className="relative flex justify-center items-center min-h-screen overflow-hidden bg-slate-900">
-      {/* Botón de Facebook Flotante */}
+    <div className="relative flex justify-center items-center min-h-screen overflow-hidden">
+      {/* Ícono de Facebook */}
       <a
         href="https://www.facebook.com/matviccelulares"
         target="_blank"
         rel="noopener noreferrer"
-        aria-label="Facebook - MatVic Celulares"
-        className="absolute top-6 left-6 z-20 p-3 bg-white/10 hover:bg-white/20 backdrop-blur-md rounded-full border border-white/20 transition-all hover:scale-110"
+        className="absolute top-6 left-6 z-20 p-3 bg-white/95 hover:bg-white rounded-full shadow-xl transition-all duration-300 hover:scale-110 hover:shadow-2xl border border-blue-100/50"
+        aria-label="Visitar nuestra página de Facebook"
       >
-        <ExternalLink className="h-6 w-6 text-blue-400" />
+        <FacebookIcon className="h-6 w-6 text-[#1877F2]" />
       </a>
 
-      {/* Fondo con imagen difuminada (Asegúrate de tener Matvic.jpeg en /public) */}
-      <div 
-        className="absolute inset-0 bg-cover bg-center opacity-40"
-        style={{ backgroundImage: 'url(/Matvic.jpeg)', filter: 'blur(10px)' }}
+      {/* Fondo con blur */}
+      <div
+        className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+        style={{
+          backgroundImage: "url(/Matvic.jpeg)",
+          filter: "blur(8px)",
+          transform: "scale(1.1)",
+        }}
       />
+      {/* Overlay de gradiente */}
+      <div className="absolute inset-0 bg-gradient-to-br from-pickled-bluewood-900/50 via-pickled-bluewood-800/40 to-pickled-bluewood-900/50" />
 
-      {/* Card de Login con efecto Glassmorphism */}
-      <div className="relative z-10 w-full max-w-md p-8 mx-4 bg-white/10 backdrop-blur-2xl rounded-3xl border border-white/20 shadow-2xl">
+      {/* Tarjeta de login */}
+      <div className="relative z-10 bg-white/20 backdrop-blur-xl p-8 rounded-2xl shadow-2xl w-full max-w-md border border-white/30">
         <div className="text-center mb-8">
-          <div className="bg-blue-600 w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg rotate-3">
-            <Smartphone className="text-white h-8 w-8" />
-          </div>
-          <h2 className="text-3xl font-black text-white tracking-tight">SAVI v1.0</h2>
-          <p className="text-blue-200 text-sm font-medium">Sistema de Gestión MatVic</p>
+          <h2 className="text-3xl font-bold mb-2 text-white drop-shadow-lg">
+            Iniciar Sesión
+          </h2>
+          <div className="w-20 h-1 bg-gradient-to-r from-[#1877F2] to-pickled-bluewood-600 mx-auto rounded-full" />
         </div>
 
         {error && (
-          <div className="mb-6 p-3 bg-red-500/20 border border-red-500/50 text-red-200 text-xs rounded-xl text-center font-bold animate-pulse">
+          <div className="mb-6 p-4 bg-red-500/80 backdrop-blur-sm border-l-4 border-red-600 text-white rounded-lg text-sm shadow-sm">
             {error}
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-5">
-          <div className="space-y-2">
-            <label className="text-xs font-bold text-blue-200 uppercase ml-1">Usuario</label>
-            <div className="relative">
-              <User className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-blue-300" />
-              <input
-                type="text"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                className="w-full pl-12 pr-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white outline-none focus:ring-2 focus:ring-blue-500 transition-all placeholder:text-white/20"
-                placeholder="Ingresa tu usuario"
-                required
-              />
-            </div>
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div>
+            <label
+              htmlFor="username"
+              className="block mb-2 text-sm font-semibold text-white drop-shadow-md"
+            >
+              Usuario
+            </label>
+            <input
+              type="text"
+              id="username"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              className="w-full px-4 py-3 border-2 border-white/40 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#1877F2]/50 focus:border-[#1877F2] transition-all bg-white/30 backdrop-blur-sm text-white placeholder-white/60"
+              placeholder="admin"
+              required
+              disabled={isLoading}
+              autoComplete="username"
+            />
           </div>
 
-          <div className="space-y-2">
-            <label className="text-xs font-bold text-blue-200 uppercase ml-1">Contraseña</label>
-            <div className="relative">
-              <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-blue-300" />
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full pl-12 pr-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white outline-none focus:ring-2 focus:ring-blue-500 transition-all placeholder:text-white/20"
-                placeholder="••••••••"
-                required
-              />
-            </div>
+          <div>
+            <label
+              htmlFor="password"
+              className="block mb-2 text-sm font-semibold text-white drop-shadow-md"
+            >
+              Contraseña
+            </label>
+            <input
+              type="password"
+              id="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full px-4 py-3 border-2 border-white/40 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#1877F2]/50 focus:border-[#1877F2] transition-all bg-white/30 backdrop-blur-sm text-white placeholder-white/60"
+              placeholder="••••••••"
+              required
+              disabled={isLoading}
+              autoComplete="current-password"
+            />
           </div>
 
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full bg-blue-600 hover:bg-blue-500 text-white py-4 rounded-xl font-black text-lg shadow-xl shadow-blue-900/20 transition-all active:scale-95 disabled:opacity-50"
+            className="w-full bg-gradient-to-r from-[#1877F2] to-pickled-bluewood-600 text-white py-3.5 rounded-xl font-semibold hover:from-[#166FE5] hover:to-pickled-bluewood-700 hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
           >
-            {isLoading ? "Validando..." : "INGRESAR AL SISTEMA"}
+            {isLoading ? "Verificando..." : "Ingresar"}
           </button>
         </form>
-
-        <p className="mt-8 text-center text-white/40 text-[10px] uppercase tracking-[0.2em]">
-          Tacna, Perú • 2026
-        </p>
       </div>
     </div>
   );

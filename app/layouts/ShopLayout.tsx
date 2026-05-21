@@ -1,69 +1,81 @@
 import { Link, Outlet, useNavigate } from "react-router";
-import { ShoppingCart, User, Smartphone, LogOut } from "lucide-react";
-import { useEffect, useState } from "react";
-
-interface UserData {
-    username: string;
-    role: 'dueño' | 'empleado' | 'cliente';
-    nombre?: string;
-  }
+import { ShoppingCart, User, Smartphone, LogOut, LayoutDashboard } from "lucide-react";
+import { useAuth } from "~/context/auth";
 
 export default function ShopLayout() {
-// 2. Dile al useState que puede ser UserData o null
-const [user, setUser] = useState<UserData | null>(null);
-  
-const navigate = useNavigate();
+  const { user, isAuthenticated, isAdmin, logout } = useAuth();
+  const navigate = useNavigate();
 
-useEffect(() => {
-  const userData = localStorage.getItem('user');
-  if (userData) {
-    try {
-      // Al parsear, TypeScript ahora sabe que cumple con UserData
-      setUser(JSON.parse(userData));
-    } catch (e) {
-      console.error("Error al parsear usuario");
-    }
-  }
-}, []);
+  const handleLogout = () => {
+    logout();
+    navigate("/login");
+  };
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <header className="bg-[#2d3e50] text-white shadow-md px-6 h-16 flex items-center justify-between">
-        <Link to="/" className="flex items-center gap-2">
+    <div className="min-h-screen flex flex-col bg-slate-50">
+      <header className="bg-[#2d3e50] text-white shadow-md px-6 h-16 flex items-center justify-between sticky top-0 z-40">
+        {/* Logo */}
+        <Link to="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
           <Smartphone className="h-7 w-7 text-blue-400" />
-          <span className="font-bold text-xl">MatVic Store</span>
+          <span className="font-bold text-xl tracking-tight">MatVic Store</span>
         </Link>
 
-        <div className="flex items-center gap-6">
-          {/* Si el usuario es Admin/Empleado, mostrar link al Panel */}
-          {user && (user.role === 'dueño' || user.role === 'empleado') && (
-            <Link to="/admin" className="text-xs font-bold bg-blue-600 px-3 py-1 rounded-full hover:bg-blue-500 transition-colors">
-              VOLVER AL PANEL
+        {/* Acciones del header */}
+        <div className="flex items-center gap-5">
+          {/* Si el usuario es admin/empleado, link al panel */}
+          {isAuthenticated && isAdmin && (
+            <Link
+              to="/admin"
+              className="flex items-center gap-1.5 text-xs font-bold bg-blue-600 px-3 py-1.5 rounded-full hover:bg-blue-500 transition-colors"
+            >
+              <LayoutDashboard className="h-3.5 w-3.5" />
+              Panel Admin
             </Link>
           )}
 
-          <Link to="/carrito" className="hover:text-blue-400">
+          {/* Carrito */}
+          <button
+            type="button"
+            className="hover:text-blue-400 transition-colors relative"
+            aria-label="Carrito de compras"
+          >
             <ShoppingCart className="h-6 w-6" />
-          </Link>
+          </button>
 
-          {/* Si NO hay usuario, mostrar botón de Login */}
-          {!user ? (
-            <Link to="/login" className="flex items-center gap-1 hover:text-blue-400 font-medium text-sm">
-              <User className="h-5 w-5" /> Iniciar Sesión
+          {/* Auth */}
+          {!isAuthenticated ? (
+            <Link
+              to="/login"
+              className="flex items-center gap-1.5 hover:text-blue-400 font-medium text-sm transition-colors"
+            >
+              <User className="h-5 w-5" />
+              Iniciar Sesión
             </Link>
           ) : (
-            <div className="flex items-center gap-2 text-sm border-l border-white/20 pl-4">
-              <span className="text-blue-300 font-bold">
-                {user?.username} 
+            <div className="flex items-center gap-3 border-l border-white/20 pl-5">
+              <span className="text-blue-300 font-bold text-sm">
+                {user?.nombre ?? user?.username}
               </span>
+              <button
+                type="button"
+                onClick={handleLogout}
+                title="Cerrar sesión"
+                className="text-slate-400 hover:text-red-400 transition-colors"
+              >
+                <LogOut className="h-4 w-4" />
+              </button>
             </div>
           )}
         </div>
       </header>
 
-      <main className="flex-1">
+      <main className="flex-1 container mx-auto px-6 py-8 max-w-7xl">
         <Outlet />
       </main>
+
+      <footer className="bg-[#2d3e50] text-slate-400 text-xs text-center py-4 mt-auto">
+        © {new Date().getFullYear()} MatVic Store · Tacna, Perú
+      </footer>
     </div>
   );
 }
