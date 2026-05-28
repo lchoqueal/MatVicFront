@@ -167,14 +167,15 @@ export default function Dashboard() {
         </button>
       </div>
 
-      {/* 1. MÉTRICAS PRINCIPALES — filtradas por local */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      {/* 1. MÉTRICAS — 1 col móvil, 2 sm, 4 lg */}
+      <div className="grid gap-3 sm:gap-4 grid-cols-2 lg:grid-cols-4">
         <MetricCard
           title="Ventas del Mes"
           value={isLoading ? "—" : `S/ ${totalLocalMes.toLocaleString("es-PE", { minimumFractionDigits: 2 })}`}
           icon={<DollarSign className="h-4 w-4" />}
           subtitle={`${cantidadLocalMes} transacciones en ${currentStore.name}`}
           isLoading={isLoading}
+          delay={0}
         />
         <MetricCard
           title="Productos en Stock"
@@ -183,6 +184,7 @@ export default function Dashboard() {
           subtitle={`${inventario?.productosBajo ?? 0} con stock bajo`}
           trend={inventario && inventario.productosBajo > 0 ? "negative" : undefined}
           isLoading={isLoading}
+          delay={75}
         />
         <MetricCard
           title="Valor Inventario"
@@ -190,6 +192,7 @@ export default function Dashboard() {
           icon={<ShoppingCart className="h-4 w-4" />}
           subtitle={currentStore.name}
           isLoading={isLoading}
+          delay={150}
         />
         <MetricCard
           title="Promedio por Venta"
@@ -197,12 +200,16 @@ export default function Dashboard() {
           icon={<TrendingUp className="h-4 w-4" />}
           subtitle={`Este mes — ${currentStore.name}`}
           isLoading={isLoading}
+          delay={225}
         />
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2">
+      <div className="grid gap-4 sm:gap-6 grid-cols-1 md:grid-cols-2">
         {/* 2. GRÁFICO DE BARRAS */}
-        <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
+        <div
+          className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm animate-in fade-in slide-in-from-left-4 duration-500"
+          style={{ animationDelay: "200ms", animationFillMode: "both" }}
+        >
           <div className="mb-6">
             <h3 className="text-lg font-bold text-slate-800">Evolución de Ventas</h3>
             <p className="text-sm text-slate-500">Últimos 6 meses en {currentStore.name}</p>
@@ -239,7 +246,10 @@ export default function Dashboard() {
         </div>
 
         {/* 3. ALERTAS DE STOCK */}
-        <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
+        <div
+          className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm animate-in fade-in slide-in-from-right-4 duration-500"
+          style={{ animationDelay: "250ms", animationFillMode: "both" }}
+        >
           <div className="mb-6 flex items-center justify-between">
             <div>
               <h3 className="text-lg font-bold text-slate-800">Alertas de Stock</h3>
@@ -261,8 +271,12 @@ export default function Dashboard() {
             </div>
           ) : (
             <div className="space-y-3 max-h-[220px] overflow-y-auto pr-1">
-              {alertas.map((alerta) => (
-                <div key={alerta.idProducto} className="flex items-center justify-between p-3 rounded-lg bg-slate-50 border border-slate-100">
+              {alertas.map((alerta, i) => (
+                <div
+                  key={alerta.idProducto}
+                  className="flex items-center justify-between p-3 rounded-lg bg-slate-50 border border-slate-100 hover:border-orange-200 hover:bg-orange-50/40 transition-all duration-200 animate-in fade-in slide-in-from-bottom-2"
+                  style={{ animationDelay: `${i * 60}ms`, animationFillMode: "both" }}
+                >
                   <div>
                     <p className="text-sm font-bold text-slate-700 line-clamp-1">{alerta.nombre}</p>
                     <p className="text-[11px] text-slate-400">
@@ -284,7 +298,9 @@ export default function Dashboard() {
       </div>
 
       {/* 4. ÚLTIMAS BOLETAS — filtradas por local */}
-      <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+      <div
+        className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-500"
+        style={{ animationDelay: "300ms", animationFillMode: "both" }}>
         <div className="p-6 border-b border-slate-100 bg-slate-50/50">
           <h3 className="font-bold text-slate-800">Últimas Transacciones — {currentStore.name}</h3>
         </div>
@@ -300,21 +316,25 @@ export default function Dashboard() {
               No hay transacciones en {currentStore.name} este mes
             </div>
           ) : (
-            boletasMesFiltradas.slice(0, 5).map((boleta) => (
-              <div key={boleta.id_boleta} className="flex items-center justify-between p-4 border-b border-slate-100 last:border-0 hover:bg-slate-50 transition-colors">
-                <div className="flex items-center gap-4">
-                  <div className="bg-blue-100 p-2 rounded-lg text-blue-600">
-                    <ShoppingCart className="h-5 w-5" />
+            boletasMesFiltradas.slice(0, 5).map((boleta, i) => (
+              <div
+                key={boleta.id_boleta}
+                className="flex items-center justify-between p-4 border-b border-slate-100 last:border-0 hover:bg-blue-50/40 transition-all duration-200 animate-in fade-in slide-in-from-bottom-2"
+                style={{ animationDelay: `${i * 50 + 350}ms`, animationFillMode: "both" }}
+              >
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="bg-blue-100 p-2 rounded-lg text-blue-600 shrink-0">
+                    <ShoppingCart className="h-4 w-4 sm:h-5 sm:w-5" />
                   </div>
-                  <div>
+                  <div className="min-w-0">
                     <p className="text-sm font-bold text-slate-700">Boleta #{boleta.id_boleta}</p>
-                    <p className="text-xs text-slate-400">
+                    <p className="text-xs text-slate-400 truncate">
                       {new Date(boleta.fecha_emision).toLocaleDateString("es-PE")} • {boleta.metodo_pago}
                     </p>
                   </div>
                 </div>
-                <div className="text-right">
-                  <p className="font-bold text-slate-800">S/ {Number(boleta.total).toFixed(2)}</p>
+                <div className="text-right shrink-0 ml-3">
+                  <p className="font-bold text-slate-800 text-sm">S/ {Number(boleta.total).toFixed(2)}</p>
                   <p className={`text-[10px] font-bold uppercase ${
                     boleta.estado_boleta === "pagado" ? "text-green-600" :
                     boleta.estado_boleta === "cancelado" ? "text-red-500" : "text-yellow-600"
@@ -327,6 +347,7 @@ export default function Dashboard() {
           )}
         </div>
       </div>
+
     </div>
   );
 }
@@ -340,13 +361,17 @@ interface MetricCardProps {
   subtitle: string;
   trend?: "positive" | "negative";
   isLoading?: boolean;
+  delay?: number;
 }
 
-function MetricCard({ title, value, icon, subtitle, trend, isLoading }: MetricCardProps) {
+function MetricCard({ title, value, icon, subtitle, trend, isLoading, delay = 0 }: MetricCardProps) {
   return (
-    <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm hover:border-blue-300 transition-colors group">
+    <div
+      className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm hover:shadow-md hover:-translate-y-0.5 hover:border-blue-200 transition-all duration-300 group animate-in fade-in slide-in-from-bottom-4"
+      style={{ animationDelay: `${delay}ms`, animationFillMode: "both" }}
+    >
       <div className="flex items-center justify-between mb-4">
-        <div className="p-2 bg-slate-100 rounded-lg text-slate-500 group-hover:bg-blue-50 group-hover:text-blue-600 transition-colors">
+        <div className="p-2 bg-slate-100 rounded-lg text-slate-500 group-hover:bg-blue-50 group-hover:text-blue-600 group-hover:scale-110 transition-all duration-300">
           {icon}
         </div>
         {trend && (
@@ -356,7 +381,7 @@ function MetricCard({ title, value, icon, subtitle, trend, isLoading }: MetricCa
         )}
       </div>
       <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider">{title}</h3>
-      <div className={`text-2xl font-black text-slate-800 my-1 ${isLoading ? "animate-pulse bg-slate-200 rounded h-8 w-24" : ""}`}>
+      <div className={`text-2xl font-black text-slate-800 my-1 transition-all duration-300 ${isLoading ? "animate-pulse bg-slate-200 rounded h-8 w-24" : ""}`}>
         {!isLoading && value}
       </div>
       <p className="text-[11px] text-slate-500 font-medium">{subtitle}</p>

@@ -123,10 +123,25 @@ export default function InventoryManagement() {
 
       {/* 1. RESUMEN DE INVENTARIO */}
       <div className="grid gap-4 md:grid-cols-4">
-        <InventoryStat title="Total SKU"    value={isLoading ? "—" : products.length}         subtitle="productos únicos"  />
-        <InventoryStat title="Stock Físico" value={isLoading ? "—" : totalStock}               subtitle="unidades totales"  />
-        <InventoryStat title="Stock Bajo"   value={isLoading ? "—" : lowStockCount}             subtitle="requieren pedido"  critical={lowStockCount > 0} />
-        <InventoryStat title="Valorización" value={isLoading ? "—" : formatCLP(valorizacion)}  subtitle="precio de venta" />
+        {([
+          { title: "Total SKU",    value: isLoading ? "—" : products.length,                subtitle: "productos únicos"  },
+          { title: "Stock Físico", value: isLoading ? "—" : totalStock,                    subtitle: "unidades totales"  },
+          { title: "Stock Bajo",   value: isLoading ? "—" : lowStockCount,                 subtitle: "requieren pedido", critical: lowStockCount > 0 },
+          { title: "Valorización", value: isLoading ? "—" : formatCLP(valorizacion),       subtitle: "precio de venta"  },
+        ] as const).map((stat, i) => (
+          <div
+            key={stat.title}
+            className="animate-in fade-in slide-in-from-bottom-4"
+            style={{ animationDelay: `${i * 75}ms`, animationFillMode: "both" }}
+          >
+            <InventoryStat
+              title={stat.title}
+              value={stat.value}
+              subtitle={stat.subtitle}
+              critical={"critical" in stat ? stat.critical : false}
+            />
+          </div>
+        ))}
       </div>
 
       {/* 2. FILTROS + BOTÓN */}
@@ -191,7 +206,7 @@ export default function InventoryManagement() {
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-left">
+            <table className="w-full min-w-[640px] text-left">
               <thead className="bg-pickled-bluewood-50 text-pickled-bluewood-700 text-xs uppercase font-bold tracking-wide">
                 <tr>
                   <th className="px-6 py-4">Imagen</th>
@@ -204,10 +219,14 @@ export default function InventoryManagement() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-pickled-bluewood-100">
-                {filteredProducts.map((product) => {
+                {filteredProducts.map((product, i) => {
                   const stockStatus = getStockStatus(product.stock, product.min_stock);
                   return (
-                    <tr key={product.id_producto} className="hover:bg-pickled-bluewood-50 transition-colors">
+                    <tr
+                      key={product.id_producto}
+                      className="hover:bg-pickled-bluewood-50/70 transition-all duration-200 animate-in fade-in slide-in-from-bottom-2"
+                      style={{ animationDelay: `${i * 40}ms`, animationFillMode: "both" }}
+                    >
                       <td className="px-6 py-4">
                         <ProductImage producto={product} size="sm" />
                       </td>

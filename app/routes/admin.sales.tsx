@@ -140,6 +140,7 @@ export default function SalesManagement() {
           suffix={`transacciones — ${currentStore.name}`}
           icon={<ShoppingCart className="h-4 w-4" />}
           isLoading={isLoadingBoletas}
+          delay={0}
         />
         <StatCard
           title="Ingresos de Hoy"
@@ -147,6 +148,7 @@ export default function SalesManagement() {
           suffix={`total facturado — ${currentStore.name}`}
           icon={<Calendar className="h-4 w-4" />}
           isLoading={isLoadingBoletas}
+          delay={75}
         />
         <StatCard
           title="Ticket Promedio"
@@ -154,6 +156,7 @@ export default function SalesManagement() {
           suffix="por venta"
           icon={<TrendingUp className="h-4 w-4" />}
           isLoading={isLoadingBoletas}
+          delay={150}
         />
       </div>
 
@@ -228,7 +231,7 @@ export default function SalesManagement() {
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-left">
+            <table className="w-full min-w-[560px] text-left">
               <thead className="bg-pickled-bluewood-50 text-pickled-bluewood-700 text-xs uppercase font-bold tracking-wide">
                 <tr>
                   <th className="px-6 py-4">N° Boleta</th>
@@ -239,8 +242,12 @@ export default function SalesManagement() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-pickled-bluewood-100">
-                {filtered.map((boleta) => (
-                  <tr key={boleta.id_boleta} className="hover:bg-pickled-bluewood-50 transition-colors">
+                {filtered.map((boleta, i) => (
+                  <tr
+                    key={boleta.id_boleta}
+                    className="hover:bg-pickled-bluewood-50/70 transition-all duration-200 animate-in fade-in slide-in-from-bottom-2"
+                    style={{ animationDelay: `${i * 40}ms`, animationFillMode: "both" }}
+                  >
                     <td className="px-6 py-4 font-bold text-pickled-bluewood-800">
                       #{boleta.id_boleta}
                     </td>
@@ -298,15 +305,20 @@ function StatCard({
   suffix,
   icon,
   isLoading,
+  delay = 0,
 }: {
   title: string;
   value: string;
   suffix: string;
   icon: React.ReactNode;
   isLoading?: boolean;
+  delay?: number;
 }) {
   return (
-    <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+    <div 
+      className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm animate-in fade-in slide-in-from-bottom-4 duration-500"
+      style={{ animationDelay: `${delay}ms`, animationFillMode: "both" }}
+    >
       <div className="flex justify-between items-start text-pickled-bluewood-400 mb-2">
         <span className="text-sm font-medium text-pickled-bluewood-700">{title}</span>
         {icon}
@@ -439,7 +451,7 @@ function NewSaleModal({
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[100] p-4">
-      <div className="bg-white w-full max-w-4xl rounded-2xl shadow-2xl flex flex-col h-[90vh] overflow-hidden">
+      <div className="bg-white w-full max-w-4xl rounded-2xl shadow-2xl flex flex-col max-h-[95vh] sm:h-[90vh] overflow-hidden">
         {/* Header */}
         <div className="flex justify-between items-center p-6 border-b border-slate-100 bg-slate-50/50 shrink-0">
           <div>
@@ -456,9 +468,9 @@ function NewSaleModal({
           </button>
         </div>
 
-        <div className="flex-1 flex overflow-hidden">
-          {/* Panel izquierdo — Catálogo */}
-          <div className="w-1/2 p-4 border-r border-slate-100 flex flex-col overflow-hidden">
+        <div className="flex-1 flex flex-col md:flex-row overflow-hidden">
+          {/* Panel catálogo */}
+          <div className="w-full md:w-1/2 p-4 border-b md:border-b-0 md:border-r border-slate-100 flex flex-col overflow-hidden" style={{ maxHeight: '45vh' }}>
             <div className="space-y-3 mb-3 shrink-0">
               <input
                 type="text"
@@ -533,8 +545,8 @@ function NewSaleModal({
             </div>
           </div>
 
-          {/* Panel derecho — Ticket */}
-          <div className="w-1/2 p-4 flex flex-col bg-slate-50/30">
+          {/* Panel ticket */}
+          <div className="w-full md:w-1/2 p-4 flex flex-col bg-slate-50/30" style={{ minHeight: 0 }}>
             <h3 className="font-bold text-pickled-bluewood-800 mb-3 flex items-center gap-2 shrink-0">
               <ShoppingCart className="h-4 w-4" /> Detalle del Ticket
             </h3>

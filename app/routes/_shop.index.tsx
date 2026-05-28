@@ -74,20 +74,21 @@ export default function ShopIndex() {
 
   return (
     <div className="space-y-12">
-      {/* 1. SECCIÓN HERO (BANNER PRINCIPAL) */}
-      <section className="relative rounded-3xl overflow-hidden bg-[#2d3e50] h-[350px] flex items-center shadow-xl">
-        <div className="absolute inset-0 bg-linear-to-r from-[#1a2530] to-transparent opacity-90"></div>
-        <div className="relative z-10 px-12 space-y-4 max-w-2xl">
-          <span className="text-blue-400 font-bold tracking-widest uppercase text-sm">Temporada 2026</span>
-          <h2 className="text-5xl font-extrabold text-white leading-tight">
-            Protección con <br /> <span className="text-blue-500">Estilo MatVic</span>
+      {/* 1. SECCIÓN HERO */}
+      <section className="relative rounded-2xl sm:rounded-3xl overflow-hidden bg-[#2d3e50] h-[220px] sm:h-[300px] lg:h-[350px] flex items-center shadow-xl">
+        <div className="absolute inset-0 bg-linear-to-r from-[#1a2530] to-transparent opacity-90" />
+        <div className="relative z-10 px-6 sm:px-12 space-y-2 sm:space-y-4 max-w-2xl">
+          <span className="text-blue-400 font-bold tracking-widest uppercase text-xs sm:text-sm">Temporada 2026</span>
+          <h2 className="text-2xl sm:text-4xl lg:text-5xl font-extrabold text-white leading-tight">
+            Protección con <br className="hidden sm:block" />
+            <span className="text-blue-500">Estilo MatVic</span>
           </h2>
-          <p className="text-slate-300 text-lg">
+          <p className="text-slate-300 text-sm sm:text-base lg:text-lg hidden sm:block">
             Los mejores accesorios para tu smartphone seleccionados con calidad garantizada en Tacna.
           </p>
           <button
             onClick={() => document.getElementById("catalogo")?.scrollIntoView({ behavior: "smooth" })}
-            className="bg-blue-600 hover:bg-blue-500 text-white px-8 py-3 rounded-full font-bold transition-transform hover:scale-105 shadow-lg"
+            className="bg-blue-600 hover:bg-blue-500 text-white px-5 sm:px-8 py-2 sm:py-3 rounded-full font-bold transition-transform hover:scale-105 shadow-lg text-sm sm:text-base"
           >
             Ver Catálogo
           </button>
@@ -96,23 +97,23 @@ export default function ShopIndex() {
 
       {/* 2. GRILLA DE PRODUCTOS */}
       <section id="catalogo">
-        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8 border-b border-slate-100 pb-4">
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 mb-6 sm:mb-8 border-b border-slate-100 pb-4">
           <div>
-            <h3 className="text-2xl font-bold text-[#2d3e50]">Accesorios Destacados</h3>
+            <h3 className="text-xl sm:text-2xl font-bold text-[#2d3e50]">Accesorios Destacados</h3>
             <p className="text-slate-500 text-sm">
               {isLoading ? "Cargando productos..." : `${productos.length} productos disponibles`}
             </p>
           </div>
 
           {/* Buscador */}
-          <div className="relative">
+          <div className="relative w-full sm:w-auto">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none" />
             <input
               type="text"
               value={busqueda}
               onChange={(e) => setBusqueda(e.target.value)}
               placeholder="Buscar producto..."
-              className="pl-9 pr-4 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50 w-56"
+              className="pl-9 pr-4 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50 w-full sm:w-56"
             />
             {buscando && (
               <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-blue-500 animate-spin" />
@@ -122,7 +123,7 @@ export default function ShopIndex() {
 
         {/* Estado: cargando */}
         {isLoading && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
             {[...Array(8)].map((_, i) => (
               <div key={i} className="bg-white rounded-2xl overflow-hidden border border-slate-100 shadow-sm animate-pulse">
                 <div className="aspect-square bg-slate-200" />
@@ -163,7 +164,7 @@ export default function ShopIndex() {
 
         {/* Lista de productos */}
         {!isLoading && !error && productos.length > 0 && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
             {productos.map((producto) => (
               <div
                 key={producto.id_producto}
