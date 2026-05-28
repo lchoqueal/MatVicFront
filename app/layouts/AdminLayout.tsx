@@ -19,7 +19,7 @@ const menuItems = [
 ];
 
 export default function AdminLayout() {
-  const { user, isAuthenticated, logout } = useAuth();
+  const { user, isAuthenticated, isHydrating, logout } = useAuth();
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [currentStore, setCurrentStore] = useState<Store>({
     id: 22,
@@ -31,14 +31,27 @@ export default function AdminLayout() {
   const navigate = useNavigate();
 
   // Guard de autenticación (client-side)
+  // Mientras isHydrating=true el context aún está restaurando la sesión
+  // desde localStorage → no redirigir todavía.
+  if (isHydrating) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-slate-50">
+        <div className="flex flex-col items-center gap-3 text-slate-400">
+          <div className="h-10 w-10 rounded-full border-4 border-pickled-bluewood-200 border-t-pickled-bluewood-600 animate-spin" />
+          <p className="text-sm font-medium">Cargando sesión…</p>
+        </div>
+      </div>
+    );
+  }
+
   if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/" replace />;
   }
 
   const handleLogout = () => {
     setShowUserMenu(false);
     logout();
-    navigate("/login");
+    navigate("/");
   };
 
   const activeLabel =
@@ -104,7 +117,7 @@ export default function AdminLayout() {
                 <p className="text-sm font-medium text-white truncate">
                   {user?.nombre ?? user?.username ?? "Usuario"}
                 </p>
-                <p className="text-xs text-slate-400 truncate">{user?.email}</p>
+                <p className="text-xs text-slate-400 truncate capitalize">{user?.rol}</p>
               </div>
               <ChevronDown
                 className={`h-4 w-4 text-slate-400 transition-transform ${

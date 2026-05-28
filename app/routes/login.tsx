@@ -16,7 +16,7 @@ export default function Login() {
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-  const { loginAdmin, loginCustomer } = useAuth();
+  const { login, user } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -29,25 +29,33 @@ export default function Login() {
     }
 
     setIsLoading(true);
-
-    // Simular latencia de red
-    await new Promise((r) => setTimeout(r, 500));
-
     try {
-      // Primero intenta como admin
-      loginAdmin(username, password);
-      navigate("/admin");
-    } catch {
-      try {
-        // Luego intenta como cliente
-        loginCustomer(username, password);
-        navigate("/");
-      } catch {
-        setError("Usuario o contraseña incorrectos.");
-      }
-    }
+      await login(username.trim(), password);
 
-    setIsLoading(false);
+      // Redirigir según el rol devuelto por el backend
+      // Necesitamos leer el usuario actualizado del contexto después del login
+      // Como login() actualiza el estado async, usamos una pequeña espera
+      // y luego consultamos localStorage directamente para el rol
+      const storedUser = localStorage.getItem("user");
+      if (storedUser) {
+        const u = JSON.parse(storedUser);
+        if (u.rol === "administrador" || u.rol === "empleado") {
+          navigate("/admin");
+        } else {
+          navigate("/");
+        }
+      } else {
+        navigate("/");
+      }
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError("Error al conectar con el servidor. Intenta de nuevo.");
+      }
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -104,7 +112,7 @@ export default function Login() {
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               className="w-full px-4 py-3 border-2 border-white/40 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#1877F2]/50 focus:border-[#1877F2] transition-all bg-white/30 backdrop-blur-sm text-white placeholder-white/60"
-              placeholder="admin"
+              placeholder="usuario"
               required
               disabled={isLoading}
               autoComplete="username"

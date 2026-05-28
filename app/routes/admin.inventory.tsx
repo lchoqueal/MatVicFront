@@ -1,36 +1,52 @@
-import { useState } from "react";
-import { Plus, Edit, Search, Package, X, Trash2, AlertCircle } from "lucide-react";
+import { useState, useEffect, useCallback } from "react";
+import { Plus, Edit, Search, Package, X, Trash2, AlertCircle, Loader2, RefreshCw } from "lucide-react";
 import { useOutletContext } from "react-router";
 import type { Store } from "~/components/ui/StoreSelector";
 import type { Product } from "~/types/inventory";
 import { formatCLP, getStockStatus } from "~/lib/utils";
 import ProductImage from "~/components/ui/ProductImage";
+import { api } from "~/lib/api";
 
-// ── Datos mock iniciales ─────────────────────────────────────────────────────
-
-const MOCK_PRODUCTS: Product[] = [
-  { id_producto: 1, nombre: "Cargador Carga Rápida 25W", descripcion: "Original Samsung Blanco", categoria: "Cargadores", precio_unit: 65,  stock: 15, min_stock: 5  },
-  { id_producto: 2, nombre: "Funda Silicona iPhone 15",   descripcion: "Color Negro Mate",         categoria: "Fundas",     precio_unit: 45,  stock: 3,  min_stock: 5  },
-  { id_producto: 3, nombre: "Mica Cerámica Privacidad",   descripcion: "iPhone y Samsung",          categoria: "Micas",      precio_unit: 25,  stock: 50, min_stock: 10 },
-  { id_producto: 4, nombre: "Audífonos In-Ear Bluetooth", descripcion: "Hasta 20h de batería",      categoria: "Audio",      precio_unit: 120, stock: 5,  min_stock: 3  },
-  { id_producto: 5, nombre: "Cable USB-C a USB-C 1m",    descripcion: "Trenzado de nylon",         categoria: "Cables",     precio_unit: 18,  stock: 40, min_stock: 10 },
-];
+interface ProductosResponse {
+  cantidad: number;
+  productos: Product[];
+}
 
 // ── Página principal ─────────────────────────────────────────────────────────
 
 export default function InventoryManagement() {
   const { currentStore } = useOutletContext<{ currentStore: Store }>();
 
-  const [products, setProducts] = useState<Product[]>(MOCK_PRODUCTS);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [apiError, setApiError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
 
-  const categories = [...new Set(products.map((p) => p.categoria))];
+  const cargarProductos = useCallback(async () => {
+    setIsLoading(true);
+    setApiError(null);
+    try {
+      const data = await api.get<ProductosResponse>("/productos");
+      setProducts(data.productos);
+    } catch (err) {
+      setApiError(err instanceof Error ? err.message : "Error al cargar productos");
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    cargarProductos();
+  }, [cargarProductos]);
+
+  const categories = [...new Set(products.map((p) => p.categoria).filter(Boolean))];
   const lowStockCount = products.filter((p) => p.stock <= p.min_stock).length;
   const totalStock = products.reduce((s, p) => s + p.stock, 0);
-  const valorizacion = products.reduce((s, p) => s + p.precio_unit * p.stock, 0);
+  const valorizacion = products.reduce((s, p) => s + Number(p.precio_unit) * p.stock, 0);
 
   const filteredProducts = products.filter((p) => {
     const matchSearch =
@@ -50,35 +66,67 @@ export default function InventoryManagement() {
     setIsDialogOpen(true);
   };
 
-  const handleSave = (data: Omit<Product, "id_producto">) => {
-    if (editingProduct) {
-      setProducts((prev) =>
-        prev.map((p) =>
-          p.id_producto === editingProduct.id_producto
-            ? { ...editingProduct, ...data }
-            : p
-        )
-      );
-    } else {
-      const newId = Math.max(...products.map((p) => p.id_producto), 0) + 1;
-      setProducts((prev) => [...prev, { id_producto: newId, ...data }]);
+  const handleSave = async (data: Omit<Product, "id_producto">) => {
+    if (!editingProduct) return; // por ahora solo edición (el backend no tiene POST /productos)
+    setIsSaving(true);
+    try {
+      await api.put(`/productos/${editingProduct.id_producto}`, {
+        nombre: data.nombre,
+        precio: data.precio_unit,
+        minStock: data.min_stock,
+        descripcion: data.descripcion,
+        imagenUrl: data.imagen_url,
+        idCategoria: null,
+      });
+      setIsDialogOpen(false);
+      await cargarProductos();
+    } catch (err) {
+      alert(err instanceof Error ? err.message : "Error al guardar el producto");
+    } finally {
+      setIsSaving(false);
     }
-    setIsDialogOpen(false);
   };
 
-  const handleDelete = (id: number) => {
-    if (!confirm("¿Seguro que deseas eliminar este producto? Esta acción no se puede deshacer.")) return;
-    setProducts((prev) => prev.filter((p) => p.id_producto !== id));
+  const handleDelete = async (id: number) => {
+    if (!confirm("¿Seguro que deseas desactivar este producto?")) return;
+    try {
+      await api.del(`/productos/${id}`);
+      await cargarProductos();
+    } catch (err) {
+      alert(err instanceof Error ? err.message : "Error al eliminar el producto");
+    }
   };
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div />
+        <button
+          onClick={cargarProductos}
+          disabled={isLoading}
+          className="flex items-center gap-2 px-3 py-1.5 text-xs font-medium text-slate-500 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors disabled:opacity-50"
+        >
+          <RefreshCw className={`h-3.5 w-3.5 ${isLoading ? "animate-spin" : ""}`} />
+          Actualizar
+        </button>
+      </div>
+
+      {/* Error global */}
+      {apiError && (
+        <div className="flex items-center gap-3 p-4 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm">
+          <AlertCircle className="h-5 w-5 shrink-0" />
+          {apiError}
+          <button onClick={cargarProductos} className="ml-auto underline font-medium">Reintentar</button>
+        </div>
+      )}
+
       {/* 1. RESUMEN DE INVENTARIO */}
       <div className="grid gap-4 md:grid-cols-4">
-        <InventoryStat title="Total SKU"       value={products.length}        subtitle="productos únicos"  />
-        <InventoryStat title="Stock Físico"    value={totalStock}             subtitle="unidades totales"  />
-        <InventoryStat title="Stock Bajo"      value={lowStockCount}         subtitle="requieren pedido"  critical={lowStockCount > 0} />
-        <InventoryStat title="Valorización"    value={formatCLP(valorizacion)} subtitle="precio de venta" />
+        <InventoryStat title="Total SKU"    value={isLoading ? "—" : products.length}         subtitle="productos únicos"  />
+        <InventoryStat title="Stock Físico" value={isLoading ? "—" : totalStock}               subtitle="unidades totales"  />
+        <InventoryStat title="Stock Bajo"   value={isLoading ? "—" : lowStockCount}             subtitle="requieren pedido"  critical={lowStockCount > 0} />
+        <InventoryStat title="Valorización" value={isLoading ? "—" : formatCLP(valorizacion)}  subtitle="precio de venta" />
       </div>
 
       {/* 2. FILTROS + BOTÓN */}
@@ -109,7 +157,9 @@ export default function InventoryManagement() {
         <button
           type="button"
           onClick={openAdd}
-          className="w-full md:w-auto flex items-center justify-center gap-2 bg-pickled-bluewood-600 hover:bg-pickled-bluewood-700 text-white px-6 py-2 rounded-lg font-bold transition-all shadow-sm"
+          disabled
+          title="Próximamente"
+          className="w-full md:w-auto flex items-center justify-center gap-2 bg-pickled-bluewood-600 hover:bg-pickled-bluewood-700 text-white px-6 py-2 rounded-lg font-bold transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <Plus className="h-4 w-4" /> Agregar Producto
         </button>
@@ -123,11 +173,17 @@ export default function InventoryManagement() {
             Productos en {currentStore.name}
           </h3>
           <span className="text-xs text-slate-400 bg-slate-100 px-2 py-1 rounded-md">
-            {filteredProducts.length} resultado{filteredProducts.length !== 1 ? "s" : ""}
+            {isLoading ? "Cargando..." : `${filteredProducts.length} resultado${filteredProducts.length !== 1 ? "s" : ""}`}
           </span>
         </div>
 
-        {filteredProducts.length === 0 ? (
+        {isLoading ? (
+          <div className="p-4 space-y-3">
+            {[...Array(5)].map((_, i) => (
+              <div key={i} className="h-16 bg-slate-100 rounded-lg animate-pulse" />
+            ))}
+          </div>
+        ) : filteredProducts.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 text-center">
             <Package className="h-12 w-12 text-slate-300 mb-3" />
             <p className="text-pickled-bluewood-600 font-medium">No se encontraron productos</p>
@@ -220,6 +276,7 @@ export default function InventoryManagement() {
           categories={categories}
           onClose={() => setIsDialogOpen(false)}
           onSave={handleSave}
+          isSaving={isSaving}
         />
       )}
     </div>
@@ -262,10 +319,11 @@ interface ProductModalProps {
   product: Product | null;
   categories: string[];
   onClose: () => void;
-  onSave: (data: ProductFormData) => void;
+  onSave: (data: ProductFormData) => Promise<void>;
+  isSaving: boolean;
 }
 
-function ProductModal({ product, categories, onClose, onSave }: ProductModalProps) {
+function ProductModal({ product, categories, onClose, onSave, isSaving }: ProductModalProps) {
   const [formData, setFormData] = useState<ProductFormData>({
     nombre:       product?.nombre       ?? "",
     descripcion:  product?.descripcion  ?? "",
@@ -297,6 +355,7 @@ function ProductModal({ product, categories, onClose, onSave }: ProductModalProp
     e.preventDefault();
     onSave(formData);
   };
+
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[100] p-4">
@@ -450,8 +509,10 @@ function ProductModal({ product, categories, onClose, onSave }: ProductModalProp
             </button>
             <button
               type="submit"
-              className="px-4 py-2 bg-pickled-bluewood-600 text-white rounded-lg hover:bg-pickled-bluewood-700 transition-colors text-sm font-bold"
+              disabled={isSaving}
+              className="flex items-center gap-2 px-4 py-2 bg-pickled-bluewood-600 text-white rounded-lg hover:bg-pickled-bluewood-700 transition-colors text-sm font-bold disabled:opacity-60"
             >
+              {isSaving && <Loader2 className="h-4 w-4 animate-spin" />}
               {product ? "Actualizar" : "Agregar"} Producto
             </button>
           </div>

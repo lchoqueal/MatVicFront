@@ -5,16 +5,24 @@ import {
   useEffect,
   type ReactNode,
 } from "react";
+import { api, ApiError } from "~/lib/api";
 
 // ── Tipos ────────────────────────────────────────────────────────────────────
 
-export type UserRole = "admin" | "empleado" | "cliente";
+/** Roles tal como los devuelve el backend */
+export type UserRole = "administrador" | "empleado" | "cliente";
 
 export interface AuthUser {
+  id: number;
   username: string;
   nombre: string;
-  email: string;
-  role: UserRole;
+  apellidos: string;
+  rol: UserRole;
+}
+
+interface LoginResponse {
+  token: string;
+  usuario: AuthUser;
 }
 
 interface AuthContextValue {
@@ -22,29 +30,13 @@ interface AuthContextValue {
   token: string | null;
   isAuthenticated: boolean;
   isAdmin: boolean;
-  isCustomer: boolean;
-  loginAdmin: (username: string, password: string) => void;
-  loginCustomer: (username: string, password: string) => void;
+  isEmpleado: boolean;
+  isCliente: boolean;
+  /** true mientras se restaura la sesión desde localStorage (solo dura un tick) */
+  isHydrating: boolean;
+  login: (username: string, password: string) => Promise<void>;
   logout: () => void;
 }
-
-// ── Credenciales hardcodeadas (sin backend) ──────────────────────────────────
-
-const ADMIN_CREDENTIALS: AuthUser = {
-  username: "admin",
-  nombre: "Administrador",
-  email: "admin@matvic.pe",
-  role: "admin",
-};
-
-const CLIENTE_CREDENTIALS: AuthUser = {
-  username: "cliente",
-  nombre: "Cliente",
-  email: "cliente@matvic.pe",
-  role: "cliente",
-};
-
-const FAKE_TOKEN = "matvic-dev-token-2026";
 
 // ── Context ──────────────────────────────────────────────────────────────────
 
@@ -59,30 +51,38 @@ export function useAuth(): AuthContextValue {
 // ── Provider ─────────────────────────────────────────────────────────────────
 
 export function AuthProvider({ children }: { children: ReactNode }) {
+  // Siempre iniciamos con null para que servidor y cliente rendericen igual
+  // (evita hydration mismatch en React Router v7 SSR).
   const [user, setUser] = useState<AuthUser | null>(null);
   const [token, setToken] = useState<string | null>(null);
 
-  // Rehidratar desde localStorage al montar (solo cliente)
+  // isHydrating = true hasta que el useEffect restaure la sesión del cliente.
+  // Mientras sea true, los guards de navegación NO deben redirigir a /login.
+  const [isHydrating, setIsHydrating] = useState(true);
+
+  // Se ejecuta solo en el cliente, después de la hidratación de React.
   useEffect(() => {
     try {
-      const storedUser = localStorage.getItem("user");
+      const storedUser  = localStorage.getItem("user");
       const storedToken = localStorage.getItem("token");
       if (storedUser && storedToken) {
-        setUser(JSON.parse(storedUser));
+        setUser(JSON.parse(storedUser) as AuthUser);
         setToken(storedToken);
       }
     } catch {
-      // Si hay datos corruptos en localStorage, limpiar
-      clearAuth();
+      // localStorage corrupto → limpiar
+      localStorage.removeItem("user");
+      localStorage.removeItem("token");
+    } finally {
+      setIsHydrating(false);
     }
   }, []);
 
-  const persist = (u: AuthUser) => {
+  const persist = (u: AuthUser, t: string) => {
     setUser(u);
-    setToken(FAKE_TOKEN);
+    setToken(t);
     localStorage.setItem("user", JSON.stringify(u));
-    localStorage.setItem("token", FAKE_TOKEN);
-    localStorage.setItem("isAuthenticated", "true");
+    localStorage.setItem("token", t);
   };
 
   const clearAuth = () => {
@@ -90,40 +90,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setToken(null);
     localStorage.removeItem("user");
     localStorage.removeItem("token");
-    localStorage.removeItem("isAuthenticated");
   };
 
   /**
-   * Valida credenciales de administrador/empleado.
-   * Acepta: admin / admin123
-   * Lanza error si las credenciales son incorrectas.
+   * Login unificado: llama al backend y guarda token + usuario.
+   * Lanza ApiError si las credenciales son incorrectas o hay error de red.
    */
-  const loginAdmin = (username: string, password: string) => {
-    if (username === "admin" && password === "admin123") {
-      persist(ADMIN_CREDENTIALS);
-    } else {
-      throw new Error("Usuario o contraseña incorrectos.");
-    }
-  };
-
-  /**
-   * Valida credenciales de cliente.
-   * Acepta: cliente / cliente123
-   * Lanza error si las credenciales son incorrectas.
-   */
-  const loginCustomer = (username: string, password: string) => {
-    if (username === "cliente" && password === "cliente123") {
-      persist(CLIENTE_CREDENTIALS);
-    } else {
-      throw new Error("Usuario o contraseña incorrectos.");
-    }
+  const login = async (username: string, password: string): Promise<void> => {
+    const data = await api.post<LoginResponse>("/auth/login", {
+      username,
+      password,
+    });
+    persist(data.usuario, data.token);
   };
 
   const logout = () => clearAuth();
 
   const isAuthenticated = !!user && !!token;
-  const isAdmin = isAuthenticated && (user?.role === "admin" || user?.role === "empleado");
-  const isCustomer = isAuthenticated && user?.role === "cliente";
+  const isAdmin     = isAuthenticated && user?.rol === "administrador";
+  const isEmpleado  = isAuthenticated && user?.rol === "empleado";
+  const isCliente   = isAuthenticated && user?.rol === "cliente";
 
   return (
     <AuthContext.Provider
@@ -132,9 +118,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         token,
         isAuthenticated,
         isAdmin,
-        isCustomer,
-        loginAdmin,
-        loginCustomer,
+        isEmpleado,
+        isCliente,
+        isHydrating,
+        login,
         logout,
       }}
     >
