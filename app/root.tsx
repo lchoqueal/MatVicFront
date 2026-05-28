@@ -32,8 +32,14 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <Meta />
         <Links />
+        {/* Anti-flash: aplica 'dark' antes del primer paint */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{if(localStorage.getItem('theme')==='dark')document.documentElement.classList.add('dark')}catch(e){}})()`,
+          }}
+        />
       </head>
-      <body className="font-[Inter,sans-serif]">
+      <body className="font-[Inter,sans-serif] bg-canvas text-primary transition-colors duration-200">
         {children}
         <ScrollRestoration />
         <Scripts />

@@ -8,11 +8,43 @@ import {
   User,
   Menu,
   X,
+  Sun,
+  Moon,
 } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Link, Outlet, useLocation, useNavigate, Navigate } from "react-router";
 import StoreSelector, { type Store } from "~/components/ui/StoreSelector";
 import { useAuth } from "~/context/auth";
+
+// ── Dark mode hook ─────────────────────────────────────────────────────────
+
+function useDarkMode() {
+  const [dark, setDark] = useState(false);
+
+  useEffect(() => {
+    // Leer preferencia guardada (el script inline ya aplicó la clase, solo sincronizamos el estado)
+    const saved = localStorage.getItem("theme");
+    setDark(saved === "dark" || (!saved && document.documentElement.classList.contains("dark")));
+  }, []);
+
+  const toggle = useCallback(() => {
+    setDark((prev) => {
+      const next = !prev;
+      if (next) {
+        document.documentElement.classList.add("dark");
+        localStorage.setItem("theme", "dark");
+      } else {
+        document.documentElement.classList.remove("dark");
+        localStorage.setItem("theme", "light");
+      }
+      return next;
+    });
+  }, []);
+
+  return { dark, toggle };
+}
+
+// ── Menú de navegación ─────────────────────────────────────────────────────
 
 const menuItems = [
   { id: "dashboard", label: "Dashboard",  icon: BarChart3,   path: "/admin" },
@@ -20,8 +52,11 @@ const menuItems = [
   { id: "sales",     label: "Ventas",     icon: ShoppingCart, path: "/admin/sales" },
 ];
 
+// ── Componente principal ───────────────────────────────────────────────────
+
 export default function AdminLayout() {
   const { user, isAuthenticated, isHydrating, logout } = useAuth();
+  const { dark, toggle: toggleDark } = useDarkMode();
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [currentStore, setCurrentStore] = useState<Store>({
@@ -30,29 +65,24 @@ export default function AdminLayout() {
     manager: "Ana García",
   });
 
-  const location = useLocation();
-  const navigate = useNavigate();
+  const location  = useLocation();
+  const navigate  = useNavigate();
 
   // Cerrar sidebar al cambiar de ruta en móvil
-  useEffect(() => {
-    setSidebarOpen(false);
-  }, [location.pathname]);
+  useEffect(() => { setSidebarOpen(false); }, [location.pathname]);
 
-  // Guard de autenticación (client-side)
+  // ── Guards ────────────────────────────────────────────────────────────────
   if (isHydrating) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-slate-50">
-        <div className="flex flex-col items-center gap-3 text-slate-400">
+      <div className="flex min-h-screen items-center justify-center bg-canvas">
+        <div className="flex flex-col items-center gap-3">
           <div className="h-10 w-10 rounded-full border-4 border-pickled-bluewood-200 border-t-pickled-bluewood-600 animate-spin" />
-          <p className="text-sm font-medium">Cargando sesión…</p>
+          <p className="text-sm font-medium text-secondary">Cargando sesión…</p>
         </div>
       </div>
     );
   }
-
-  if (!isAuthenticated) {
-    return <Navigate to="/" replace />;
-  }
+  if (!isAuthenticated) return <Navigate to="/" replace />;
 
   const handleLogout = () => {
     setShowUserMenu(false);
@@ -60,95 +90,128 @@ export default function AdminLayout() {
     navigate("/");
   };
 
-  const activeLabel =
-    menuItems.find((i) => i.path === location.pathname)?.label ?? "Panel Admin";
+  const activeLabel = menuItems.find((i) => i.path === location.pathname)?.label ?? "Panel Admin";
 
-  // ── Sidebar (compartido entre mobile overlay y desktop fixed) ──────────────
+  // Saludo según la hora
+  const hour = new Date().getHours();
+  const greeting = hour < 12 ? "Buenos días" : hour < 18 ? "Buenas tardes" : "Buenas noches";
+
+  // ── Sidebar content ───────────────────────────────────────────────────────
   const SidebarContent = () => (
     <>
       {/* Logo */}
-      <div className="p-6 border-b border-slate-800">
+      <div className="px-6 py-5 border-b" style={{ borderColor: "var(--border-main)" }}>
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2 group">
-            <Smartphone className="h-8 w-8 text-pickled-bluewood-400 group-hover:scale-110 transition-transform duration-300" />
+          <div className="flex items-center gap-3 group">
+            <div className="w-9 h-9 rounded-xl bg-pickled-bluewood-600 flex items-center justify-center shadow-sm group-hover:bg-pickled-bluewood-500 transition-colors">
+              <Smartphone className="h-5 w-5 text-white" />
+            </div>
             <div>
-              <h1 className="text-white font-semibold text-lg">MatVic</h1>
-              <p className="text-sm text-slate-400">SAVI</p>
+              <h1 className="text-white font-bold text-base leading-none">MatVic</h1>
+              <p className="text-xs mt-0.5" style={{ color: "var(--text-sidebar)" }}>SAVI · Panel</p>
             </div>
           </div>
-          {/* Botón cerrar en móvil */}
+          {/* Cerrar sidebar en móvil */}
           <button
             type="button"
             onClick={() => setSidebarOpen(false)}
-            className="lg:hidden p-1 rounded-md text-slate-400 hover:text-white hover:bg-slate-700 transition-colors"
+            className="lg:hidden p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/10 transition-colors"
           >
-            <X className="h-5 w-5" />
+            <X className="h-4 w-4" />
           </button>
         </div>
       </div>
 
       {/* Navegación */}
-      <nav className="flex-1 p-4">
-        <div className="space-y-1">
-          {menuItems.map((item) => {
-            const Icon = item.icon;
-            const isActive = location.pathname === item.path;
-            return (
-              <Link
-                key={item.id}
-                to={item.path}
-                className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-md transition-all duration-200 text-sm font-medium group/link ${
-                  isActive
-                    ? "bg-slate-800 text-white border-l-2 border-pickled-bluewood-400 pl-[14px]"
-                    : "text-slate-300 hover:bg-slate-800 hover:text-white hover:translate-x-1"
-                }`}
+      <nav className="flex-1 px-3 py-4 space-y-0.5">
+        <p className="text-[10px] font-bold uppercase tracking-widest px-3 mb-3" style={{ color: "var(--text-muted)" }}>
+          Menú Principal
+        </p>
+        {menuItems.map((item) => {
+          const Icon  = item.icon;
+          const isActive = location.pathname === item.path;
+          return (
+            <Link
+              key={item.id}
+              to={item.path}
+              className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 group/link ${
+                isActive
+                  ? "bg-pickled-bluewood-600 text-white shadow-sm"
+                  : "hover:bg-white/8 hover:translate-x-0.5"
+              }`}
+              style={!isActive ? { color: "var(--text-sidebar)" } : {}}
+            >
+              <div className={`w-7 h-7 rounded-lg flex items-center justify-center transition-all duration-200 ${
+                isActive
+                  ? "bg-white/20 text-white"
+                  : "group-hover/link:bg-white/10"
+              }`}
+                style={!isActive ? { color: "var(--text-sidebar)" } : {}}
               >
-                <Icon className={`h-4 w-4 transition-transform duration-200 ${
-                  isActive ? "text-pickled-bluewood-400" : "group-hover/link:scale-110"
-                }`} />
-                {item.label}
-              </Link>
-            );
-          })}
-        </div>
+                <Icon className="h-4 w-4" />
+              </div>
+              {item.label}
+              {isActive && (
+                <div className="ml-auto w-1.5 h-1.5 rounded-full bg-white/70" />
+              )}
+            </Link>
+          );
+        })}
       </nav>
 
-      {/* Footer del sidebar */}
-      <div className="p-4 border-t border-slate-800">
-        <div className="text-xs text-slate-500 mb-4">
-          <p>Accesorios de Celulares</p>
-          <p>Sistema de Gestión SAVI v1.0</p>
-        </div>
+      {/* Footer sidebar */}
+      <div className="px-3 py-4 space-y-2 border-t" style={{ borderColor: "var(--border-main)" }}>
+
+        {/* Toggle oscuro/claro */}
+        <button
+          type="button"
+          onClick={toggleDark}
+          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 hover:bg-white/8"
+          style={{ color: "var(--text-sidebar)" }}
+        >
+          <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: "var(--bg-sidebar-item)" }}>
+            {dark
+              ? <Sun  className="h-4 w-4 text-yellow-400" />
+              : <Moon className="h-4 w-4 text-pickled-bluewood-400" />
+            }
+          </div>
+          {dark ? "Modo Día" : "Modo Noche"}
+          {/* Indicador visual */}
+          <div className={`ml-auto w-9 h-5 rounded-full transition-colors duration-300 relative ${dark ? "bg-pickled-bluewood-500" : "bg-white/20"}`}>
+            <div className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform duration-300 ${dark ? "translate-x-4" : "translate-x-0.5"}`} />
+          </div>
+        </button>
 
         {/* Tarjeta de usuario */}
         <div className="relative">
           <button
             type="button"
             onClick={() => setShowUserMenu(!showUserMenu)}
-            className="w-full flex items-center gap-3 p-3 rounded-lg bg-slate-800 hover:bg-slate-700 hover:scale-[1.02] transition-all duration-200"
+            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 hover:bg-white/8 group"
           >
-            <div className="w-10 h-10 rounded-full bg-pickled-bluewood-600 flex items-center justify-center shrink-0">
-              <User className="h-5 w-5 text-white" />
+            <div className="w-8 h-8 rounded-full bg-pickled-bluewood-600 flex items-center justify-center shrink-0 ring-2 ring-white/10">
+              <User className="h-4 w-4 text-white" />
             </div>
             <div className="flex-1 text-left overflow-hidden">
-              <p className="text-sm font-medium text-white truncate">
-                {user?.nombre ?? user?.username ?? "Usuario"}
+              <p className="text-sm font-semibold text-white truncate leading-none">
+                {user?.nombre ?? user?.username}
               </p>
-              <p className="text-xs text-slate-400 truncate capitalize">{user?.rol}</p>
+              <p className="text-[11px] mt-0.5 capitalize truncate" style={{ color: "var(--text-sidebar)" }}>
+                {user?.rol}
+              </p>
             </div>
-            <ChevronDown
-              className={`h-4 w-4 text-slate-400 transition-transform ${
-                showUserMenu ? "rotate-180" : ""
-              }`}
-            />
+            <ChevronDown className={`h-3.5 w-3.5 text-slate-400 transition-transform ${showUserMenu ? "rotate-180" : ""}`} />
           </button>
 
           {showUserMenu && (
-            <div className="absolute bottom-full left-0 right-0 mb-2 bg-slate-800 rounded-lg shadow-lg border border-slate-700 overflow-hidden z-50">
+            <div
+              className="absolute bottom-full left-0 right-0 mb-2 rounded-xl shadow-lg overflow-hidden z-50 border"
+              style={{ background: "var(--bg-sidebar-item)", borderColor: "var(--border-main)" }}
+            >
               <button
                 type="button"
                 onClick={handleLogout}
-                className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-slate-700 transition-colors text-red-400 hover:text-red-300"
+                className="w-full flex items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-red-500/10 text-red-400 hover:text-red-300"
               >
                 <LogOut className="h-4 w-4" />
                 <span className="text-sm font-medium">Cerrar Sesión</span>
@@ -161,49 +224,71 @@ export default function AdminLayout() {
   );
 
   return (
-    <div className="flex min-h-screen bg-slate-50">
+    <div className="flex min-h-screen bg-canvas">
 
-      {/* ── Overlay móvil (backdrop) ──────────────────────────────────────── */}
+      {/* Overlay móvil */}
       {sidebarOpen && (
         <div
-          className="fixed inset-0 bg-black/60 z-40 lg:hidden"
+          className="fixed inset-0 bg-black/60 z-40 lg:hidden backdrop-blur-sm"
           onClick={() => setSidebarOpen(false)}
         />
       )}
 
-      {/* ── Sidebar móvil (slide-over) ────────────────────────────────────── */}
+      {/* Sidebar móvil */}
       <aside
-        className={`fixed inset-y-0 left-0 z-50 w-64 bg-pickled-bluewood-800 shadow-lg flex flex-col border-r border-pickled-bluewood-700 transition-transform duration-300 lg:hidden ${
-          sidebarOpen ? "translate-x-0" : "-translate-x-full"
-        }`}
+        className={`fixed inset-y-0 left-0 z-50 w-64 flex flex-col shadow-2xl transition-transform duration-300 lg:hidden`}
+        style={{
+          background: "var(--bg-sidebar)",
+          borderRight: "1px solid var(--border-main)",
+          transform: sidebarOpen ? "translateX(0)" : "translateX(-100%)",
+        }}
       >
         <SidebarContent />
       </aside>
 
-      {/* ── Sidebar desktop (sticky fijo) ─────────────────────────────────── */}
-      <aside className="hidden lg:flex w-64 h-screen sticky top-0 bg-pickled-bluewood-800 shadow-lg flex-col border-r border-pickled-bluewood-700 shrink-0">
+      {/* Sidebar desktop */}
+      <aside
+        className="hidden lg:flex w-64 h-screen sticky top-0 flex-col shrink-0"
+        style={{ background: "var(--bg-sidebar)", borderRight: "1px solid var(--border-main)" }}
+      >
         <SidebarContent />
       </aside>
 
-      {/* ── Contenido principal ───────────────────────────────────────────── */}
+      {/* Área principal */}
       <div className="flex-1 flex flex-col min-h-screen overflow-hidden">
 
         {/* Header */}
-        <header className="h-16 lg:h-20 bg-white border-b border-slate-200 px-4 lg:px-8 flex items-center justify-between shrink-0 shadow-sm gap-3">
+        <header
+          className="h-16 lg:h-[72px] px-4 lg:px-8 flex items-center justify-between shrink-0 gap-3"
+          style={{
+            background: "var(--bg-surface)",
+            borderBottom: "1px solid var(--border-main)",
+            boxShadow: "var(--shadow-card)",
+          }}
+        >
           <div className="flex items-center gap-3 min-w-0">
-            {/* Hamburger — solo móvil */}
+            {/* Hamburger móvil */}
             <button
               type="button"
               onClick={() => setSidebarOpen(true)}
-              className="lg:hidden p-2 rounded-lg text-slate-600 hover:bg-slate-100 transition-colors shrink-0"
+              className="lg:hidden p-2 rounded-xl transition-colors"
+              style={{ color: "var(--text-secondary)" }}
               aria-label="Abrir menú"
             >
               <Menu className="h-5 w-5" />
             </button>
+
             <div className="min-w-0">
-              <h2 className="font-bold text-slate-800 text-base lg:text-xl truncate">{activeLabel}</h2>
-              <p className="text-xs text-slate-500 hidden sm:block">
-                Sistema de Administración de Ventas e Inventario
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-medium hidden sm:block" style={{ color: "var(--text-muted)" }}>
+                  {greeting},
+                </span>
+                <span className="text-sm font-bold" style={{ color: "var(--text-primary)" }}>
+                  {user?.nombre?.split(" ")[0] ?? user?.username}
+                </span>
+              </div>
+              <p className="text-xs hidden sm:block" style={{ color: "var(--text-muted)" }}>
+                {activeLabel} · {currentStore.name}
               </p>
             </div>
           </div>
@@ -214,8 +299,8 @@ export default function AdminLayout() {
           />
         </header>
 
-        {/* Área de contenido */}
-        <main className="flex-1 overflow-y-auto p-4 lg:p-8 bg-slate-50">
+        {/* Contenido */}
+        <main className="flex-1 overflow-y-auto p-4 lg:p-8">
           <Outlet context={{ currentStore, userData: user }} />
         </main>
       </div>

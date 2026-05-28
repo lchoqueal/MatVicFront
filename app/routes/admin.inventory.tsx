@@ -105,10 +105,16 @@ export default function InventoryManagement() {
         <button
           onClick={cargarProductos}
           disabled={isLoading}
-          className="flex items-center gap-2 px-3 py-1.5 text-xs font-medium text-slate-500 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors disabled:opacity-50"
+          className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 hover:scale-[1.02] disabled:opacity-50"
+          style={{
+            background: "var(--bg-surface)",
+            border: "1px solid var(--border-main)",
+            color: "var(--text-secondary)",
+            boxShadow: "var(--shadow-card)",
+          }}
         >
           <RefreshCw className={`h-3.5 w-3.5 ${isLoading ? "animate-spin" : ""}`} />
-          Actualizar
+          {isLoading ? "Sincronizando…" : "Actualizar"}
         </button>
       </div>
 
@@ -145,14 +151,18 @@ export default function InventoryManagement() {
       </div>
 
       {/* 2. FILTROS + BOTÓN */}
-      <div className="flex flex-col md:flex-row gap-4 justify-between items-center bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+      <div
+        className="flex flex-col md:flex-row gap-4 justify-between items-center p-4 rounded-2xl"
+        style={{ background: "var(--bg-surface)", border: "1px solid var(--border-main)", boxShadow: "var(--shadow-card)" }}
+      >
         <div className="flex gap-3 w-full md:w-auto flex-1">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4" style={{ color: "var(--text-muted)" }} />
             <input
               type="text"
               placeholder="Buscar por nombre o descripción..."
-              className="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-pickled-bluewood-600 outline-none text-sm"
+              className="w-full pl-10 pr-4 py-2 rounded-lg focus:ring-2 focus:ring-pickled-bluewood-600 outline-none text-sm transition-colors"
+              style={{ background: "var(--bg-surface-2)", border: "1px solid var(--border-main)", color: "var(--text-primary)" }}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
@@ -160,7 +170,8 @@ export default function InventoryManagement() {
           <select
             value={selectedCategory}
             onChange={(e) => setSelectedCategory(e.target.value)}
-            className="px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-pickled-bluewood-600 outline-none text-sm bg-white"
+            className="px-3 py-2 rounded-lg focus:ring-2 focus:ring-pickled-bluewood-600 outline-none text-sm transition-colors"
+            style={{ background: "var(--bg-surface-2)", border: "1px solid var(--border-main)", color: "var(--text-primary)" }}
           >
             <option value="all">Todas las categorías</option>
             {categories.map((c) => (
@@ -172,22 +183,23 @@ export default function InventoryManagement() {
         <button
           type="button"
           onClick={openAdd}
-          disabled
-          title="Próximamente"
-          className="w-full md:w-auto flex items-center justify-center gap-2 bg-pickled-bluewood-600 hover:bg-pickled-bluewood-700 text-white px-6 py-2 rounded-lg font-bold transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full md:w-auto flex items-center justify-center gap-2 bg-pickled-bluewood-600 hover:bg-pickled-bluewood-700 text-white px-6 py-2 rounded-xl font-bold transition-all shadow-sm hover:scale-[1.02]"
         >
           <Plus className="h-4 w-4" /> Agregar Producto
         </button>
       </div>
 
       {/* 3. TABLA */}
-      <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-        <div className="p-6 border-b border-slate-100 flex justify-between items-center">
-          <h3 className="font-bold text-pickled-bluewood-800 flex items-center gap-2">
+      <div className="rounded-2xl overflow-hidden" style={{ background: "var(--bg-surface)", border: "1px solid var(--border-main)", boxShadow: "var(--shadow-card)" }}>
+        <div className="p-5 border-b flex justify-between items-center" style={{ borderColor: "var(--border-subtle)" }}>
+          <h3 className="font-bold flex items-center gap-2" style={{ color: "var(--text-primary)" }}>
             <Package className="h-5 w-5" />
             Productos en {currentStore.name}
           </h3>
-          <span className="text-xs text-slate-400 bg-slate-100 px-2 py-1 rounded-md">
+          <span
+            className="text-xs px-2 py-1 rounded-lg font-medium"
+            style={{ background: "var(--bg-muted)", color: "var(--text-muted)" }}
+          >
             {isLoading ? "Cargando..." : `${filteredProducts.length} resultado${filteredProducts.length !== 1 ? "s" : ""}`}
           </span>
         </div>
@@ -195,19 +207,19 @@ export default function InventoryManagement() {
         {isLoading ? (
           <div className="p-4 space-y-3">
             {[...Array(5)].map((_, i) => (
-              <div key={i} className="h-16 bg-slate-100 rounded-lg animate-pulse" />
+              <div key={i} className="h-16 rounded-xl animate-pulse" style={{ background: "var(--bg-muted)" }} />
             ))}
           </div>
         ) : filteredProducts.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 text-center">
-            <Package className="h-12 w-12 text-slate-300 mb-3" />
-            <p className="text-pickled-bluewood-600 font-medium">No se encontraron productos</p>
-            <p className="text-sm text-slate-400 mt-1">Prueba con otro término de búsqueda</p>
+            <Package className="h-12 w-12 mb-3" style={{ color: "var(--text-muted)" }} />
+            <p className="font-medium" style={{ color: "var(--text-secondary)" }}>No se encontraron productos</p>
+            <p className="text-sm mt-1" style={{ color: "var(--text-muted)" }}>Prueba con otro término de búsqueda</p>
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full min-w-[640px] text-left">
-              <thead className="bg-pickled-bluewood-50 text-pickled-bluewood-700 text-xs uppercase font-bold tracking-wide">
+              <thead style={{ background: "var(--bg-surface-2)", color: "var(--text-secondary)" }} className="text-xs uppercase font-bold tracking-wide">
                 <tr>
                   <th className="px-6 py-4">Imagen</th>
                   <th className="px-6 py-4">Producto</th>
@@ -218,28 +230,30 @@ export default function InventoryManagement() {
                   <th className="px-6 py-4">Acciones</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-pickled-bluewood-100">
+              <tbody style={{ borderColor: "var(--border-subtle)" }} className="divide-y">
                 {filteredProducts.map((product, i) => {
                   const stockStatus = getStockStatus(product.stock, product.min_stock);
                   return (
                     <tr
                       key={product.id_producto}
-                      className="hover:bg-pickled-bluewood-50/70 transition-all duration-200 animate-in fade-in slide-in-from-bottom-2"
+                      className="transition-all duration-200 animate-in fade-in slide-in-from-bottom-2"
                       style={{ animationDelay: `${i * 40}ms`, animationFillMode: "both" }}
+                      onMouseEnter={(e) => (e.currentTarget.style.background = "var(--bg-surface-2)")}
+                      onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
                     >
                       <td className="px-6 py-4">
                         <ProductImage producto={product} size="sm" />
                       </td>
                       <td className="px-6 py-4">
-                        <div className="font-bold text-pickled-bluewood-800 text-sm">{product.nombre}</div>
-                        <div className="text-xs text-slate-400">{product.descripcion}</div>
+                        <div className="font-bold text-sm" style={{ color: "var(--text-primary)" }}>{product.nombre}</div>
+                        <div className="text-xs" style={{ color: "var(--text-muted)" }}>{product.descripcion}</div>
                       </td>
                       <td className="px-6 py-4">
-                        <span className="px-2 py-1 bg-blue-50 text-blue-700 rounded-md text-[10px] font-bold uppercase">
+                        <span className="px-2 py-1 bg-blue-500/10 text-blue-500 rounded-lg text-[10px] font-bold uppercase">
                           {product.categoria}
                         </span>
                       </td>
-                      <td className="px-6 py-4 font-bold text-pickled-bluewood-800 text-sm">
+                      <td className="px-6 py-4 font-bold text-sm" style={{ color: "var(--text-primary)" }}>
                         {formatCLP(product.precio_unit)}
                       </td>
                       <td className="px-6 py-4">
@@ -264,7 +278,7 @@ export default function InventoryManagement() {
                           <button
                             type="button"
                             onClick={() => openEdit(product)}
-                            className="p-2 text-pickled-bluewood-600 hover:bg-pickled-bluewood-50 rounded-lg transition-colors"
+                            className="p-2 rounded-lg transition-colors hover:bg-pickled-bluewood-500/10 text-pickled-bluewood-400"
                             title="Editar producto"
                           >
                             <Edit className="h-4 w-4" />
@@ -272,7 +286,7 @@ export default function InventoryManagement() {
                           <button
                             type="button"
                             onClick={() => handleDelete(product.id_producto)}
-                            className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                            className="p-2 text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
                             title="Eliminar producto"
                           >
                             <Trash2 className="h-4 w-4" />
@@ -304,26 +318,31 @@ export default function InventoryManagement() {
 
 // ── Sub-componentes ───────────────────────────────────────────────────────────
 
-function InventoryStat({
-  title,
-  value,
-  subtitle,
-  critical = false,
-}: {
+function InventoryStat({ title, value, subtitle, critical = false }: {
   title: string;
   value: number | string;
   subtitle: string;
   critical?: boolean;
 }) {
   return (
-    <div className={`p-6 rounded-xl border shadow-sm ${critical ? "bg-red-50 border-red-200" : "bg-white border-slate-200"}`}>
-      <h4 className={`text-xs font-bold uppercase tracking-wider ${critical ? "text-red-400" : "text-slate-400"}`}>
+    <div
+      className="p-5 rounded-2xl"
+      style={{
+        background: critical ? "rgba(239,68,68,0.06)" : "var(--bg-surface)",
+        border: `1px solid ${critical ? "rgba(239,68,68,0.25)" : "var(--border-main)"}`,
+        boxShadow: "var(--shadow-card)",
+      }}
+    >
+      <h4 className={`text-[10px] font-bold uppercase tracking-widest mb-2 ${critical ? "text-red-400" : ""}`}
+        style={!critical ? { color: "var(--text-muted)" } : {}}>
         {title}
       </h4>
-      <div className={`text-2xl font-black my-1 ${critical ? "text-red-700" : "text-pickled-bluewood-800"}`}>
+      <div className={`text-2xl font-black my-1 ${critical ? "text-red-500" : ""}`}
+        style={!critical ? { color: "var(--text-primary)" } : {}}>
         {value}
       </div>
-      <p className={`text-[11px] font-medium ${critical ? "text-red-500" : "text-slate-500"}`}>
+      <p className={`text-[11px] font-medium ${critical ? "text-red-400" : ""}`}
+        style={!critical ? { color: "var(--text-muted)" } : {}}>
         {subtitle}
       </p>
     </div>
@@ -377,20 +396,30 @@ function ProductModal({ product, categories, onClose, onSave, isSaving }: Produc
 
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[100] p-4">
-      <div className="bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden max-h-[90vh] flex flex-col">
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[100] p-4">
+      <div
+        className="w-full max-w-md rounded-2xl shadow-2xl overflow-hidden max-h-[90vh] flex flex-col"
+        style={{ background: "var(--bg-surface)", border: "1px solid var(--border-main)" }}
+      >
         {/* Header */}
-        <div className="p-6 border-b border-pickled-bluewood-200 flex justify-between items-center shrink-0">
+        <div className="p-6 border-b flex justify-between items-center shrink-0" style={{ borderColor: "var(--border-main)" }}>
           <div>
-            <h2 className="text-xl font-bold text-pickled-bluewood-800">
+            <h2 className="text-xl font-bold" style={{ color: "var(--text-primary)" }}>
               {product ? "Editar Producto" : "Agregar Nuevo Producto"}
             </h2>
-            <p className="text-sm text-slate-400 mt-0.5">
+            <p className="text-sm mt-0.5" style={{ color: "var(--text-muted)" }}>
               {product ? "Modifica la información del producto" : "Ingresa los datos del nuevo producto"}
             </p>
           </div>
-          <button type="button" onClick={onClose} className="p-2 hover:bg-slate-100 rounded-full transition-colors">
-            <X className="h-5 w-5 text-slate-400" />
+          <button
+            type="button"
+            onClick={onClose}
+            className="p-2 rounded-full transition-colors"
+            style={{ color: "var(--text-muted)" }}
+            onMouseEnter={(e) => (e.currentTarget.style.background = "var(--bg-muted)")}
+            onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
+          >
+            <X className="h-5 w-5" />
           </button>
         </div>
 
@@ -398,25 +427,27 @@ function ProductModal({ product, categories, onClose, onSave, isSaving }: Produc
         <form onSubmit={handleSubmit} className="p-6 space-y-4 overflow-y-auto flex-1">
           {/* Nombre */}
           <div>
-            <label className="block text-sm font-medium text-pickled-bluewood-700 mb-1.5">Nombre del producto *</label>
+            <label className="block text-sm font-medium mb-1.5" style={{ color: "var(--text-secondary)" }}>Nombre del producto *</label>
             <input
               type="text"
               value={formData.nombre}
               onChange={(e) => set("nombre", e.target.value)}
               required
-              className="w-full px-4 py-2 border border-pickled-bluewood-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-pickled-bluewood-600 text-sm"
+              className="w-full px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-pickled-bluewood-600 text-sm transition-colors"
+              style={{ background: "var(--bg-surface-2)", border: "1px solid var(--border-main)", color: "var(--text-primary)" }}
               placeholder="Ej: Funda Silicona iPhone 15"
             />
           </div>
 
           {/* Categoría */}
           <div>
-            <label className="block text-sm font-medium text-pickled-bluewood-700 mb-1.5">Categoría *</label>
+            <label className="block text-sm font-medium mb-1.5" style={{ color: "var(--text-secondary)" }}>Categoría *</label>
             <select
               value={formData.categoria}
               onChange={(e) => set("categoria", e.target.value)}
               required
-              className="w-full px-4 py-2 border border-pickled-bluewood-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-pickled-bluewood-600 text-sm bg-white"
+              className="w-full px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-pickled-bluewood-600 text-sm transition-colors"
+              style={{ background: "var(--bg-surface-2)", border: "1px solid var(--border-main)", color: "var(--text-primary)" }}
             >
               <option value="">Selecciona una categoría</option>
               {categories.map((c) => (
@@ -427,7 +458,8 @@ function ProductModal({ product, categories, onClose, onSave, isSaving }: Produc
             {formData.categoria === "__nueva__" && (
               <input
                 type="text"
-                className="w-full mt-2 px-4 py-2 border border-pickled-bluewood-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-pickled-bluewood-600 text-sm"
+                className="w-full mt-2 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-pickled-bluewood-600 text-sm transition-colors"
+                style={{ background: "var(--bg-surface-2)", border: "1px solid var(--border-main)", color: "var(--text-primary)" }}
                 placeholder="Nombre de la nueva categoría"
                 onChange={(e) => set("categoria", e.target.value)}
                 autoFocus
@@ -438,79 +470,75 @@ function ProductModal({ product, categories, onClose, onSave, isSaving }: Produc
           {/* Precio y Stock */}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-pickled-bluewood-700 mb-1.5">Precio (S/) *</label>
+              <label className="block text-sm font-medium mb-1.5" style={{ color: "var(--text-secondary)" }}>Precio (S/) *</label>
               <input
-                type="number"
-                min={0}
-                step={1}
+                type="number" min={0} step={1}
                 value={formData.precio_unit}
                 onChange={(e) => set("precio_unit", Number(e.target.value))}
                 required
-                className="w-full px-4 py-2 border border-pickled-bluewood-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-pickled-bluewood-600 text-sm"
+                className="w-full px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-pickled-bluewood-600 text-sm transition-colors"
+                style={{ background: "var(--bg-surface-2)", border: "1px solid var(--border-main)", color: "var(--text-primary)" }}
                 placeholder="0"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-pickled-bluewood-700 mb-1.5">Stock actual *</label>
+              <label className="block text-sm font-medium mb-1.5" style={{ color: "var(--text-secondary)" }}>Stock actual *</label>
               <input
-                type="number"
-                min={0}
+                type="number" min={0}
                 value={formData.stock}
                 onChange={(e) => set("stock", Number(e.target.value))}
                 required
-                className="w-full px-4 py-2 border border-pickled-bluewood-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-pickled-bluewood-600 text-sm"
+                className="w-full px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-pickled-bluewood-600 text-sm transition-colors"
+                style={{ background: "var(--bg-surface-2)", border: "1px solid var(--border-main)", color: "var(--text-primary)" }}
               />
             </div>
           </div>
 
           {/* Stock mínimo */}
           <div>
-            <label className="block text-sm font-medium text-pickled-bluewood-700 mb-1.5">Stock mínimo *</label>
+            <label className="block text-sm font-medium mb-1.5" style={{ color: "var(--text-secondary)" }}>Stock mínimo *</label>
             <input
-              type="number"
-              min={0}
+              type="number" min={0}
               value={formData.min_stock}
               onChange={(e) => set("min_stock", Number(e.target.value))}
               required
-              className="w-full px-4 py-2 border border-pickled-bluewood-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-pickled-bluewood-600 text-sm"
+              className="w-full px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-pickled-bluewood-600 text-sm transition-colors"
+              style={{ background: "var(--bg-surface-2)", border: "1px solid var(--border-main)", color: "var(--text-primary)" }}
             />
           </div>
 
           {/* Descripción */}
           <div>
-            <label className="block text-sm font-medium text-pickled-bluewood-700 mb-1.5">Descripción</label>
+            <label className="block text-sm font-medium mb-1.5" style={{ color: "var(--text-secondary)" }}>Descripción</label>
             <textarea
               value={formData.descripcion ?? ""}
               onChange={(e) => set("descripcion", e.target.value)}
               rows={2}
-              className="w-full px-4 py-2 border border-pickled-bluewood-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-pickled-bluewood-600 text-sm resize-none"
+              className="w-full px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-pickled-bluewood-600 text-sm resize-none transition-colors"
+              style={{ background: "var(--bg-surface-2)", border: "1px solid var(--border-main)", color: "var(--text-primary)" }}
               placeholder="Descripción breve del producto..."
             />
           </div>
 
           {/* Imagen */}
           <div>
-            <label className="block text-sm font-medium text-pickled-bluewood-700 mb-1.5">Imagen del producto</label>
+            <label className="block text-sm font-medium mb-1.5" style={{ color: "var(--text-secondary)" }}>Imagen del producto</label>
             <div className="flex gap-4 items-start">
               <div className="flex-1">
                 <input
                   type="file"
                   accept="image/*"
                   onChange={handleFile}
-                  className="w-full text-sm file:mr-3 file:py-1.5 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-bold file:bg-pickled-bluewood-50 file:text-pickled-bluewood-700 hover:file:bg-pickled-bluewood-100 transition-colors"
+                  className="w-full text-sm file:mr-3 file:py-1.5 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-bold file:bg-pickled-bluewood-600 file:text-white hover:file:bg-pickled-bluewood-700 transition-colors"
                 />
-                <p className="text-[11px] text-slate-400 mt-1">JPG, PNG, WebP. Máximo 5 MB</p>
+                <p className="text-[11px] mt-1" style={{ color: "var(--text-muted)" }}>JPG, PNG, WebP. Máximo 5 MB</p>
               </div>
               <div className="shrink-0">
                 {imagePreview ? (
-                  <img
-                    src={imagePreview}
-                    alt="Preview"
-                    className="w-20 h-20 object-cover rounded-lg border border-slate-200"
-                  />
+                  <img src={imagePreview} alt="Preview" className="w-20 h-20 object-cover rounded-xl" style={{ border: "1px solid var(--border-main)" }} />
                 ) : (
-                  <div className="w-20 h-20 bg-slate-100 border-2 border-dashed border-slate-300 rounded-lg flex items-center justify-center">
-                    <Package className="w-6 h-6 text-slate-400" />
+                  <div className="w-20 h-20 rounded-xl border-2 border-dashed flex items-center justify-center" style={{ borderColor: "var(--border-main)", background: "var(--bg-muted)" }}>
+                    <Package className="w-6 h-6" style={{ color: "var(--text-muted)" }} />
                   </div>
                 )}
               </div>
@@ -522,14 +550,17 @@ function ProductModal({ product, categories, onClose, onSave, isSaving }: Produc
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 border border-pickled-bluewood-200 text-pickled-bluewood-700 rounded-lg hover:bg-pickled-bluewood-50 transition-colors text-sm font-medium"
+              className="px-4 py-2 rounded-xl text-sm font-medium transition-colors"
+              style={{ border: "1px solid var(--border-main)", color: "var(--text-secondary)" }}
+              onMouseEnter={(e) => (e.currentTarget.style.background = "var(--bg-muted)")}
+              onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
             >
               Cancelar
             </button>
             <button
               type="submit"
               disabled={isSaving}
-              className="flex items-center gap-2 px-4 py-2 bg-pickled-bluewood-600 text-white rounded-lg hover:bg-pickled-bluewood-700 transition-colors text-sm font-bold disabled:opacity-60"
+              className="flex items-center gap-2 px-4 py-2 bg-pickled-bluewood-600 text-white rounded-xl hover:bg-pickled-bluewood-700 transition-colors text-sm font-bold disabled:opacity-60"
             >
               {isSaving && <Loader2 className="h-4 w-4 animate-spin" />}
               {product ? "Actualizar" : "Agregar"} Producto

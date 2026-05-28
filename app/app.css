@@ -1,5 +1,67 @@
 @import "tailwindcss";
 
+/* ══════════════════════════════════════════════════════════════
+   VARIABLES CSS — Modo claro (base) y Modo oscuro
+   ══════════════════════════════════════════════════════════════ */
+:root {
+  /* Fondo */
+  --bg-canvas:      hsl(215, 30%, 96%);
+  --bg-surface:     hsl(0, 0%, 100%);
+  --bg-surface-2:   hsl(215, 30%, 98%);
+  --bg-sidebar:     hsl(208, 43%, 9%);
+  --bg-sidebar-item:hsl(208, 43%, 13%);
+  --bg-muted:       hsl(215, 25%, 93%);
+
+  /* Texto */
+  --text-primary:   hsl(208, 43%, 10%);
+  --text-secondary: hsl(210, 15%, 45%);
+  --text-muted:     hsl(210, 12%, 62%);
+  --text-sidebar:   hsl(215, 30%, 80%);
+  --text-sidebar-active: hsl(0, 0%, 100%);
+
+  /* Bordes */
+  --border-main:    hsl(215, 25%, 88%);
+  --border-subtle:  hsl(215, 25%, 94%);
+
+  /* Acento principal (pickled-bluewood-600) */
+  --accent:         hsl(210, 28%, 37%);
+  --accent-light:   hsl(210, 32%, 55%);
+  --accent-lighter: hsl(214, 47%, 87%);
+  --accent-dark:    hsl(210, 29%, 29%);
+
+  /* Sombras */
+  --shadow-card:    0 1px 3px 0 rgba(0,0,0,.06), 0 1px 2px -1px rgba(0,0,0,.04);
+  --shadow-lg:      0 10px 25px -5px rgba(0,0,0,.08), 0 4px 10px -5px rgba(0,0,0,.06);
+}
+
+html.dark {
+  /* Fondo */
+  --bg-canvas:      hsl(222, 25%, 9%);
+  --bg-surface:     hsl(220, 25%, 13%);
+  --bg-surface-2:   hsl(220, 25%, 17%);
+  --bg-sidebar:     hsl(220, 30%, 10%);
+  --bg-sidebar-item:hsl(220, 30%, 16%);
+  --bg-muted:       hsl(220, 25%, 20%);
+
+  /* Texto */
+  --text-primary:   hsl(215, 30%, 93%);
+  --text-secondary: hsl(215, 15%, 65%);
+  --text-muted:     hsl(215, 12%, 45%);
+  --text-sidebar:   hsl(215, 20%, 65%);
+  --text-sidebar-active: hsl(0, 0%, 100%);
+
+  /* Bordes */
+  --border-main:    hsl(220, 20%, 22%);
+  --border-subtle:  hsl(220, 20%, 18%);
+
+  /* Sombras oscuras */
+  --shadow-card:    0 1px 3px 0 rgba(0,0,0,.3), 0 1px 2px -1px rgba(0,0,0,.2);
+  --shadow-lg:      0 10px 25px -5px rgba(0,0,0,.4), 0 4px 10px -5px rgba(0,0,0,.3);
+}
+
+/* ══════════════════════════════════════════════════════════════
+   PALETA PICKLED-BLUEWOOD (sin cambios)
+   ══════════════════════════════════════════════════════════════ */
 @layer utilities {
   /* ── BACKGROUND ─────────────────────────────────────────────── */
   .bg-pickled-bluewood-50  { background-color: hsl(215, 46%, 95%); }
@@ -43,4 +105,24 @@
   .to-pickled-bluewood-900\/50   { --tw-gradient-to:   hsl(208, 50%, 4% / 0.5); }
   .to-pickled-bluewood-600       { --tw-gradient-to:   hsl(210, 28%, 37%); }
   .hover\:to-pickled-bluewood-700:hover { --tw-gradient-to: hsl(210, 29%, 29%); }
+
+  /* ── TOKENS DINÁMICOS (CSS vars) ────────────────────────────── */
+  .bg-canvas    { background-color: var(--bg-canvas); }
+  .bg-surface   { background-color: var(--bg-surface); }
+  .bg-surface-2 { background-color: var(--bg-surface-2); }
+  .bg-sidebar   { background-color: var(--bg-sidebar); }
+  .bg-sidebar-item { background-color: var(--bg-sidebar-item); }
+  .bg-muted     { background-color: var(--bg-muted); }
+
+  .text-primary   { color: var(--text-primary); }
+  .text-secondary { color: var(--text-secondary); }
+  .text-muted-token { color: var(--text-muted); }
+  .text-sidebar-t { color: var(--text-sidebar); }
+  .text-sidebar-active { color: var(--text-sidebar-active); }
+
+  .border-main   { border-color: var(--border-main); }
+  .border-subtle { border-color: var(--border-subtle); }
+
+  .shadow-card { box-shadow: var(--shadow-card); }
+  .shadow-lg-token { box-shadow: var(--shadow-lg); }
 }

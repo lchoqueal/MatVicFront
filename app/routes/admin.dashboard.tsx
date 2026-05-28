@@ -1,11 +1,11 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { DollarSign, Package, ShoppingCart, TrendingUp, AlertTriangle, RefreshCw } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip, CartesianGrid } from "recharts";
 import { useOutletContext } from "react-router";
 import type { Store } from "~/components/ui/StoreSelector";
 import { api } from "~/lib/api";
 
-// ── Tipos de respuesta ────────────────────────────────────────────────────────
+// ── Tipos ─────────────────────────────────────────────────────────────────────
 
 interface Boleta {
   id_boleta: number;
@@ -13,7 +13,7 @@ interface Boleta {
   fecha_emision: string;
   metodo_pago: string;
   estado_boleta: string;
-  id_local?: number; // puede venir como null si la venta no tiene local asignado
+  id_local?: number;
 }
 
 interface ReporteVentas {
@@ -48,56 +48,56 @@ interface ReporteInventario {
 
 interface MesVenta {
   month: string;
-  sales: number;       // total del local seleccionado
-  salesGlobal: number; // total global (todos los locales)
-  boletas: Boleta[];   // boletas del mes para filtrar client-side
+  sales: number;
+  salesGlobal: number;
+  boletas: Boleta[];
 }
 
-// Construir fechas para el reporte del mes actual y los últimos 6 meses
+// ── Helpers de fechas ─────────────────────────────────────────────────────────
+
 function getFechasMesActual() {
   const hoy = new Date();
   const inicio = new Date(hoy.getFullYear(), hoy.getMonth(), 1);
-  const fin = new Date(hoy.getFullYear(), hoy.getMonth() + 1, 0);
+  const fin    = new Date(hoy.getFullYear(), hoy.getMonth() + 1, 0);
   return {
     inicio: inicio.toISOString().split("T")[0],
-    fin: fin.toISOString().split("T")[0],
+    fin:    fin.toISOString().split("T")[0],
   };
 }
 
 function getFechasUltimosSeisMeses(): { inicio: string; fin: string; label: string }[] {
-  const meses = [];
-  const MESES_ES = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
-  for (let i = 5; i >= 0; i--) {
+  const MESES = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
+  return Array.from({ length: 6 }, (_, i) => {
     const d = new Date();
-    d.setMonth(d.getMonth() - i);
-    const inicio = new Date(d.getFullYear(), d.getMonth(), 1).toISOString().split("T")[0];
-    const fin = new Date(d.getFullYear(), d.getMonth() + 1, 0).toISOString().split("T")[0];
-    meses.push({ inicio, fin, label: MESES_ES[d.getMonth()] });
-  }
-  return meses;
+    d.setMonth(d.getMonth() - (5 - i));
+    return {
+      inicio: new Date(d.getFullYear(), d.getMonth(), 1).toISOString().split("T")[0],
+      fin:    new Date(d.getFullYear(), d.getMonth() + 1, 0).toISOString().split("T")[0],
+      label:  MESES[d.getMonth()],
+    };
+  });
 }
+
+// ── Componente principal ──────────────────────────────────────────────────────
 
 export default function Dashboard() {
   const { currentStore } = useOutletContext<{ currentStore: Store }>();
 
-  const [ventasMes, setVentasMes] = useState<ReporteVentas | null>(null);
+  const [ventasMes,    setVentasMes]    = useState<ReporteVentas | null>(null);
   const [historialRaw, setHistorialRaw] = useState<MesVenta[]>([]);
-  const [alertas, setAlertas] = useState<AlertaStock[]>([]);
-  const [inventario, setInventario] = useState<ReporteInventario | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+  const [alertas,      setAlertas]      = useState<AlertaStock[]>([]);
+  const [inventario,   setInventario]   = useState<ReporteInventario | null>(null);
+  const [isLoading,    setIsLoading]    = useState(true);
+  const [lastUpdated,  setLastUpdated]  = useState<Date | null>(null);
 
-  // ── Filtrado client-side por local ──────────────────────────────────────
-  const boletasMesFiltradas = (ventasMes?.boletas ?? []).filter(
+  // ── Filtrado client-side por local ────────────────────────────────────────
+  const boletasMes = (ventasMes?.boletas ?? []).filter(
     (b) => b.id_local == null || b.id_local === currentStore.id
   );
-
-  // Métricas derivadas del local actual
-  const totalLocalMes = boletasMesFiltradas.reduce((s, b) => s + Number(b.total), 0);
-  const cantidadLocalMes = boletasMesFiltradas.length;
+  const totalLocalMes    = boletasMes.reduce((s, b) => s + Number(b.total), 0);
+  const cantidadLocalMes = boletasMes.length;
   const promedioLocalMes = cantidadLocalMes > 0 ? totalLocalMes / cantidadLocalMes : 0;
 
-  // Historial filtrado para el gráfico
   const historialVentas = historialRaw.map((m) => ({
     month: m.month,
     sales: m.boletas
@@ -105,35 +105,28 @@ export default function Dashboard() {
       .reduce((s, b) => s + Number(b.total), 0),
   }));
 
+  // ── Carga de datos ────────────────────────────────────────────────────────
   const cargarDatos = useCallback(async () => {
     setIsLoading(true);
     try {
       const { inicio, fin } = getFechasMesActual();
-
-      // Cargar en paralelo
-      const [ventasData, alertasData, inventarioData] = await Promise.allSettled([
+      const [ventasR, alertasR, inventarioR] = await Promise.allSettled([
         api.get<ReporteVentas>(`/reportes/ventas?fechaInicio=${inicio}&fechaFin=${fin}`),
         api.get<AlertasResponse>("/productos/alertas/stock-bajo"),
         api.get<ReporteInventario>("/reportes/inventario"),
       ]);
+      if (ventasR.status     === "fulfilled") setVentasMes(ventasR.value);
+      if (alertasR.status    === "fulfilled") setAlertas(alertasR.value.alertas);
+      if (inventarioR.status === "fulfilled") setInventario(inventarioR.value);
 
-      if (ventasData.status === "fulfilled") setVentasMes(ventasData.value);
-      if (alertasData.status === "fulfilled") setAlertas(alertasData.value.alertas);
-      if (inventarioData.status === "fulfilled") setInventario(inventarioData.value);
-
-      // Cargar historial de 6 meses en paralelo — guardamos las boletas raw para filtrar
       const meses = getFechasUltimosSeisMeses();
-      const historialPromises = meses.map(({ inicio, fin, label }) =>
-        api.get<ReporteVentas>(`/reportes/ventas?fechaInicio=${inicio}&fechaFin=${fin}`)
-          .then((d) => ({
-            month: label,
-            sales: Number(d.totalVentas) || 0,
-            salesGlobal: Number(d.totalVentas) || 0,
-            boletas: d.boletas ?? [],
-          }))
-          .catch(() => ({ month: label, sales: 0, salesGlobal: 0, boletas: [] }))
+      const historial = await Promise.all(
+        meses.map(({ inicio, fin, label }) =>
+          api.get<ReporteVentas>(`/reportes/ventas?fechaInicio=${inicio}&fechaFin=${fin}`)
+            .then((d) => ({ month: label, sales: Number(d.totalVentas) || 0, salesGlobal: Number(d.totalVentas) || 0, boletas: d.boletas ?? [] }))
+            .catch(() => ({ month: label, sales: 0, salesGlobal: 0, boletas: [] }))
+        )
       );
-      const historial = await Promise.all(historialPromises);
       setHistorialRaw(historial);
       setLastUpdated(new Date());
     } finally {
@@ -141,250 +134,350 @@ export default function Dashboard() {
     }
   }, []);
 
-  useEffect(() => {
-    cargarDatos();
-  }, [cargarDatos]);
+  useEffect(() => { cargarDatos(); }, [cargarDatos]);
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-700">
-      {/* Header con botón de refresco */}
+    <div className="space-y-5 animate-in fade-in duration-500">
+
+      {/* ── HEADER ──────────────────────────────────────────────────────────── */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-lg font-bold text-slate-700">Resumen del mes</h2>
-          {lastUpdated && (
-            <p className="text-xs text-slate-400">
-              Actualizado: {lastUpdated.toLocaleTimeString("es-PE")}
-            </p>
-          )}
+          <h2 className="text-xl font-bold" style={{ color: "var(--text-primary)" }}>
+            Resumen del Mes
+          </h2>
+          <p className="text-sm mt-0.5" style={{ color: "var(--text-secondary)" }}>
+            {currentStore.name}
+            {lastUpdated && (
+              <span style={{ color: "var(--text-muted)" }}>
+                {" "}· {lastUpdated.toLocaleTimeString("es-PE", { hour: "2-digit", minute: "2-digit" })}
+              </span>
+            )}
+          </p>
         </div>
         <button
           onClick={cargarDatos}
           disabled={isLoading}
-          className="flex items-center gap-2 px-3 py-1.5 text-xs font-medium text-slate-500 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors disabled:opacity-50"
+          className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 hover:scale-[1.02] disabled:opacity-50"
+          style={{
+            background: "var(--bg-surface)",
+            border: "1px solid var(--border-main)",
+            color: "var(--text-secondary)",
+            boxShadow: "var(--shadow-card)",
+          }}
         >
           <RefreshCw className={`h-3.5 w-3.5 ${isLoading ? "animate-spin" : ""}`} />
-          Actualizar
+          {isLoading ? "Sincronizando…" : "Actualizar"}
         </button>
       </div>
 
-      {/* 1. MÉTRICAS — 1 col móvil, 2 sm, 4 lg */}
-      <div className="grid gap-3 sm:gap-4 grid-cols-2 lg:grid-cols-4">
+      {/* ── 1. MÉTRICAS ESTILO AETHERDASH ───────────────────────────────────── */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         <MetricCard
-          title="Ventas del Mes"
-          value={isLoading ? "—" : `S/ ${totalLocalMes.toLocaleString("es-PE", { minimumFractionDigits: 2 })}`}
-          icon={<DollarSign className="h-4 w-4" />}
-          subtitle={`${cantidadLocalMes} transacciones en ${currentStore.name}`}
+          title="VENTAS DEL MES"
+          value={isLoading ? "—" : `S/ ${totalLocalMes.toLocaleString("es-PE", { minimumFractionDigits: 0 })}`}
+          sub={`${cantidadLocalMes} transacciones`}
+          icon={<DollarSign className="h-5 w-5" />}
+          iconBg="bg-blue-500/10" iconText="text-blue-500"
+          badge={cantidadLocalMes > 0 ? "+activo" : null}
+          badgeColor="text-emerald-500"
           isLoading={isLoading}
           delay={0}
         />
         <MetricCard
-          title="Productos en Stock"
+          title="PRODUCTOS EN STOCK"
           value={isLoading ? "—" : String(inventario?.totalProductos ?? 0)}
-          icon={<Package className="h-4 w-4" />}
-          subtitle={`${inventario?.productosBajo ?? 0} con stock bajo`}
-          trend={inventario && inventario.productosBajo > 0 ? "negative" : undefined}
+          sub={`${inventario?.productosBajo ?? 0} bajo mínimo`}
+          icon={<Package className="h-5 w-5" />}
+          iconBg="bg-violet-500/10" iconText="text-violet-500"
+          badge={inventario && inventario.productosBajo > 0 ? `−${inventario.productosBajo}` : null}
+          badgeColor="text-red-500"
           isLoading={isLoading}
           delay={75}
         />
         <MetricCard
-          title="Valor Inventario"
-          value={isLoading ? "—" : `S/ ${Number(inventario?.totalValorInventario ?? 0).toLocaleString("es-PE", { minimumFractionDigits: 2 })}`}
-          icon={<ShoppingCart className="h-4 w-4" />}
-          subtitle={currentStore.name}
+          title="VALOR INVENTARIO"
+          value={isLoading ? "—" : `S/ ${Number(inventario?.totalValorInventario ?? 0).toLocaleString("es-PE", { minimumFractionDigits: 0 })}`}
+          sub="precio de venta"
+          icon={<ShoppingCart className="h-5 w-5" />}
+          iconBg="bg-amber-500/10" iconText="text-amber-500"
+          badge={null} badgeColor=""
           isLoading={isLoading}
           delay={150}
         />
         <MetricCard
-          title="Promedio por Venta"
-          value={isLoading ? "—" : `S/ ${promedioLocalMes.toFixed(2)}`}
-          icon={<TrendingUp className="h-4 w-4" />}
-          subtitle={`Este mes — ${currentStore.name}`}
+          title="TICKET PROMEDIO"
+          value={isLoading ? "—" : `S/ ${promedioLocalMes.toFixed(0)}`}
+          sub="por venta este mes"
+          icon={<TrendingUp className="h-5 w-5" />}
+          iconBg="bg-emerald-500/10" iconText="text-emerald-500"
+          badge={promedioLocalMes > 0 ? "calculado" : null}
+          badgeColor="text-pickled-bluewood-400"
           isLoading={isLoading}
           delay={225}
         />
       </div>
 
-      <div className="grid gap-4 sm:gap-6 grid-cols-1 md:grid-cols-2">
-        {/* 2. GRÁFICO DE BARRAS */}
+      {/* ── 2. GRÁFICO (2/3) + ÚLTIMAS BOLETAS (1/3) ────────────────────────── */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-5">
+
+        {/* Gráfico de barras */}
         <div
-          className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm animate-in fade-in slide-in-from-left-4 duration-500"
-          style={{ animationDelay: "200ms", animationFillMode: "both" }}
+          className="lg:col-span-2 rounded-2xl p-5 sm:p-6 animate-in fade-in slide-in-from-bottom-4 duration-500"
+          style={{
+            background: "var(--bg-surface)",
+            border: "1px solid var(--border-main)",
+            boxShadow: "var(--shadow-card)",
+            animationDelay: "200ms", animationFillMode: "both",
+          }}
         >
-          <div className="mb-6">
-            <h3 className="text-lg font-bold text-slate-800">Evolución de Ventas</h3>
-            <p className="text-sm text-slate-500">Últimos 6 meses en {currentStore.name}</p>
+          <div className="flex items-start justify-between mb-5">
+            <div>
+              <h3 className="font-bold text-base" style={{ color: "var(--text-primary)" }}>Evolución de Ventas</h3>
+              <p className="text-sm mt-0.5" style={{ color: "var(--text-secondary)" }}>Últimos 6 meses · {currentStore.name}</p>
+            </div>
+            <div className="flex items-center gap-1.5 text-xs" style={{ color: "var(--text-muted)" }}>
+              <span className="w-2 h-2 rounded-full bg-pickled-bluewood-500 inline-block" />
+              Ventas (S/)
+            </div>
           </div>
-          <div className="h-[250px] w-full">
+
+          <div className="h-[210px]">
             {isLoading ? (
-              <div className="h-full flex items-center justify-center">
-                <div className="flex gap-1 items-end">
-                  {[...Array(6)].map((_, i) => (
-                    <div
-                      key={i}
-                      className="w-8 bg-slate-200 rounded-t animate-pulse"
-                      style={{ height: `${40 + (i * 20)}px` }}
-                    />
-                  ))}
-                </div>
+              <div className="h-full flex items-end gap-2">
+                {[40, 65, 50, 80, 60, 95].map((h, i) => (
+                  <div key={i} className="flex-1 rounded-t-lg animate-pulse" style={{ height: `${h}%`, background: "var(--bg-muted)" }} />
+                ))}
               </div>
             ) : (
-              <ResponsiveContainer width="99%" height={250}>
-                <BarChart data={historialVentas}>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                  <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fill: "#64748b", fontSize: 12 }} />
-                  <YAxis axisLine={false} tickLine={false} tick={{ fill: "#64748b", fontSize: 12 }} />
+              <ResponsiveContainer width="99%" height={210}>
+                <BarChart data={historialVentas} barGap={4}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border-subtle)" />
+                  <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fill: "var(--text-muted)", fontSize: 11 }} />
+                  <YAxis axisLine={false} tickLine={false} tick={{ fill: "var(--text-muted)", fontSize: 11 }}
+                    tickFormatter={(v) => v === 0 ? "0" : `${(v / 1000).toFixed(0)}k`} width={34} />
                   <Tooltip
-                    cursor={{ fill: "#f8fafc" }}
-                    contentStyle={{ borderRadius: "12px", border: "none", boxShadow: "0 10px 15px -3px rgba(0,0,0,0.1)" }}
-                    formatter={(value) => [`S/ ${Number(value).toFixed(2)}`, "Ventas"]}
+                    cursor={{ fill: "var(--bg-muted)", radius: 8 }}
+                    contentStyle={{
+                      borderRadius: "12px",
+                      border: "1px solid var(--border-main)",
+                      background: "var(--bg-surface)",
+                      color: "var(--text-primary)",
+                      boxShadow: "var(--shadow-lg)",
+                      fontSize: "13px",
+                    }}
+                    formatter={(value) => [`S/ ${Number(value).toLocaleString("es-PE")}`, "Ventas"]}
                   />
-                  <Bar dataKey="sales" fill="#3b82f6" radius={[6, 6, 0, 0]} barSize={35} />
+                  <Bar dataKey="sales" fill="hsl(210, 28%, 37%)" radius={[8, 8, 0, 0]} barSize={30} />
                 </BarChart>
               </ResponsiveContainer>
             )}
           </div>
         </div>
 
-        {/* 3. ALERTAS DE STOCK */}
+        {/* Recent Hub — últimas boletas */}
         <div
-          className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm animate-in fade-in slide-in-from-right-4 duration-500"
-          style={{ animationDelay: "250ms", animationFillMode: "both" }}
+          className="rounded-2xl flex flex-col overflow-hidden animate-in fade-in slide-in-from-right-4 duration-500"
+          style={{
+            background: "var(--bg-surface)",
+            border: "1px solid var(--border-main)",
+            boxShadow: "var(--shadow-card)",
+            animationDelay: "270ms", animationFillMode: "both",
+          }}
         >
-          <div className="mb-6 flex items-center justify-between">
-            <div>
-              <h3 className="text-lg font-bold text-slate-800">Alertas de Stock</h3>
-              <p className="text-sm text-slate-500">Productos por agotarse</p>
-            </div>
-            <AlertTriangle className="h-5 w-5 text-orange-500" />
+          <div className="px-5 py-4 border-b" style={{ borderColor: "var(--border-subtle)" }}>
+            <h3 className="font-bold text-sm" style={{ color: "var(--text-primary)" }}>Últimas Transacciones</h3>
+            <p className="text-xs mt-0.5" style={{ color: "var(--text-muted)" }}>{currentStore.name}</p>
           </div>
 
-          {isLoading ? (
-            <div className="space-y-3">
-              {[...Array(3)].map((_, i) => (
-                <div key={i} className="h-14 bg-slate-100 rounded-lg animate-pulse" />
-              ))}
-            </div>
-          ) : alertas.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-8 text-center">
-              <Package className="h-8 w-8 text-green-400 mb-2" />
-              <p className="text-sm text-slate-500 font-medium">¡Todo el stock está bien!</p>
-            </div>
-          ) : (
-            <div className="space-y-3 max-h-[220px] overflow-y-auto pr-1">
-              {alertas.map((alerta, i) => (
+          <div className="flex-1">
+            {isLoading ? (
+              <div className="p-4 space-y-3">
+                {[...Array(4)].map((_, i) => (
+                  <div key={i} className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-full animate-pulse shrink-0" style={{ background: "var(--bg-muted)" }} />
+                    <div className="flex-1 space-y-1.5">
+                      <div className="h-3 rounded animate-pulse w-2/3" style={{ background: "var(--bg-muted)" }} />
+                      <div className="h-2.5 rounded animate-pulse w-1/3" style={{ background: "var(--bg-muted)" }} />
+                    </div>
+                    <div className="h-3 rounded animate-pulse w-10" style={{ background: "var(--bg-muted)" }} />
+                  </div>
+                ))}
+              </div>
+            ) : !boletasMes.length ? (
+              <div className="flex flex-col items-center justify-center py-10 text-center px-4">
+                <ShoppingCart className="h-8 w-8 mb-2" style={{ color: "var(--text-muted)" }} />
+                <p className="text-sm" style={{ color: "var(--text-muted)" }}>Sin transacciones</p>
+              </div>
+            ) : (
+              boletasMes.slice(0, 5).map((boleta, i) => (
                 <div
-                  key={alerta.idProducto}
-                  className="flex items-center justify-between p-3 rounded-lg bg-slate-50 border border-slate-100 hover:border-orange-200 hover:bg-orange-50/40 transition-all duration-200 animate-in fade-in slide-in-from-bottom-2"
-                  style={{ animationDelay: `${i * 60}ms`, animationFillMode: "both" }}
+                  key={boleta.id_boleta}
+                  className="flex items-center gap-3 px-5 py-3 cursor-default animate-in fade-in slide-in-from-right-2 border-b last:border-0"
+                  style={{
+                    borderColor: "var(--border-subtle)",
+                    animationDelay: `${i * 60 + 300}ms`,
+                    animationFillMode: "both",
+                    transition: "background 150ms",
+                  }}
+                  onMouseEnter={(e) => (e.currentTarget.style.background = "var(--bg-surface-2)")}
+                  onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
                 >
-                  <div>
-                    <p className="text-sm font-bold text-slate-700 line-clamp-1">{alerta.nombre}</p>
-                    <p className="text-[11px] text-slate-400">
-                      Mínimo: {alerta.stockMinimo} • Falta: {alerta.diferencia}
+                  <div
+                    className="w-8 h-8 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0"
+                    style={{ background: "var(--bg-muted)", color: "var(--text-secondary)" }}
+                  >
+                    #{boleta.id_boleta}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold truncate" style={{ color: "var(--text-primary)" }}>
+                      {boleta.metodo_pago}
+                    </p>
+                    <p className="text-xs truncate" style={{ color: "var(--text-muted)" }}>
+                      {new Date(boleta.fecha_emision).toLocaleDateString("es-PE")}
                     </p>
                   </div>
-                  <span className={`px-2 py-1 rounded-md text-xs font-bold ${
-                    alerta.urgencia === "alta" || alerta.stockActual <= 2
-                      ? "bg-red-100 text-red-600"
-                      : "bg-orange-100 text-orange-600"
-                  }`}>
-                    {alerta.stockActual} uds
-                  </span>
+                  <div className="text-right shrink-0">
+                    <p className="text-sm font-bold" style={{ color: "var(--text-primary)" }}>
+                      S/ {Number(boleta.total).toFixed(0)}
+                    </p>
+                    <span className={`text-[10px] font-bold uppercase ${
+                      boleta.estado_boleta === "pagado"   ? "text-emerald-500" :
+                      boleta.estado_boleta === "cancelado" ? "text-red-400"    : "text-amber-500"
+                    }`}>{boleta.estado_boleta}</span>
+                  </div>
                 </div>
-              ))}
-            </div>
-          )}
+              ))
+            )}
+          </div>
         </div>
       </div>
 
-      {/* 4. ÚLTIMAS BOLETAS — filtradas por local */}
+      {/* ── 3. ALERTAS DE STOCK ─────────────────────────────────────────────── */}
       <div
-        className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-500"
-        style={{ animationDelay: "300ms", animationFillMode: "both" }}>
-        <div className="p-6 border-b border-slate-100 bg-slate-50/50">
-          <h3 className="font-bold text-slate-800">Últimas Transacciones — {currentStore.name}</h3>
+        className="rounded-2xl animate-in fade-in slide-in-from-bottom-4 duration-500"
+        style={{
+          background: "var(--bg-surface)",
+          border: "1px solid var(--border-main)",
+          boxShadow: "var(--shadow-card)",
+          animationDelay: "350ms", animationFillMode: "both",
+        }}
+      >
+        <div className="px-6 py-4 border-b flex items-center justify-between" style={{ borderColor: "var(--border-subtle)" }}>
+          <div>
+            <h3 className="font-bold text-sm" style={{ color: "var(--text-primary)" }}>Alertas de Stock</h3>
+            <p className="text-xs mt-0.5" style={{ color: "var(--text-muted)" }}>Productos por agotarse</p>
+          </div>
+          <div className="flex items-center gap-2">
+            <AlertTriangle className="h-4 w-4 text-amber-500" />
+            {!isLoading && alertas.length > 0 && (
+              <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-red-500/10 text-red-500">
+                {alertas.length}
+              </span>
+            )}
+          </div>
         </div>
-        <div className="p-0">
-          {isLoading ? (
-            <div className="p-4 space-y-3">
-              {[...Array(3)].map((_, i) => (
-                <div key={i} className="h-14 bg-slate-100 rounded-lg animate-pulse" />
-              ))}
-            </div>
-          ) : !boletasMesFiltradas.length ? (
-            <div className="py-12 text-center text-slate-400 text-sm">
-              No hay transacciones en {currentStore.name} este mes
-            </div>
-          ) : (
-            boletasMesFiltradas.slice(0, 5).map((boleta, i) => (
+
+        {isLoading ? (
+          <div className="p-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            {[...Array(3)].map((_, i) => (
+              <div key={i} className="h-16 rounded-xl animate-pulse" style={{ background: "var(--bg-muted)" }} />
+            ))}
+          </div>
+        ) : alertas.length === 0 ? (
+          <div className="flex items-center justify-center gap-2 py-8">
+            <Package className="h-5 w-5 text-emerald-500" />
+            <p className="text-sm font-medium text-emerald-600">¡Todo el inventario está en orden!</p>
+          </div>
+        ) : (
+          <div className="p-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            {alertas.map((alerta, i) => (
               <div
-                key={boleta.id_boleta}
-                className="flex items-center justify-between p-4 border-b border-slate-100 last:border-0 hover:bg-blue-50/40 transition-all duration-200 animate-in fade-in slide-in-from-bottom-2"
-                style={{ animationDelay: `${i * 50 + 350}ms`, animationFillMode: "both" }}
+                key={alerta.idProducto}
+                className="flex items-center justify-between p-3 rounded-xl transition-all duration-200 animate-in fade-in slide-in-from-bottom-2"
+                style={{
+                  background: "var(--bg-surface-2)",
+                  border: "1px solid var(--border-subtle)",
+                  animationDelay: `${i * 60}ms`, animationFillMode: "both",
+                }}
+                onMouseEnter={(e) => (e.currentTarget.style.borderColor = "var(--border-main)")}
+                onMouseLeave={(e) => (e.currentTarget.style.borderColor = "var(--border-subtle)")}
               >
-                <div className="flex items-center gap-3 min-w-0">
-                  <div className="bg-blue-100 p-2 rounded-lg text-blue-600 shrink-0">
-                    <ShoppingCart className="h-4 w-4 sm:h-5 sm:w-5" />
-                  </div>
-                  <div className="min-w-0">
-                    <p className="text-sm font-bold text-slate-700">Boleta #{boleta.id_boleta}</p>
-                    <p className="text-xs text-slate-400 truncate">
-                      {new Date(boleta.fecha_emision).toLocaleDateString("es-PE")} • {boleta.metodo_pago}
-                    </p>
-                  </div>
-                </div>
-                <div className="text-right shrink-0 ml-3">
-                  <p className="font-bold text-slate-800 text-sm">S/ {Number(boleta.total).toFixed(2)}</p>
-                  <p className={`text-[10px] font-bold uppercase ${
-                    boleta.estado_boleta === "pagado" ? "text-green-600" :
-                    boleta.estado_boleta === "cancelado" ? "text-red-500" : "text-yellow-600"
-                  }`}>
-                    {boleta.estado_boleta}
+                <div className="min-w-0">
+                  <p className="text-sm font-semibold truncate" style={{ color: "var(--text-primary)" }}>
+                    {alerta.nombre}
+                  </p>
+                  <p className="text-xs mt-0.5" style={{ color: "var(--text-muted)" }}>
+                    Mín: {alerta.stockMinimo} · Falta: {alerta.diferencia}
                   </p>
                 </div>
+                <span className={`ml-3 shrink-0 px-2 py-1 rounded-lg text-xs font-bold ${
+                  alerta.urgencia === "alta" || alerta.stockActual <= 2
+                    ? "bg-red-500/10 text-red-500"
+                    : "bg-amber-500/10 text-amber-600"
+                }`}>
+                  {alerta.stockActual} ud{alerta.stockActual !== 1 ? "s" : ""}
+                </span>
               </div>
-            ))
-          )}
-        </div>
+            ))}
+          </div>
+        )}
       </div>
 
     </div>
   );
 }
 
-// ── Subcomponente MetricCard ──────────────────────────────────────────────────
+// ── MetricCard estilo AetherDash ──────────────────────────────────────────────
 
 interface MetricCardProps {
   title: string;
   value: string;
+  sub: string;
   icon: React.ReactNode;
-  subtitle: string;
-  trend?: "positive" | "negative";
+  iconBg: string;
+  iconText: string;
+  badge: string | null;
+  badgeColor: string;
   isLoading?: boolean;
   delay?: number;
 }
 
-function MetricCard({ title, value, icon, subtitle, trend, isLoading, delay = 0 }: MetricCardProps) {
+function MetricCard({ title, value, sub, icon, iconBg, iconText, badge, badgeColor, isLoading, delay = 0 }: MetricCardProps) {
   return (
     <div
-      className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm hover:shadow-md hover:-translate-y-0.5 hover:border-blue-200 transition-all duration-300 group animate-in fade-in slide-in-from-bottom-4"
-      style={{ animationDelay: `${delay}ms`, animationFillMode: "both" }}
+      className="rounded-2xl p-4 sm:p-5 transition-all duration-300 hover:-translate-y-0.5 animate-in fade-in slide-in-from-bottom-4 group"
+      style={{
+        background: "var(--bg-surface)",
+        border: "1px solid var(--border-main)",
+        boxShadow: "var(--shadow-card)",
+        animationDelay: `${delay}ms`, animationFillMode: "both",
+      }}
+      onMouseEnter={(e) => ((e.currentTarget as HTMLDivElement).style.boxShadow = "var(--shadow-lg)")}
+      onMouseLeave={(e) => ((e.currentTarget as HTMLDivElement).style.boxShadow = "var(--shadow-card)")}
     >
-      <div className="flex items-center justify-between mb-4">
-        <div className="p-2 bg-slate-100 rounded-lg text-slate-500 group-hover:bg-blue-50 group-hover:text-blue-600 group-hover:scale-110 transition-all duration-300">
+      {/* Fila superior: ícono + badge */}
+      <div className="flex items-start justify-between mb-4">
+        <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-transform duration-300 group-hover:scale-110 ${iconBg} ${iconText}`}>
           {icon}
         </div>
-        {trend && (
-          <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${trend === "positive" ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}>
-            {trend === "positive" ? "↑" : "↓"}
-          </span>
-        )}
+        {badge && <span className={`text-[11px] font-bold ${badgeColor}`}>{badge}</span>}
       </div>
-      <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider">{title}</h3>
-      <div className={`text-2xl font-black text-slate-800 my-1 transition-all duration-300 ${isLoading ? "animate-pulse bg-slate-200 rounded h-8 w-24" : ""}`}>
+
+      {/* Etiqueta */}
+      <p className="text-[10px] font-bold tracking-widest uppercase mb-1" style={{ color: "var(--text-muted)" }}>
+        {title}
+      </p>
+
+      {/* Valor */}
+      <div
+        className={`text-2xl font-black leading-none mb-1 ${isLoading ? "animate-pulse rounded h-7 w-20" : ""}`}
+        style={isLoading ? { background: "var(--bg-muted)" } : { color: "var(--text-primary)" }}
+      >
         {!isLoading && value}
       </div>
-      <p className="text-[11px] text-slate-500 font-medium">{subtitle}</p>
+
+      {/* Sub */}
+      <p className="text-xs" style={{ color: "var(--text-muted)" }}>{sub}</p>
     </div>
   );
 }
