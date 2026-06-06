@@ -12,6 +12,7 @@ import "./app.css";
 import { AuthProvider } from "./context/auth";
 
 export const links: Route.LinksFunction = () => [
+  { rel: "icon", type: "image/png", href: "/favicon.png" },
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
   {
     rel: "preconnect",
@@ -26,7 +27,7 @@ export const links: Route.LinksFunction = () => [
 
 export function Layout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="es">
+    <html lang="es" suppressHydrationWarning>
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />

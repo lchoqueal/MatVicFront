@@ -26,3 +26,7 @@ yarn-error.log*
 # Windows
 Thumbs.db
 desktop.ini
+
+# Carpeta de una api oño
+
+/api/
