@@ -3,6 +3,7 @@ import { useNavigate } from "react-router";
 import { ShoppingCart, Eye, Star, Smartphone, Search, Loader2, AlertCircle } from "lucide-react";
 import { api } from "~/lib/api";
 import type { Product } from "~/types/inventory";
+import { formatCLP } from "~/lib/utils";
 
 interface ProductosResponse {
   cantidad: number;
@@ -84,7 +85,7 @@ export default function ShopIndex() {
             <span className="text-blue-500">Estilo MatVic</span>
           </h2>
           <p className="text-slate-300 text-sm sm:text-base lg:text-lg hidden sm:block">
-            Los mejores accesorios para tu smartphone seleccionados con calidad garantizada en Tacna.
+            Los mejores accesorios para tu smartphone seleccionados con calidad garantizada en Arica.
           </p>
           <button
             onClick={() => document.getElementById("catalogo")?.scrollIntoView({ behavior: "smooth" })}
@@ -228,7 +229,7 @@ export default function ShopIndex() {
 
                   <div className="mt-auto flex items-center justify-between">
                     <p className="text-xl font-bold text-[#2d3e50]">
-                      S/ {Number(producto.precio_unit).toFixed(2)}
+                    {formatCLP(Number(producto.precio_unit))}
                     </p>
                     <button
                       onClick={() => handleAgregarCarrito(producto)}
@@ -260,7 +261,7 @@ export default function ShopIndex() {
             <Smartphone className="h-6 w-6" />
           </div>
           <div>
-            <h5 className="font-bold text-[#2d3e50] text-sm">Calidad SAVI</h5>
+            <h5 className="font-bold text-[#2d3e50] text-sm">Calidad MatVic</h5>
             <p className="text-xs text-slate-500">Productos probados y garantizados</p>
           </div>
         </div>

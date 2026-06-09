@@ -17,4 +17,9 @@ export interface Sale {
   location: string;
 }
 
-export type PaymentMethod = "Efectivo" | "Tarjeta" | "Transferencia" | "Yape" | "Plin";
+export type PaymentMethod =
+  | "Efectivo"
+  | "Débito"
+  | "Crédito"
+  | "Transferencia"
+  | "Giro BancoEstado";

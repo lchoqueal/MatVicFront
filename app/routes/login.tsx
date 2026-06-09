@@ -107,7 +107,9 @@ export default function Login() {
       const storedUser = localStorage.getItem("user");
       if (storedUser) {
         const u = JSON.parse(storedUser);
-        navigate(u.rol === "administrador" || u.rol === "empleado" ? "/admin" : "/");
+        if (u.rol === "administrador") navigate("/admin");
+        else if (u.rol === "empleado") navigate("/admin/sales");
+        else navigate("/"); // cliente → tienda virtual
       } else {
         navigate("/");
       }

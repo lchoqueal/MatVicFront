@@ -3,6 +3,7 @@ import { Link, useParams, useLocation, useNavigate } from "react-router";
 import { ArrowLeft, ShoppingCart, Star, Package, Smartphone, Loader2, AlertCircle } from "lucide-react";
 import { api } from "~/lib/api";
 import type { Product } from "~/types/inventory";
+import { formatCLP } from "~/lib/utils";
 
 interface ProductosResponse {
   cantidad: number;
@@ -150,7 +151,7 @@ export default function ProductDetail() {
 
           {/* Precio */}
           <div className="text-4xl font-black text-[#2d3e50]">
-            S/ {Number(producto.precio_unit).toFixed(2)}
+            {formatCLP(Number(producto.precio_unit))}
           </div>
 
           {/* Stock */}

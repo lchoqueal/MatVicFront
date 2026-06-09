@@ -6,6 +6,7 @@ import type { Product } from "~/types/inventory";
 import { formatCLP, getStockStatus } from "~/lib/utils";
 import ProductImage from "~/components/ui/ProductImage";
 import { api } from "~/lib/api";
+import { useAuth } from "~/context/auth";
 
 interface ProductosResponse {
   cantidad: number;
@@ -16,6 +17,7 @@ interface ProductosResponse {
 
 export default function InventoryManagement() {
   const { currentStore } = useOutletContext<{ currentStore: Store }>();
+  const { isAdmin } = useAuth();
 
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -180,13 +182,16 @@ export default function InventoryManagement() {
           </select>
         </div>
 
-        <button
-          type="button"
-          onClick={openAdd}
-          className="w-full md:w-auto flex items-center justify-center gap-2 bg-pickled-bluewood-600 hover:bg-pickled-bluewood-700 text-white px-6 py-2 rounded-xl font-bold transition-all shadow-sm hover:scale-[1.02]"
-        >
-          <Plus className="h-4 w-4" /> Agregar Producto
-        </button>
+        {/* Botón agregar: solo para admin */}
+        {isAdmin && (
+          <button
+            type="button"
+            onClick={openAdd}
+            className="w-full md:w-auto flex items-center justify-center gap-2 bg-pickled-bluewood-600 hover:bg-pickled-bluewood-700 text-white px-6 py-2 rounded-xl font-bold transition-all shadow-sm hover:scale-[1.02]"
+          >
+            <Plus className="h-4 w-4" /> Agregar Producto
+          </button>
+        )}
       </div>
 
       {/* 3. TABLA */}
@@ -227,7 +232,7 @@ export default function InventoryManagement() {
                   <th className="px-6 py-4">Precio</th>
                   <th className="px-6 py-4">Stock</th>
                   <th className="px-6 py-4">Estado</th>
-                  <th className="px-6 py-4">Acciones</th>
+                  {isAdmin && <th className="px-6 py-4">Acciones</th>}
                 </tr>
               </thead>
               <tbody style={{ borderColor: "var(--border-subtle)" }} className="divide-y">
@@ -273,26 +278,29 @@ export default function InventoryManagement() {
                           {stockStatus.label}
                         </span>
                       </td>
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-1">
-                          <button
-                            type="button"
-                            onClick={() => openEdit(product)}
-                            className="p-2 rounded-lg transition-colors hover:bg-pickled-bluewood-500/10 text-pickled-bluewood-400"
-                            title="Editar producto"
-                          >
-                            <Edit className="h-4 w-4" />
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => handleDelete(product.id_producto)}
-                            className="p-2 text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
-                            title="Eliminar producto"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </button>
-                        </div>
-                      </td>
+                      {/* Botones de edición: solo para admin */}
+                      {isAdmin && (
+                        <td className="px-6 py-4">
+                          <div className="flex items-center gap-1">
+                            <button
+                              type="button"
+                              onClick={() => openEdit(product)}
+                              className="p-2 rounded-lg transition-colors hover:bg-pickled-bluewood-500/10 text-pickled-bluewood-400"
+                              title="Editar producto"
+                            >
+                              <Edit className="h-4 w-4" />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleDelete(product.id_producto)}
+                              className="p-2 text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
+                              title="Eliminar producto"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </button>
+                          </div>
+                        </td>
+                      )}
                     </tr>
                   );
                 })}
@@ -372,7 +380,10 @@ function ProductModal({ product, categories, onClose, onSave, isSaving }: Produc
     imagen_url:   product?.imagen_url   ?? undefined,
   });
 
+  // Estado separado para cuando el usuario escribe una nueva categoría
+  const [newCategoryName, setNewCategoryName] = useState("");
   const [imagePreview, setImagePreview] = useState<string | undefined>(product?.imagen_url);
+  const isNewCategory = formData.categoria === "__nueva__";
 
   const set = <K extends keyof ProductFormData>(key: K, value: ProductFormData[K]) =>
     setFormData((prev) => ({ ...prev, [key]: value }));
@@ -391,7 +402,12 @@ function ProductModal({ product, categories, onClose, onSave, isSaving }: Produc
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSave(formData);
+    // Si está creando una nueva categoría, usar el nombre escrito
+    const dataToSave: ProductFormData = isNewCategory
+      ? { ...formData, categoria: newCategoryName.trim() }
+      : formData;
+    if (isNewCategory && !newCategoryName.trim()) return; // no guardar sin nombre
+    onSave(dataToSave);
   };
 
 
@@ -444,8 +460,11 @@ function ProductModal({ product, categories, onClose, onSave, isSaving }: Produc
             <label className="block text-sm font-medium mb-1.5" style={{ color: "var(--text-secondary)" }}>Categoría *</label>
             <select
               value={formData.categoria}
-              onChange={(e) => set("categoria", e.target.value)}
-              required
+              onChange={(e) => {
+                set("categoria", e.target.value);
+                if (e.target.value !== "__nueva__") setNewCategoryName("");
+              }}
+              required={!isNewCategory}
               className="w-full px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-pickled-bluewood-600 text-sm transition-colors"
               style={{ background: "var(--bg-surface-2)", border: "1px solid var(--border-main)", color: "var(--text-primary)" }}
             >
@@ -455,13 +474,15 @@ function ProductModal({ product, categories, onClose, onSave, isSaving }: Produc
               ))}
               <option value="__nueva__">+ Nueva categoría</option>
             </select>
-            {formData.categoria === "__nueva__" && (
+            {isNewCategory && (
               <input
                 type="text"
+                value={newCategoryName}
+                onChange={(e) => setNewCategoryName(e.target.value)}
                 className="w-full mt-2 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-pickled-bluewood-600 text-sm transition-colors"
                 style={{ background: "var(--bg-surface-2)", border: "1px solid var(--border-main)", color: "var(--text-primary)" }}
                 placeholder="Nombre de la nueva categoría"
-                onChange={(e) => set("categoria", e.target.value)}
+                required
                 autoFocus
               />
             )}
@@ -470,7 +491,7 @@ function ProductModal({ product, categories, onClose, onSave, isSaving }: Produc
           {/* Precio y Stock */}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium mb-1.5" style={{ color: "var(--text-secondary)" }}>Precio (S/) *</label>
+              <label className="block text-sm font-medium mb-1.5" style={{ color: "var(--text-secondary)" }}>Precio ($) *</label>
               <input
                 type="number" min={0} step={1}
                 value={formData.precio_unit}

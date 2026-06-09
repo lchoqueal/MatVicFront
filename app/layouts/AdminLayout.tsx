@@ -16,6 +16,19 @@ import { Link, Outlet, useLocation, useNavigate, Navigate } from "react-router";
 import StoreSelector, { type Store } from "~/components/ui/StoreSelector";
 import { useAuth } from "~/context/auth";
 
+// Menú completo para admin
+const adminMenuItems = [
+  { id: "dashboard", label: "Dashboard",  icon: BarChart3,   path: "/admin" },
+  { id: "inventory", label: "Inventario", icon: Package,      path: "/admin/inventory" },
+  { id: "sales",     label: "Ventas",     icon: ShoppingCart, path: "/admin/sales" },
+];
+
+// Menú limitado para empleado
+const empleadoMenuItems = [
+  { id: "inventory", label: "Inventario", icon: Package,      path: "/admin/inventory" },
+  { id: "sales",     label: "Caja / Ventas", icon: ShoppingCart, path: "/admin/sales" },
+];
+
 // ── Dark mode hook ─────────────────────────────────────────────────────────
 
 function useDarkMode() {
@@ -46,16 +59,12 @@ function useDarkMode() {
 
 // ── Menú de navegación ─────────────────────────────────────────────────────
 
-const menuItems = [
-  { id: "dashboard", label: "Dashboard",  icon: BarChart3,   path: "/admin" },
-  { id: "inventory", label: "Inventario", icon: Package,      path: "/admin/inventory" },
-  { id: "sales",     label: "Ventas",     icon: ShoppingCart, path: "/admin/sales" },
-];
+
 
 // ── Componente principal ───────────────────────────────────────────────────
 
 export default function AdminLayout() {
-  const { user, isAuthenticated, isHydrating, logout } = useAuth();
+  const { user, isAuthenticated, isAdmin, isEmpleado, isHydrating, logout } = useAuth();
   const { dark, toggle: toggleDark } = useDarkMode();
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -67,6 +76,9 @@ export default function AdminLayout() {
 
   const location  = useLocation();
   const navigate  = useNavigate();
+
+  // Menú según rol
+  const menuItems = isAdmin ? adminMenuItems : empleadoMenuItems;
 
   // Cerrar sidebar al cambiar de ruta en móvil
   useEffect(() => { setSidebarOpen(false); }, [location.pathname]);
@@ -82,7 +94,10 @@ export default function AdminLayout() {
       </div>
     );
   }
-  if (!isAuthenticated) return <Navigate to="/" replace />;
+  // Clientes no pueden entrar al dashboard
+  if (!isAuthenticated || (!isAdmin && !isEmpleado)) return <Navigate to="/" replace />;
+  // Empleado que intente ir a /admin (dashboard) se redirige a ventas/caja
+  if (isEmpleado && location.pathname === "/admin") return <Navigate to="/admin/sales" replace />;
 
   const handleLogout = () => {
     setShowUserMenu(false);
@@ -100,7 +115,7 @@ export default function AdminLayout() {
   const SidebarContent = () => (
     <>
       {/* Logo */}
-      <div className="px-6 py-5 border-b" style={{ borderColor: "var(--border-main)" }}>
+      <div className="px-6 py-5 border-b" style={{ borderColor: "var(--border-sidebar)" }}>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3 group">
             <div className="w-9 h-9 rounded-xl bg-pickled-bluewood-600 flex items-center justify-center shadow-sm group-hover:bg-pickled-bluewood-500 transition-colors">
@@ -124,7 +139,7 @@ export default function AdminLayout() {
 
       {/* Navegación */}
       <nav className="flex-1 px-3 py-4 space-y-0.5">
-        <p className="text-[10px] font-bold uppercase tracking-widest px-3 mb-3" style={{ color: "var(--text-muted)" }}>
+        <p className="text-[10px] font-bold uppercase tracking-widest px-3 mb-3" style={{ color: "var(--text-sidebar)", opacity: 0.5 }}>
           Menú Principal
         </p>
         {menuItems.map((item) => {
@@ -160,7 +175,23 @@ export default function AdminLayout() {
       </nav>
 
       {/* Footer sidebar */}
-      <div className="px-3 py-4 space-y-2 border-t" style={{ borderColor: "var(--border-main)" }}>
+      <div className="px-3 py-4 space-y-2 border-t" style={{ borderColor: "var(--border-sidebar)" }}>
+
+        {/* Ir a la tienda */}
+        <Link
+          to="/"
+          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 hover:bg-white/8 group/store"
+          style={{ color: "var(--text-sidebar)" }}
+        >
+          <div
+            className="w-7 h-7 rounded-lg flex items-center justify-center transition-all duration-200 group-hover/store:bg-white/10"
+            style={{ background: "var(--bg-sidebar-item)" }}
+          >
+            <ShoppingCart className="h-4 w-4 text-emerald-400" />
+          </div>
+          Ver Tienda
+          <div className="ml-auto w-1.5 h-1.5 rounded-full bg-emerald-400/70" />
+        </Link>
 
         {/* Toggle oscuro/claro */}
         <button
@@ -206,7 +237,7 @@ export default function AdminLayout() {
           {showUserMenu && (
             <div
               className="absolute bottom-full left-0 right-0 mb-2 rounded-xl shadow-lg overflow-hidden z-50 border"
-              style={{ background: "var(--bg-sidebar-item)", borderColor: "var(--border-main)" }}
+              style={{ background: "var(--bg-sidebar-item)", borderColor: "var(--border-sidebar)" }}
             >
               <button
                 type="button"
@@ -239,7 +270,7 @@ export default function AdminLayout() {
         className={`fixed inset-y-0 left-0 z-50 w-64 flex flex-col shadow-2xl transition-transform duration-300 lg:hidden`}
         style={{
           background: "var(--bg-sidebar)",
-          borderRight: "1px solid var(--border-main)",
+          borderRight: "1px solid var(--border-sidebar)",
           transform: sidebarOpen ? "translateX(0)" : "translateX(-100%)",
         }}
       >
@@ -249,7 +280,7 @@ export default function AdminLayout() {
       {/* Sidebar desktop */}
       <aside
         className="hidden lg:flex w-64 h-screen sticky top-0 flex-col shrink-0"
-        style={{ background: "var(--bg-sidebar)", borderRight: "1px solid var(--border-main)" }}
+        style={{ background: "var(--bg-sidebar)", borderRight: "1px solid var(--border-sidebar)" }}
       >
         <SidebarContent />
       </aside>

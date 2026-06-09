@@ -8,20 +8,24 @@
   --bg-canvas:      hsl(215, 30%, 96%);
   --bg-surface:     hsl(0, 0%, 100%);
   --bg-surface-2:   hsl(215, 30%, 98%);
-  --bg-sidebar:     hsl(208, 43%, 9%);
-  --bg-sidebar-item:hsl(208, 43%, 13%);
+  /* Sidebar — FIJO, no cambia con el tema */
+  --bg-sidebar:     hsl(222, 35%, 8%);
+  --bg-sidebar-item:hsl(222, 35%, 14%);
   --bg-muted:       hsl(215, 25%, 93%);
 
   /* Texto */
   --text-primary:   hsl(208, 43%, 10%);
   --text-secondary: hsl(210, 15%, 45%);
   --text-muted:     hsl(210, 12%, 62%);
-  --text-sidebar:   hsl(215, 30%, 80%);
+  /* Sidebar — FIJO, no cambia con el tema */
+  --text-sidebar:   hsl(215, 22%, 70%);
   --text-sidebar-active: hsl(0, 0%, 100%);
 
   /* Bordes */
   --border-main:    hsl(215, 25%, 88%);
   --border-subtle:  hsl(215, 25%, 94%);
+  /* Sidebar siempre oscuro — borde fijo que no cambia con el tema */
+  --border-sidebar: rgba(255, 255, 255, 0.08);
 
   /* Acento principal (pickled-bluewood-600) */
   --accent:         hsl(210, 28%, 37%);
@@ -39,20 +43,23 @@ html.dark {
   --bg-canvas:      hsl(222, 25%, 9%);
   --bg-surface:     hsl(220, 25%, 13%);
   --bg-surface-2:   hsl(220, 25%, 17%);
-  --bg-sidebar:     hsl(220, 30%, 10%);
-  --bg-sidebar-item:hsl(220, 30%, 16%);
+  /* Sidebar — FIJO, idéntico al modo claro */
+  --bg-sidebar:     hsl(222, 35%, 8%);
+  --bg-sidebar-item:hsl(222, 35%, 14%);
   --bg-muted:       hsl(220, 25%, 20%);
 
   /* Texto */
   --text-primary:   hsl(215, 30%, 93%);
   --text-secondary: hsl(215, 15%, 65%);
   --text-muted:     hsl(215, 12%, 45%);
-  --text-sidebar:   hsl(215, 20%, 65%);
+  /* Sidebar — FIJO, idéntico al modo claro */
+  --text-sidebar:   hsl(215, 22%, 70%);
   --text-sidebar-active: hsl(0, 0%, 100%);
 
   /* Bordes */
   --border-main:    hsl(220, 20%, 22%);
   --border-subtle:  hsl(220, 20%, 18%);
+  --border-sidebar: rgba(255, 255, 255, 0.08);
 
   /* Sombras oscuras */
   --shadow-card:    0 1px 3px 0 rgba(0,0,0,.3), 0 1px 2px -1px rgba(0,0,0,.2);

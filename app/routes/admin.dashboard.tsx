@@ -174,7 +174,7 @@ export default function Dashboard() {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         <MetricCard
           title="VENTAS DEL MES"
-          value={isLoading ? "—" : `S/ ${totalLocalMes.toLocaleString("es-PE", { minimumFractionDigits: 0 })}`}
+          value={isLoading ? "—" : new Intl.NumberFormat("es-CL", { style: "currency", currency: "CLP", minimumFractionDigits: 0 }).format(totalLocalMes)}
           sub={`${cantidadLocalMes} transacciones`}
           icon={<DollarSign className="h-5 w-5" />}
           iconBg="bg-blue-500/10" iconText="text-blue-500"
@@ -196,7 +196,7 @@ export default function Dashboard() {
         />
         <MetricCard
           title="VALOR INVENTARIO"
-          value={isLoading ? "—" : `S/ ${Number(inventario?.totalValorInventario ?? 0).toLocaleString("es-PE", { minimumFractionDigits: 0 })}`}
+          value={isLoading ? "—" : new Intl.NumberFormat("es-CL", { style: "currency", currency: "CLP", minimumFractionDigits: 0 }).format(Number(inventario?.totalValorInventario ?? 0))}
           sub="precio de venta"
           icon={<ShoppingCart className="h-5 w-5" />}
           iconBg="bg-amber-500/10" iconText="text-amber-500"
@@ -206,7 +206,7 @@ export default function Dashboard() {
         />
         <MetricCard
           title="TICKET PROMEDIO"
-          value={isLoading ? "—" : `S/ ${promedioLocalMes.toFixed(0)}`}
+          value={isLoading ? "—" : new Intl.NumberFormat("es-CL", { style: "currency", currency: "CLP", minimumFractionDigits: 0 }).format(promedioLocalMes)}
           sub="por venta este mes"
           icon={<TrendingUp className="h-5 w-5" />}
           iconBg="bg-emerald-500/10" iconText="text-emerald-500"
@@ -237,7 +237,7 @@ export default function Dashboard() {
             </div>
             <div className="flex items-center gap-1.5 text-xs" style={{ color: "var(--text-muted)" }}>
               <span className="w-2 h-2 rounded-full bg-pickled-bluewood-500 inline-block" />
-              Ventas (S/)
+              Ventas ($)
             </div>
           </div>
 
@@ -265,7 +265,7 @@ export default function Dashboard() {
                       boxShadow: "var(--shadow-lg)",
                       fontSize: "13px",
                     }}
-                    formatter={(value) => [`S/ ${Number(value).toLocaleString("es-PE")}`, "Ventas"]}
+                    formatter={(value) => [new Intl.NumberFormat("es-CL", { style: "currency", currency: "CLP", minimumFractionDigits: 0 }).format(Number(value)), "Ventas"]}
                   />
                   <Bar dataKey="sales" fill="hsl(210, 28%, 37%)" radius={[8, 8, 0, 0]} barSize={30} />
                 </BarChart>
@@ -333,12 +333,12 @@ export default function Dashboard() {
                       {boleta.metodo_pago}
                     </p>
                     <p className="text-xs truncate" style={{ color: "var(--text-muted)" }}>
-                      {new Date(boleta.fecha_emision).toLocaleDateString("es-PE")}
+                      {new Date(boleta.fecha_emision).toLocaleDateString("es-CL")}
                     </p>
                   </div>
                   <div className="text-right shrink-0">
                     <p className="text-sm font-bold" style={{ color: "var(--text-primary)" }}>
-                      S/ {Number(boleta.total).toFixed(0)}
+                      {new Intl.NumberFormat("es-CL", { style: "currency", currency: "CLP", minimumFractionDigits: 0 }).format(Number(boleta.total))}
                     </p>
                     <span className={`text-[10px] font-bold uppercase ${
                       boleta.estado_boleta === "pagado"   ? "text-emerald-500" :
