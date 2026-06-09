@@ -2,20 +2,35 @@ import { useState, type SVGProps } from "react";
 import { useNavigate } from "react-router";
 import { useAuth } from "~/core/auth";
 import { api } from "~/core/api/client";
+import { Loader2 } from "lucide-react";
 
-// ── Icono Facebook ─────────────────────────────────────────────────────────────
+// ── Iconos ──────────────────────────────────────────────────────────────────
 
 function FacebookIcon(props: SVGProps<SVGSVGElement>) {
   return (
-    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" {...props}>
+    <svg viewBox="0 0 24 24" fill="currentColor" {...props}>
       <path d="M24 12.073C24 5.405 18.627 0 12 0S0 5.405 0 12.073C0 18.099 4.388 23.094 10.125 24v-8.437H7.078v-3.49h3.047V9.414c0-3.021 1.792-4.691 4.533-4.691 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.928-1.956 1.88v2.258h3.328l-.532 3.49h-2.796V24C19.612 23.094 24 18.099 24 12.073z" />
     </svg>
   );
 }
 
-// ── Tipos ─────────────────────────────────────────────────────────────────────
+function LinkedinIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" {...props}>
+      <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
+    </svg>
+  );
+}
 
-type Mode = "login" | "register";
+function XIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" {...props}>
+      <path d="M18.901 1.153h3.68l-8.04 9.19L24 22.846h-7.406l-5.8-7.584-6.638 7.584H.474l8.6-9.83L0 1.154h7.594l5.243 6.932ZM17.61 20.644h2.039L6.486 3.24H4.298Z" />
+    </svg>
+  );
+}
+
+// ── Tipos ─────────────────────────────────────────────────────────────────────
 
 interface RegisterResponse {
   token: string;
@@ -28,45 +43,44 @@ interface RegisterResponse {
   };
 }
 
-// ── Input reutilizable con estilo glassmorphism ───────────────────────────────
+// ── Componentes UI Neumorfismo ──────────────────────────────────────────────
 
-interface FloatInputProps {
-  id: string;
-  label: string;
-  type?: string;
-  value: string;
-  onChange: (v: string) => void;
-  placeholder?: string;
-  required?: boolean;
-  disabled?: boolean;
-  autoComplete?: string;
-}
+const NeuInput = (props: React.InputHTMLAttributes<HTMLInputElement>) => (
+  <input
+    className="w-full bg-[#f0f2f5] border-none px-5 py-3.5 rounded-2xl outline-none text-[#2d3e50] shadow-[inset_4px_4px_8px_#d1d9e6,inset_-4px_-4px_8px_#ffffff] focus:shadow-[inset_6px_6px_12px_#c2cce0,inset_-6px_-6px_12px_#ffffff] transition-shadow duration-300 placeholder-[#2d3e50]/40 font-semibold text-sm disabled:opacity-50"
+    {...props}
+  />
+);
 
-function FloatInput({ id, label, type = "text", value, onChange, placeholder = "", required, disabled, autoComplete }: FloatInputProps) {
-  return (
-    <div>
-      <label htmlFor={id} className="block mb-1.5 text-sm font-semibold text-white drop-shadow-md">
-        {label}
-      </label>
-      <input
-        id={id}
-        type={type}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        placeholder={placeholder}
-        required={required}
-        disabled={disabled}
-        autoComplete={autoComplete}
-        className="w-full px-4 py-3 border-2 border-white/40 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#1877F2]/60 focus:border-[#1877F2] transition-all bg-white/25 backdrop-blur-sm text-white placeholder-white/50 disabled:opacity-60"
-      />
-    </div>
-  );
-}
+const NeuSocialBtn = ({ children }: { children: React.ReactNode }) => (
+  <button type="button" className="w-12 h-12 flex items-center justify-center bg-[#f0f2f5] text-[#2d3e50] rounded-full shadow-[5px_5px_10px_#d1d9e6,-5px_-5px_10px_#ffffff] hover:shadow-[inset_4px_4px_8px_#d1d9e6,inset_-4px_-4px_8px_#ffffff] hover:text-[#1877F2] transition-all duration-300">
+    {children}
+  </button>
+);
 
-// ── Componente principal ──────────────────────────────────────────────────────
+const NeuButton = ({ children, isLoading, ...props }: React.ButtonHTMLAttributes<HTMLButtonElement> & { isLoading?: boolean }) => (
+  <button
+    className="w-48 bg-[#2d3e50] text-white font-bold tracking-widest uppercase text-sm py-4 rounded-full shadow-[6px_6px_12px_#d1d9e6,-6px_-6px_12px_#ffffff] hover:shadow-[4px_4px_8px_#d1d9e6,-4px_-4px_8px_#ffffff] active:shadow-[inset_4px_4px_8px_rgba(0,0,0,0.4)] transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed mx-auto hover:text-[#1877F2]"
+    {...props}
+  >
+    {isLoading && <Loader2 className="h-4 w-4 animate-spin" />}
+    {children}
+  </button>
+);
+
+const GhostButton = ({ children, ...props }: React.ButtonHTMLAttributes<HTMLButtonElement>) => (
+  <button
+    className="w-48 bg-transparent text-[#e6e9f0] border border-[#e6e9f0] font-bold tracking-widest uppercase text-sm py-3.5 rounded-full hover:bg-[#1877F2] hover:border-[#1877F2] hover:text-white transition-colors duration-300 mx-auto shadow-sm"
+    {...props}
+  >
+    {children}
+  </button>
+);
+
+// ── Componente Principal ────────────────────────────────────────────────────
 
 export default function Login() {
-  const [mode, setMode] = useState<Mode>("login");
+  const [isSignUp, setIsSignUp] = useState(false);
 
   // Login state
   const [username, setUsername] = useState("");
@@ -75,7 +89,6 @@ export default function Login() {
   // Register state
   const [regUsername, setRegUsername] = useState("");
   const [regPassword, setRegPassword] = useState("");
-  const [regPassword2, setRegPassword2] = useState("");
   const [regNombre, setRegNombre] = useState("");
   const [regApellidos, setRegApellidos] = useState("");
 
@@ -88,8 +101,8 @@ export default function Login() {
 
   // ── Handlers ───────────────────────────────────────────────────────────────
 
-  const switchMode = (m: Mode) => {
-    setMode(m);
+  const toggleMode = (signup: boolean) => {
+    setIsSignUp(signup);
     setError("");
     setSuccess("");
   };
@@ -109,7 +122,7 @@ export default function Login() {
         const u = JSON.parse(storedUser);
         if (u.rol === "administrador") navigate("/admin");
         else if (u.rol === "empleado") navigate("/admin/sales");
-        else navigate("/"); // cliente → tienda virtual
+        else navigate("/");
       } else {
         navigate("/");
       }
@@ -125,10 +138,6 @@ export default function Login() {
     setError("");
     setSuccess("");
 
-    if (regPassword !== regPassword2) {
-      setError("Las contraseñas no coinciden.");
-      return;
-    }
     if (regPassword.length < 6) {
       setError("La contraseña debe tener al menos 6 caracteres.");
       return;
@@ -137,29 +146,23 @@ export default function Login() {
     setIsLoading(true);
     try {
       await api.post<RegisterResponse>("/auth/registro", {
-        username:  regUsername.trim(),
-        password:  regPassword,
-        nombre:    regNombre.trim(),
+        username: regUsername.trim(),
+        password: regPassword,
+        nombre: regNombre.trim(),
         apellidos: regApellidos.trim(),
       });
-      setSuccess("¡Cuenta creada exitosamente! Ahora puedes iniciar sesión.");
-      // Limpiar campos y volver al login después de 2 segundos
+      setSuccess("¡Cuenta creada exitosamente!");
       setTimeout(() => {
-        setRegUsername(""); setRegPassword(""); setRegPassword2("");
+        setRegUsername(""); setRegPassword("");
         setRegNombre(""); setRegApellidos("");
-        switchMode("login");
+        toggleMode(false);
       }, 2000);
     } catch (err: unknown) {
       const raw = err instanceof Error ? err.message : "";
-      // Traduce errores técnicos del backend a mensajes amigables
-      if (raw.toLowerCase().includes("unique") || raw.toLowerCase().includes("duplicate") || raw.toLowerCase().includes("ya existe") || raw.toLowerCase().includes("conflict")) {
-        setError("El nombre de usuario ya está en uso. Elige otro.");
-      } else if (raw.toLowerCase().includes("constraint") || raw.toLowerCase().includes("500") || raw.includes("500")) {
-        setError("Error interno del servidor. Contacta al administrador.");
-      } else if (raw) {
-        setError(raw);
+      if (raw.toLowerCase().includes("unique") || raw.toLowerCase().includes("duplicate")) {
+        setError("El nombre de usuario ya está en uso.");
       } else {
-        setError("No se pudo crear la cuenta. Intenta de nuevo.");
+        setError("Error al crear la cuenta. Verifica los datos.");
       }
     } finally {
       setIsLoading(false);
@@ -169,208 +172,128 @@ export default function Login() {
   // ── Render ─────────────────────────────────────────────────────────────────
 
   return (
-    <div className="relative flex justify-center items-center min-h-screen overflow-hidden">
+    <div className="relative flex items-center justify-center min-h-screen bg-[#f0f2f5] p-4 font-sans selection:bg-[#1877F2] selection:text-white overflow-hidden">
 
-      {/* Botón Facebook */}
-      <a
-        href="https://www.facebook.com/matviccelulares"
-        target="_blank"
-        rel="noopener noreferrer"
-        className="absolute top-6 left-6 z-20 p-3 bg-white/95 hover:bg-white rounded-full shadow-xl transition-all duration-300 hover:scale-110 hover:shadow-2xl border border-blue-100/50"
-        aria-label="Visitar nuestra página de Facebook"
-      >
-        <FacebookIcon className="h-6 w-6 text-[#1877F2]" />
-      </a>
+      {/* Círculo animado de fondo (sombra muy suave y lenta) */}
+      <style>{`
+        @keyframes floatBg {
+          0% { transform: translate(0px, 0px) scale(1); }
+          33% { transform: translate(15vw, -10vh) scale(1.2); }
+          66% { transform: translate(-10vw, 15vh) scale(0.9); }
+          100% { transform: translate(0px, 0px) scale(1); }
+        }
+        .animate-floatBg {
+          animation: floatBg 25s infinite alternate ease-in-out;
+        }
+      `}</style>
+      <div className="absolute top-[10%] left-[10%] w-[60vw] h-[60vw] max-w-[800px] max-h-[800px] bg-[#1877F2] rounded-full mix-blend-multiply filter blur-[150px] opacity-[0.07] animate-floatBg pointer-events-none" />
+      <div className="absolute bottom-[5%] right-[5%] w-[40vw] h-[40vw] max-w-[600px] max-h-[600px] bg-[#2d3e50] rounded-full mix-blend-multiply filter blur-[120px] opacity-[0.05] animate-floatBg pointer-events-none" style={{ animationDelay: '5s', animationDirection: 'alternate-reverse' }} />
 
-      {/* Fondo */}
-      <div
-        className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-        style={{ backgroundImage: "url(/Matvic.jpeg)", filter: "blur(8px)", transform: "scale(1.1)" }}
-      />
-      <div className="absolute inset-0 bg-gradient-to-br from-pickled-bluewood-900/50 via-pickled-bluewood-800/40 to-pickled-bluewood-900/50" />
+      {/* Contenedor Neumórfico Principal */}
+      <div className="relative w-full max-w-5xl min-h-[650px] bg-[#f0f2f5] rounded-[40px] shadow-[15px_15px_30px_#d1d9e6,-15px_-15px_30px_#ffffff] overflow-hidden flex flex-col lg:flex-row z-10">
 
-      {/* Tarjeta */}
-      <div className="relative z-10 bg-white/20 backdrop-blur-xl p-8 rounded-2xl shadow-2xl w-full max-w-md border border-white/30 transition-all duration-300">
+        {/* ========================================================= */}
+        {/* 1. FORMULARIO SIGN UP (Izquierda a Derecha) */}
+        {/* ========================================================= */}
+        <div className={`absolute top-0 left-0 w-full lg:w-1/2 h-full flex flex-col justify-center px-8 sm:px-16 transition-all duration-700 ease-in-out ${isSignUp ? 'translate-x-0 lg:translate-x-full opacity-100 z-20' : '-translate-x-[50%] lg:translate-x-0 opacity-0 z-0 pointer-events-none'}`}>
+          <form onSubmit={handleRegister} className="flex flex-col items-center text-center w-full max-w-sm mx-auto space-y-5">
+            <h2 className="text-3xl sm:text-4xl font-black text-[#2d3e50] mb-2 tracking-tight">Crear Cuenta</h2>
 
-        {/* Título */}
-        <div className="text-center mb-6">
-          <h2 className="text-2xl font-bold text-white drop-shadow-lg">
-            {mode === "login" ? "Bienvenido de vuelta" : "Crear una cuenta"}
-          </h2>
-          <p className="text-white/60 text-sm mt-1">
-            {mode === "login"
-              ? "Ingresa tus credenciales para continuar"
-              : "Completa el formulario para registrarte"}
-          </p>
-          <div className="w-16 h-0.5 bg-gradient-to-r from-[#1877F2] to-pickled-bluewood-400 mx-auto rounded-full mt-3" />
+            <div className="flex gap-4 mb-2">
+              <NeuSocialBtn><FacebookIcon className="w-5 h-5" /></NeuSocialBtn>
+              <NeuSocialBtn><LinkedinIcon className="w-5 h-5" /></NeuSocialBtn>
+              <NeuSocialBtn><XIcon className="w-5 h-5" /></NeuSocialBtn>
+            </div>
+
+            <span className="text-[10px] font-bold text-[#2d3e50]/50 tracking-widest uppercase mb-2">O inicia sesión</span>
+
+            {(error && isSignUp) && <p className="text-red-500 text-sm font-bold w-full">{error}</p>}
+            {(success && isSignUp) && <p className="text-emerald-500 text-sm font-bold w-full">{success}</p>}
+
+            <div className="flex gap-4 w-full">
+              <NeuInput placeholder="Nombre" value={regNombre} onChange={(e) => setRegNombre(e.target.value)} required disabled={isLoading} />
+              <NeuInput placeholder="Apellidos" value={regApellidos} onChange={(e) => setRegApellidos(e.target.value)} required disabled={isLoading} />
+            </div>
+            <NeuInput type="text" placeholder="Usuario" value={regUsername} onChange={(e) => setRegUsername(e.target.value)} required disabled={isLoading} />
+            <NeuInput type="password" placeholder="Contraseña" value={regPassword} onChange={(e) => setRegPassword(e.target.value)} required disabled={isLoading} />
+
+            <div className="pt-4">
+              <NeuButton type="submit" disabled={isLoading} isLoading={isLoading}>REGISTRARSE</NeuButton>
+            </div>
+
+            {/* Enlace móvil para cambiar a Login */}
+            <p className="lg:hidden mt-6 text-sm font-medium text-[#2d3e50]/60">
+              ¿Ya tienes cuenta? <button type="button" onClick={() => toggleMode(false)} className="text-[#1877F2] font-bold underline decoration-2 underline-offset-4">Inicia Sesión</button>
+            </p>
+          </form>
         </div>
 
-        {/* Mensajes */}
-        {error && (
-          <div className="mb-5 p-3.5 bg-red-500/80 backdrop-blur-sm border-l-4 border-red-600 text-white rounded-xl text-sm flex items-start gap-2">
-            <span className="shrink-0 mt-0.5">⚠</span>
-            <span>{error}</span>
-          </div>
-        )}
-        {success && (
-          <div className="mb-5 p-3.5 bg-emerald-500/80 backdrop-blur-sm border-l-4 border-emerald-400 text-white rounded-xl text-sm flex items-start gap-2">
-            <span className="shrink-0 mt-0.5">✓</span>
-            <span>{success}</span>
-          </div>
-        )}
+        {/* ========================================================= */}
+        {/* 2. FORMULARIO SIGN IN (Izquierda) */}
+        {/* ========================================================= */}
+        <div className={`absolute top-0 left-0 w-full lg:w-1/2 h-full flex flex-col justify-center px-8 sm:px-16 transition-all duration-700 ease-in-out z-10 ${isSignUp ? 'translate-x-[50%] lg:translate-x-full opacity-0 pointer-events-none' : 'translate-x-0 opacity-100'}`}>
+          <form onSubmit={handleLogin} className="flex flex-col items-center text-center w-full max-w-sm mx-auto space-y-5">
+            <h2 className="text-3xl sm:text-4xl font-black text-[#2d3e50] mb-2 tracking-tight">Iniciar Sesión</h2>
 
-        {/* ── FORM LOGIN ─────────────────────────────────────────────── */}
-        {mode === "login" && (
-          <form onSubmit={handleLogin} className="space-y-5 animate-in fade-in slide-in-from-bottom-3 duration-300">
-            <FloatInput
-              id="username"
-              label="Usuario"
-              value={username}
-              onChange={setUsername}
-              placeholder="usuario"
-              required
-              disabled={isLoading}
-              autoComplete="username"
-            />
-            <FloatInput
-              id="password"
-              label="Contraseña"
-              type="password"
-              value={password}
-              onChange={setPassword}
-              placeholder="••••••••"
-              required
-              disabled={isLoading}
-              autoComplete="current-password"
-            />
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="w-full bg-gradient-to-r from-[#1877F2] to-pickled-bluewood-600 text-white py-3.5 rounded-xl font-semibold hover:from-[#166FE5] hover:to-pickled-bluewood-700 hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 mt-2"
-            >
-              {isLoading ? (
-                <span className="flex items-center justify-center gap-2">
-                  <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                  </svg>
-                  Verificando...
-                </span>
-              ) : "Ingresar"}
-            </button>
-
-            <p className="text-center text-white/60 text-sm pt-1">
-              ¿No tienes cuenta?{" "}
-              <button
-                type="button"
-                onClick={() => switchMode("register")}
-                className="text-white font-semibold hover:underline"
-              >
-                Regístrate aquí
-              </button>
-            </p>
-          </form>
-        )}
-
-        {/* ── FORM REGISTRO ──────────────────────────────────────────── */}
-        {mode === "register" && (
-          <form onSubmit={handleRegister} className="space-y-4 animate-in fade-in slide-in-from-bottom-3 duration-300">
-
-            {/* Nombre + Apellidos en fila */}
-            <div className="grid grid-cols-2 gap-3">
-              <FloatInput
-                id="reg-nombre"
-                label="Nombre"
-                value={regNombre}
-                onChange={setRegNombre}
-                placeholder="Juan"
-                required
-                disabled={isLoading}
-                autoComplete="given-name"
-              />
-              <FloatInput
-                id="reg-apellidos"
-                label="Apellidos"
-                value={regApellidos}
-                onChange={setRegApellidos}
-                placeholder="Pérez García"
-                required
-                disabled={isLoading}
-                autoComplete="family-name"
-              />
+            <div className="flex gap-4 mb-2">
+              <NeuSocialBtn><FacebookIcon className="w-5 h-5" /></NeuSocialBtn>
+              <NeuSocialBtn><LinkedinIcon className="w-5 h-5" /></NeuSocialBtn>
+              <NeuSocialBtn><XIcon className="w-5 h-5" /></NeuSocialBtn>
             </div>
 
-            <FloatInput
-              id="reg-username"
-              label="Usuario"
-              value={regUsername}
-              onChange={setRegUsername}
-              placeholder="nombre_usuario"
-              required
-              disabled={isLoading}
-              autoComplete="username"
-            />
+            <span className="text-[10px] font-bold text-[#2d3e50]/50 tracking-widest uppercase mb-2">O registrate por primera vez</span>
 
-            <FloatInput
-              id="reg-password"
-              label="Contraseña"
-              type="password"
-              value={regPassword}
-              onChange={setRegPassword}
-              placeholder="Mínimo 6 caracteres"
-              required
-              disabled={isLoading}
-              autoComplete="new-password"
-            />
+            {(error && !isSignUp) && <p className="text-red-500 text-sm font-bold w-full">{error}</p>}
 
-            <div>
-              <FloatInput
-                id="reg-password2"
-                label="Confirmar Contraseña"
-                type="password"
-                value={regPassword2}
-                onChange={setRegPassword2}
-                placeholder="••••••••"
-                required
-                disabled={isLoading}
-                autoComplete="new-password"
-              />
-              {/* Indicador de coincidencia */}
-              {regPassword2.length > 0 && (
-                <p className={`text-xs mt-1.5 font-medium ${regPassword === regPassword2 ? "text-emerald-300" : "text-red-300"}`}>
-                  {regPassword === regPassword2 ? "✓ Las contraseñas coinciden" : "✗ Las contraseñas no coinciden"}
-                </p>
-              )}
-            </div>
+            <NeuInput type="text" placeholder="Usuario" value={username} onChange={(e) => setUsername(e.target.value)} required disabled={isLoading} />
+            <NeuInput type="password" placeholder="Contraseña" value={password} onChange={(e) => setPassword(e.target.value)} required disabled={isLoading} />
 
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="w-full bg-gradient-to-r from-[#1877F2] to-pickled-bluewood-600 text-white py-3.5 rounded-xl font-semibold hover:from-[#166FE5] hover:to-pickled-bluewood-700 hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 mt-1"
-            >
-              {isLoading ? (
-                <span className="flex items-center justify-center gap-2">
-                  <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                  </svg>
-                  Registrando...
-                </span>
-              ) : "Crear Cuenta"}
+            <button type="button" className="text-sm font-semibold text-[#2d3e50]/70 hover:text-[#1877F2] transition-colors border-b-2 border-transparent hover:border-[#1877F2] pb-0.5">
+              ¿Olvidaste tu contraseña?
             </button>
 
-            <p className="text-center text-white/60 text-sm pt-1">
-              ¿Ya tienes cuenta?{" "}
-              <button
-                type="button"
-                onClick={() => switchMode("login")}
-                className="text-white font-semibold hover:underline"
-              >
-                Inicia sesión
-              </button>
+            <div className="pt-2">
+              <NeuButton type="submit" disabled={isLoading} isLoading={isLoading}>INGRESAR</NeuButton>
+            </div>
+
+            {/* Enlace móvil para cambiar a Registro */}
+            <p className="lg:hidden mt-6 text-sm font-medium text-[#2d3e50]/60">
+              ¿No tienes cuenta? <button type="button" onClick={() => toggleMode(true)} className="text-[#1877F2] font-bold underline decoration-2 underline-offset-4">Regístrate</button>
             </p>
           </form>
-        )}
+        </div>
+
+        {/* ========================================================= */}
+        {/* 3. PANEL SUPERPUESTO (Pickled Bluewood) - Solo visible en Desktop */}
+        {/* ========================================================= */}
+        <div className={`hidden lg:block absolute top-0 left-1/2 w-1/2 h-full overflow-hidden transition-transform duration-700 ease-in-out z-50 ${isSignUp ? '-translate-x-full' : 'translate-x-0'}`}>
+          <div className={`absolute top-0 left-[-100%] w-[200%] h-full bg-[#2d3e50] transition-transform duration-700 ease-in-out ${isSignUp ? 'translate-x-1/2' : 'translate-x-0'} shadow-[inset_10px_0_30px_rgba(0,0,0,0.3)]`}>
+
+            {/* Detalles decorativos en el panel */}
+            <div className="absolute top-[-20%] left-[-10%] w-[500px] h-[500px] rounded-full border-[1px] border-white/5 opacity-50" />
+            <div className="absolute bottom-[-20%] right-[-10%] w-[400px] h-[400px] rounded-full border-[1px] border-white/5 opacity-50" />
+
+            {/* Contenido Izquierdo (Para ir a Login) */}
+            <div className={`absolute top-0 left-0 w-1/2 h-full flex flex-col items-center justify-center p-16 text-center transition-transform duration-700 ease-in-out ${isSignUp ? 'translate-x-0' : '-translate-x-[20%]'}`}>
+              <h2 className="text-4xl font-black text-white mb-6 tracking-tight">¡Bienvenido de Nuevo!</h2>
+              <p className="text-[#e6e9f0]/70 mb-10 font-medium text-lg leading-relaxed">
+                Para mantenerte conectado, por favor inicia sesión con tu cuenta personal.
+              </p>
+              <GhostButton onClick={() => toggleMode(false)}>INGRESAR</GhostButton>
+            </div>
+
+            {/* Contenido Derecho (Para ir a Registro) */}
+            <div className={`absolute top-0 right-0 w-1/2 h-full flex flex-col items-center justify-center p-16 text-center transition-transform duration-700 ease-in-out ${isSignUp ? 'translate-x-[20%]' : 'translate-x-0'}`}>
+              <h2 className="text-4xl font-black text-white mb-6 tracking-tight">¡Hola, Amigo!</h2>
+              <p className="text-[#e6e9f0]/70 mb-10 font-medium text-lg leading-relaxed">
+                Ingresa tus datos personales y comienza tu experiencia con MatVic.
+              </p>
+              <GhostButton onClick={() => toggleMode(true)}>REGISTRARSE</GhostButton>
+            </div>
+
+          </div>
+        </div>
+
       </div>
     </div>
   );
