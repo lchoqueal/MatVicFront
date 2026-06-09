@@ -1,7 +1,7 @@
 import { useState, type SVGProps } from "react";
 import { useNavigate } from "react-router";
-import { useAuth } from "~/context/auth";
-import { api } from "~/lib/api";
+import { useAuth } from "~/core/auth";
+import { api } from "~/core/api/client";
 
 // ── Icono Facebook ─────────────────────────────────────────────────────────────
 

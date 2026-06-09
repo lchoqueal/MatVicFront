@@ -1,10 +1,3 @@
-export interface Product {
-  id_producto: number;
-  nombre: string;
-  descripcion?: string;
-  categoria: string;
-  precio_unit: number;
-  stock: number;
-  min_stock: number;
-  imagen_url?: string;
-}
+// Los tipos de inventario viven en features/inventory/types.ts
+// Este archivo se mantiene solo para compatibilidad con imports existentes en la tienda virtual.
+export type { Product } from "~/features/inventory/types";

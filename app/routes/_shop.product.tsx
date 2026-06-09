@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useParams, useLocation, useNavigate } from "react-router";
 import { ArrowLeft, ShoppingCart, Star, Package, Smartphone, Loader2, AlertCircle } from "lucide-react";
 import { api } from "~/lib/api";
-import type { Product } from "~/types/inventory";
+import type { Product } from "~/features/inventory/types";
 import { formatCLP } from "~/lib/utils";
 
 interface ProductosResponse {

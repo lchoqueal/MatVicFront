@@ -1,4 +1,3 @@
-import { ShoppingCart } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip, CartesianGrid } from "recharts";
 
 interface SalesChartProps {

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Plus, Search, Package, AlertCircle, RefreshCw } from "lucide-react";
 import { useOutletContext } from "react-router";
 import type { Store } from "~/components/ui/StoreSelector";
@@ -9,7 +9,6 @@ import { ProductTable } from "~/features/inventory/components/ProductTable";
 import { ProductModal } from "~/features/inventory/components/ProductModal";
 import type { Product } from "~/features/inventory/types";
 import { formatCLP } from "~/lib/utils";
-import { useEffect } from "react";
 
 // Stats card inline (pequeño, solo para inventario)
 function InventoryStat({ title, value, subtitle, critical = false }: {

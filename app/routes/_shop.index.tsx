@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router";
 import { ShoppingCart, Eye, Star, Smartphone, Search, Loader2, AlertCircle } from "lucide-react";
 import { api } from "~/lib/api";
-import type { Product } from "~/types/inventory";
+import type { Product } from "~/features/inventory/types";
 import { formatCLP } from "~/lib/utils";
 
 interface ProductosResponse {
@@ -253,7 +253,7 @@ export default function ShopIndex() {
           </div>
           <div>
             <h5 className="font-bold text-[#2d3e50] text-sm">Recojo en Tienda</h5>
-            <p className="text-xs text-slate-500">Gratis en nuestro local de Tacna</p>
+            <p className="text-xs text-slate-500">Gratis en nuestro local de Arica</p>
           </div>
         </div>
         <div className="flex items-center gap-4 p-4 border border-slate-100 rounded-xl bg-slate-50">

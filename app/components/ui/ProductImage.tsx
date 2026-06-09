@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Package } from "lucide-react";
-import type { Product } from "~/types/inventory";
+import type { Product } from "~/features/inventory/types";
 
 interface ProductImageProps {
   producto: Product;

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, Outlet, useNavigate } from "react-router";
 import { ShoppingCart, User, Smartphone, LogOut, LayoutDashboard, Menu, X } from "lucide-react";
-import { useAuth } from "~/context/auth";
+import { useAuth } from "~/core/auth";
 
 export default function ShopLayout() {
   const { user, isAuthenticated, isAdmin, logout } = useAuth();
@@ -136,7 +136,7 @@ export default function ShopLayout() {
       </main>
 
       <footer className="bg-[#2d3e50] text-slate-400 text-xs text-center py-4 mt-auto">
-        © {new Date().getFullYear()} MatVic Store · Tacna, Perú
+        © {new Date().getFullYear()} MatVic Store · Arica, Chile
       </footer>
     </div>
   );
