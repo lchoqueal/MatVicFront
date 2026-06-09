@@ -1,0 +1,173 @@
+import { useState } from "react";
+import { X, Package, Loader2 } from "lucide-react";
+import type { Product, ProductFormData } from "~/features/inventory/types";
+
+interface ProductModalProps {
+  product: Product | null;
+  categories: string[];
+  onClose: () => void;
+  onSave: (id: number, data: ProductFormData) => Promise<void>;
+  isSaving: boolean;
+}
+
+export function ProductModal({ product, categories, onClose, onSave, isSaving }: ProductModalProps) {
+  const [formData, setFormData] = useState<ProductFormData>({
+    nombre:      product?.nombre      ?? "",
+    descripcion: product?.descripcion ?? "",
+    categoria:   product?.categoria   ?? "",
+    precio_unit: product?.precio_unit ?? 0,
+    stock:       product?.stock       ?? 0,
+    min_stock:   product?.min_stock   ?? 5,
+    imagen_url:  product?.imagen_url  ?? undefined,
+  });
+  const [newCategoryName, setNewCategoryName] = useState("");
+  const [imagePreview, setImagePreview] = useState<string | undefined>(product?.imagen_url);
+  const isNewCategory = formData.categoria === "__nueva__";
+
+  const set = <K extends keyof ProductFormData>(key: K, value: ProductFormData[K]) =>
+    setFormData((prev) => ({ ...prev, [key]: value }));
+
+  const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const result = reader.result as string;
+      setImagePreview(result);
+      set("imagen_url", result);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!product) return;
+    const dataToSave = isNewCategory ? { ...formData, categoria: newCategoryName.trim() } : formData;
+    if (isNewCategory && !newCategoryName.trim()) return;
+    onSave(product.id_producto, dataToSave);
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[100] p-4">
+      <div className="w-full max-w-md rounded-2xl shadow-2xl overflow-hidden max-h-[90vh] flex flex-col"
+        style={{ background: "var(--bg-surface)", border: "1px solid var(--border-main)" }}>
+        <div className="p-6 border-b flex justify-between items-center shrink-0" style={{ borderColor: "var(--border-main)" }}>
+          <div>
+            <h2 className="text-xl font-bold" style={{ color: "var(--text-primary)" }}>
+              {product ? "Editar Producto" : "Agregar Nuevo Producto"}
+            </h2>
+            <p className="text-sm mt-0.5" style={{ color: "var(--text-muted)" }}>
+              {product ? "Modifica la información del producto" : "Ingresa los datos del nuevo producto"}
+            </p>
+          </div>
+          <button type="button" onClick={onClose} className="p-2 rounded-full transition-colors"
+            style={{ color: "var(--text-muted)" }}
+            onMouseEnter={(e) => (e.currentTarget.style.background = "var(--bg-muted)")}
+            onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}>
+            <X className="h-5 w-5" />
+          </button>
+        </div>
+
+        <form onSubmit={handleSubmit} className="p-6 space-y-4 overflow-y-auto flex-1">
+          {/* Nombre */}
+          <div>
+            <label className="block text-sm font-medium mb-1.5" style={{ color: "var(--text-secondary)" }}>Nombre del producto *</label>
+            <input type="text" value={formData.nombre} onChange={(e) => set("nombre", e.target.value)} required
+              className="w-full px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-pickled-bluewood-600 text-sm transition-colors"
+              style={{ background: "var(--bg-surface-2)", border: "1px solid var(--border-main)", color: "var(--text-primary)" }}
+              placeholder="Ej: Funda Silicona iPhone 15" />
+          </div>
+
+          {/* Categoría */}
+          <div>
+            <label className="block text-sm font-medium mb-1.5" style={{ color: "var(--text-secondary)" }}>Categoría *</label>
+            <select value={formData.categoria} onChange={(e) => { set("categoria", e.target.value); if (e.target.value !== "__nueva__") setNewCategoryName(""); }}
+              required={!isNewCategory}
+              className="w-full px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-pickled-bluewood-600 text-sm transition-colors"
+              style={{ background: "var(--bg-surface-2)", border: "1px solid var(--border-main)", color: "var(--text-primary)" }}>
+              <option value="">Selecciona una categoría</option>
+              {categories.map((c) => <option key={c} value={c}>{c}</option>)}
+              <option value="__nueva__">+ Nueva categoría</option>
+            </select>
+            {isNewCategory && (
+              <input type="text" value={newCategoryName} onChange={(e) => setNewCategoryName(e.target.value)}
+                className="w-full mt-2 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-pickled-bluewood-600 text-sm"
+                style={{ background: "var(--bg-surface-2)", border: "1px solid var(--border-main)", color: "var(--text-primary)" }}
+                placeholder="Nombre de la nueva categoría" required autoFocus />
+            )}
+          </div>
+
+          {/* Precio y Stock */}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium mb-1.5" style={{ color: "var(--text-secondary)" }}>Precio ($) *</label>
+              <input type="number" min={0} step={1} value={formData.precio_unit} onChange={(e) => set("precio_unit", Number(e.target.value))} required
+                className="w-full px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-pickled-bluewood-600 text-sm"
+                style={{ background: "var(--bg-surface-2)", border: "1px solid var(--border-main)", color: "var(--text-primary)" }} placeholder="0" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1.5" style={{ color: "var(--text-secondary)" }}>Stock actual *</label>
+              <input type="number" min={0} value={formData.stock} onChange={(e) => set("stock", Number(e.target.value))} required
+                className="w-full px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-pickled-bluewood-600 text-sm"
+                style={{ background: "var(--bg-surface-2)", border: "1px solid var(--border-main)", color: "var(--text-primary)" }} />
+            </div>
+          </div>
+
+          {/* Stock mínimo */}
+          <div>
+            <label className="block text-sm font-medium mb-1.5" style={{ color: "var(--text-secondary)" }}>Stock mínimo *</label>
+            <input type="number" min={0} value={formData.min_stock} onChange={(e) => set("min_stock", Number(e.target.value))} required
+              className="w-full px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-pickled-bluewood-600 text-sm"
+              style={{ background: "var(--bg-surface-2)", border: "1px solid var(--border-main)", color: "var(--text-primary)" }} />
+          </div>
+
+          {/* Descripción */}
+          <div>
+            <label className="block text-sm font-medium mb-1.5" style={{ color: "var(--text-secondary)" }}>Descripción</label>
+            <textarea value={formData.descripcion ?? ""} onChange={(e) => set("descripcion", e.target.value)} rows={2}
+              className="w-full px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-pickled-bluewood-600 text-sm resize-none"
+              style={{ background: "var(--bg-surface-2)", border: "1px solid var(--border-main)", color: "var(--text-primary)" }}
+              placeholder="Descripción breve del producto..." />
+          </div>
+
+          {/* Imagen */}
+          <div>
+            <label className="block text-sm font-medium mb-1.5" style={{ color: "var(--text-secondary)" }}>Imagen del producto</label>
+            <div className="flex gap-4 items-start">
+              <div className="flex-1">
+                <input type="file" accept="image/*" onChange={handleFile}
+                  className="w-full text-sm file:mr-3 file:py-1.5 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-bold file:bg-pickled-bluewood-600 file:text-white hover:file:bg-pickled-bluewood-700" />
+                <p className="text-[11px] mt-1" style={{ color: "var(--text-muted)" }}>JPG, PNG, WebP. Máximo 5 MB</p>
+              </div>
+              <div className="shrink-0">
+                {imagePreview ? (
+                  <img src={imagePreview} alt="Preview" className="w-20 h-20 object-cover rounded-xl" style={{ border: "1px solid var(--border-main)" }} />
+                ) : (
+                  <div className="w-20 h-20 rounded-xl border-2 border-dashed flex items-center justify-center" style={{ borderColor: "var(--border-main)", background: "var(--bg-muted)" }}>
+                    <Package className="w-6 h-6" style={{ color: "var(--text-muted)" }} />
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Botones */}
+          <div className="flex justify-end gap-3 pt-2">
+            <button type="button" onClick={onClose}
+              className="px-4 py-2 rounded-xl text-sm font-medium transition-colors"
+              style={{ border: "1px solid var(--border-main)", color: "var(--text-secondary)" }}
+              onMouseEnter={(e) => (e.currentTarget.style.background = "var(--bg-muted)")}
+              onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}>
+              Cancelar
+            </button>
+            <button type="submit" disabled={isSaving}
+              className="flex items-center gap-2 px-4 py-2 bg-pickled-bluewood-600 text-white rounded-xl hover:bg-pickled-bluewood-700 transition-colors text-sm font-bold disabled:opacity-60">
+              {isSaving && <Loader2 className="h-4 w-4 animate-spin" />}
+              {product ? "Actualizar" : "Agregar"} Producto
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}

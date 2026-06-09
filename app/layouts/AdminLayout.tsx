@@ -11,10 +11,11 @@ import {
   Sun,
   Moon,
 } from "lucide-react";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { Link, Outlet, useLocation, useNavigate, Navigate } from "react-router";
 import StoreSelector, { type Store } from "~/components/ui/StoreSelector";
-import { useAuth } from "~/context/auth";
+import { useAuth } from "~/core/auth";
+import { useDarkMode } from "~/core/hooks/useDarkMode";
 
 // Menú completo para admin
 const adminMenuItems = [
@@ -28,34 +29,6 @@ const empleadoMenuItems = [
   { id: "inventory", label: "Inventario", icon: Package,      path: "/admin/inventory" },
   { id: "sales",     label: "Caja / Ventas", icon: ShoppingCart, path: "/admin/sales" },
 ];
-
-// ── Dark mode hook ─────────────────────────────────────────────────────────
-
-function useDarkMode() {
-  const [dark, setDark] = useState(false);
-
-  useEffect(() => {
-    // Leer preferencia guardada (el script inline ya aplicó la clase, solo sincronizamos el estado)
-    const saved = localStorage.getItem("theme");
-    setDark(saved === "dark" || (!saved && document.documentElement.classList.contains("dark")));
-  }, []);
-
-  const toggle = useCallback(() => {
-    setDark((prev) => {
-      const next = !prev;
-      if (next) {
-        document.documentElement.classList.add("dark");
-        localStorage.setItem("theme", "dark");
-      } else {
-        document.documentElement.classList.remove("dark");
-        localStorage.setItem("theme", "light");
-      }
-      return next;
-    });
-  }, []);
-
-  return { dark, toggle };
-}
 
 // ── Menú de navegación ─────────────────────────────────────────────────────
 
