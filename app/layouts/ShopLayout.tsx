@@ -1,12 +1,17 @@
 import { useState } from "react";
-import { Link, Outlet, useNavigate } from "react-router";
-import { ShoppingCart, User, Smartphone, LogOut, LayoutDashboard, Menu, X } from "lucide-react";
+import { Link, Outlet, useNavigate, useLocation } from "react-router";
+import { ShoppingCart, User, Smartphone, LogOut, LayoutDashboard, Menu, X, Plus, Minus, Trash2, Search } from "lucide-react";
 import { useAuth } from "~/core/auth";
+import CheckoutModal from "~/components/ui/CheckoutModal";
+import { formatCLP } from "~/lib/utils";
 
 export default function ShopLayout() {
   const { user, isAuthenticated, isAdmin, logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [cartOpen, setCartOpen] = useState(false);
+  const [checkoutOpen, setCheckoutOpen] = useState(false);
 
   const handleLogout = () => {
     logout();
@@ -14,116 +19,205 @@ export default function ShopLayout() {
     navigate("/");
   };
 
+  // MOCK CART ITEMS FOR PREVIEW
+  const [cartItems, setCartItems] = useState([
+    { id: 1, name: "Auriculares Bluetooth Pro", price: 199990, quantity: 1, image: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500&q=80" },
+    { id: 2, name: "Cargador USB-C 65W", price: 89990, quantity: 1, image: "https://images.unsplash.com/photo-1583863788434-e58a36330cf0?w=500&q=80" },
+    { id: 3, name: "Funda Premium iPhone 15", price: 49990, quantity: 1, image: "https://images.unsplash.com/photo-1603313011101-320f26a4f6f6?w=500&q=80" }
+  ]);
+
+  const updateQuantity = (id: number, delta: number) => {
+    setCartItems(items => items.map(item => {
+      if (item.id === id) {
+        const newQ = Math.max(1, item.quantity + delta);
+        return { ...item, quantity: newQ };
+      }
+      return item;
+    }));
+  };
+
+  const removeItem = (id: number) => {
+    setCartItems(items => items.filter(item => item.id !== id));
+  };
+
+  const cartTotal = cartItems.reduce((acc, item) => acc + (item.price * item.quantity), 0);
+  const cartCount = cartItems.reduce((acc, item) => acc + item.quantity, 0);
+
   return (
-    <div className="min-h-screen flex flex-col bg-slate-50">
-      <header className="bg-[#2d3e50] text-white shadow-md px-4 sm:px-6 h-16 flex items-center justify-between sticky top-0 z-40">
+    <div className="min-h-screen flex flex-col bg-[#f8f9fa]">
+      {/* HEADER TIPO FIGMA */}
+      <header className="bg-white shadow-xs px-4 sm:px-6 h-20 flex items-center justify-between sticky top-0 z-40">
         {/* Logo */}
         <Link to="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity shrink-0">
-          <Smartphone className="h-6 w-6 sm:h-7 sm:w-7 text-blue-400" />
-          <span className="font-bold text-lg sm:text-xl tracking-tight">MatVic Store</span>
+          <div className="bg-blue-600 p-1.5 rounded-lg">
+            <Smartphone className="h-6 w-6 text-white" />
+          </div>
+          <div className="flex flex-col leading-none">
+            <span className="font-extrabold text-xl tracking-tight text-[#2d3e50]">MatVic</span>
+            <span className="text-[10px] font-bold text-slate-500 tracking-widest uppercase">STORE</span>
+          </div>
         </Link>
 
-        {/* Acciones desktop */}
-        <div className="hidden sm:flex items-center gap-4 lg:gap-5">
+        {/* Navegación Central (Desktop) */}
+        <nav className="hidden md:flex items-center gap-2">
+          <Link to="/" className={`px-5 py-2 rounded-full text-sm font-bold transition-colors ${location.pathname === '/' ? 'bg-blue-100 text-blue-700' : 'text-slate-600 hover:bg-slate-100'}`}>
+            Inicio
+          </Link>
+          <a href="#catalogo" onClick={(e) => {
+             if (location.pathname !== '/') {
+               navigate('/');
+               setTimeout(() => document.getElementById("catalogo")?.scrollIntoView({ behavior: "smooth" }), 300);
+             } else {
+               e.preventDefault();
+               document.getElementById("catalogo")?.scrollIntoView({ behavior: "smooth" });
+             }
+          }} className="px-5 py-2 rounded-full text-sm font-bold text-slate-600 hover:bg-slate-100 transition-colors">
+            Catálogo
+          </a>
+        </nav>
+
+        {/* Acciones Derecha */}
+        <div className="hidden sm:flex items-center gap-4">
           {isAuthenticated && isAdmin && (
             <Link
               to="/admin"
-              className="flex items-center gap-1.5 text-xs font-bold bg-blue-600 px-3 py-1.5 rounded-full hover:bg-blue-500 transition-colors"
+              className="flex items-center gap-1.5 text-xs font-bold bg-slate-100 text-[#2d3e50] px-3 py-1.5 rounded-full hover:bg-slate-200 transition-colors"
             >
               <LayoutDashboard className="h-3.5 w-3.5" />
-              Panel Admin
+              Admin
             </Link>
           )}
-
-          <button
-            type="button"
-            className="hover:text-blue-400 transition-colors relative"
-            aria-label="Carrito de compras"
-          >
-            <ShoppingCart className="h-6 w-6" />
+          
+          <button className="p-2 text-slate-400 hover:text-[#2d3e50] transition-colors rounded-full hover:bg-slate-100">
+            <Search className="h-5 w-5" />
           </button>
+          
+          <div className="h-6 w-px bg-slate-200 mx-1"></div>
 
           {!isAuthenticated ? (
-            <Link
-              to="/login"
-              className="flex items-center gap-1.5 hover:text-blue-400 font-medium text-sm transition-colors"
-            >
+            <Link to="/login" className="p-2 text-slate-400 hover:text-[#2d3e50] transition-colors rounded-full hover:bg-slate-100">
               <User className="h-5 w-5" />
-              Iniciar Sesión
             </Link>
           ) : (
-            <div className="flex items-center gap-3 border-l border-white/20 pl-4">
-              <span className="text-blue-300 font-bold text-sm truncate max-w-[100px]">
+            <div className="flex items-center gap-3">
+              <span className="text-[#2d3e50] font-bold text-sm truncate max-w-[100px]">
                 {user?.nombre ?? user?.username}
               </span>
-              <button
-                type="button"
-                onClick={handleLogout}
-                title="Cerrar sesión"
-                className="text-slate-400 hover:text-red-400 transition-colors"
-              >
+              <button onClick={handleLogout} className="text-slate-400 hover:text-red-500 p-2 rounded-full hover:bg-red-50 transition-colors">
                 <LogOut className="h-4 w-4" />
               </button>
             </div>
           )}
+
+          <button
+            onClick={() => setCartOpen(true)}
+            className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2.5 rounded-full hover:bg-blue-700 transition-colors shadow-md shadow-blue-600/20 group"
+          >
+            <ShoppingCart className="h-4 w-4 group-hover:scale-110 transition-transform" />
+            <span className="text-sm font-bold">Carrito</span>
+            {cartCount > 0 && (
+              <span className="bg-white text-blue-600 text-[10px] font-black px-1.5 py-0.5 rounded-full ml-1 leading-none">
+                {cartCount}
+              </span>
+            )}
+          </button>
         </div>
 
-        {/* Botones móvil */}
+        {/* Menú Móvil Toggle */}
         <div className="flex sm:hidden items-center gap-3">
-          <button
-            type="button"
-            className="hover:text-blue-400 transition-colors"
-            aria-label="Carrito"
-          >
-            <ShoppingCart className="h-5 w-5" />
+          <button onClick={() => setCartOpen(true)} className="p-2 text-[#2d3e50] relative">
+            <ShoppingCart className="h-6 w-6" />
+            {cartCount > 0 && (
+              <span className="absolute top-0 right-0 bg-blue-600 text-white text-[10px] font-bold h-4 w-4 rounded-full flex items-center justify-center">
+                {cartCount}
+              </span>
+            )}
           </button>
-          <button
-            type="button"
-            onClick={() => setMenuOpen(!menuOpen)}
-            className="hover:text-blue-400 transition-colors"
-            aria-label="Menú"
-          >
-            {menuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+          <button onClick={() => setMenuOpen(!menuOpen)} className="p-2 text-[#2d3e50]">
+            {menuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
           </button>
         </div>
       </header>
 
-      {/* Menú móvil desplegable */}
+      {/* Menú Móvil */}
       {menuOpen && (
-        <div className="sm:hidden fixed top-16 left-0 right-0 z-30 bg-[#2d3e50] border-t border-white/10 shadow-xl animate-in slide-in-from-top-2 duration-200">
-          <div className="px-4 py-4 space-y-3">
-            {isAuthenticated && isAdmin && (
-              <Link
-                to="/admin"
-                onClick={() => setMenuOpen(false)}
-                className="flex items-center gap-2 text-sm font-bold bg-blue-600 px-4 py-2.5 rounded-lg hover:bg-blue-500 transition-colors text-white"
-              >
-                <LayoutDashboard className="h-4 w-4" />
-                Panel Admin
-              </Link>
-            )}
+        <div className="sm:hidden fixed inset-0 z-30 top-20 bg-white animate-in slide-in-from-top p-4 space-y-4 shadow-xl">
+           <Link to="/" onClick={() => setMenuOpen(false)} className="block py-3 font-bold text-[#2d3e50] border-b border-slate-100">Inicio</Link>
+           <a href="#catalogo" onClick={() => setMenuOpen(false)} className="block py-3 font-bold text-[#2d3e50] border-b border-slate-100">Catálogo</a>
+           
+           {!isAuthenticated ? (
+            <Link to="/login" onClick={() => setMenuOpen(false)} className="flex items-center gap-2 py-3 font-bold text-[#2d3e50]">
+              <User className="h-5 w-5" /> Iniciar Sesión
+            </Link>
+          ) : (
+            <div className="pt-2">
+              <p className="text-blue-600 font-bold mb-3">{user?.nombre ?? user?.username}</p>
+              <button onClick={handleLogout} className="flex items-center gap-2 text-red-500 font-bold">
+                <LogOut className="h-5 w-5" /> Cerrar Sesión
+              </button>
+            </div>
+          )}
+        </div>
+      )}
 
-            {!isAuthenticated ? (
-              <Link
-                to="/login"
-                onClick={() => setMenuOpen(false)}
-                className="flex items-center gap-2 text-sm font-medium text-white hover:text-blue-400 transition-colors py-2"
-              >
-                <User className="h-4 w-4" />
-                Iniciar Sesión
-              </Link>
-            ) : (
-              <div className="border-t border-white/10 pt-3">
-                <p className="text-blue-300 font-bold text-sm mb-2">
-                  {user?.nombre ?? user?.username}
-                </p>
-                <button
-                  type="button"
-                  onClick={handleLogout}
-                  className="flex items-center gap-2 text-sm text-red-400 hover:text-red-300 transition-colors"
+      {/* Sidebar del Carrito (Drawer) */}
+      {cartOpen && (
+        <div className="fixed inset-0 z-50 flex justify-end">
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setCartOpen(false)} />
+          <div className="relative w-full max-w-sm bg-white h-full shadow-2xl flex flex-col animate-in slide-in-from-right duration-300">
+            <div className="p-5 flex items-center justify-between border-b border-slate-100">
+              <div className="flex items-center gap-2">
+                <ShoppingCart className="h-5 w-5 text-[#2d3e50]" />
+                <h2 className="font-bold text-[#2d3e50] text-lg">Mi Carrito</h2>
+                <span className="bg-blue-100 text-blue-700 text-xs font-bold px-2 py-0.5 rounded-full">{cartCount}</span>
+              </div>
+              <button onClick={() => setCartOpen(false)} className="p-2 text-slate-400 hover:text-[#2d3e50] bg-slate-50 hover:bg-slate-100 rounded-full transition-colors">
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            
+            <div className="flex-1 overflow-y-auto p-5 space-y-4">
+              {cartItems.length === 0 ? (
+                <div className="h-full flex flex-col items-center justify-center text-center space-y-3 opacity-50">
+                  <ShoppingCart className="h-12 w-12 text-slate-300" />
+                  <p className="text-slate-500 font-medium">Tu carrito está vacío</p>
+                </div>
+              ) : (
+                cartItems.map(item => (
+                  <div key={item.id} className="flex gap-4 p-3 border border-slate-100 rounded-2xl bg-white shadow-xs">
+                    <img src={item.image} alt={item.name} className="w-20 h-20 object-cover rounded-xl bg-slate-50" />
+                    <div className="flex-1 flex flex-col justify-between">
+                      <div className="flex justify-between items-start gap-2">
+                        <h4 className="font-bold text-sm text-[#2d3e50] leading-tight">{item.name}</h4>
+                        <button onClick={() => removeItem(item.id)} className="text-slate-300 hover:text-red-500 transition-colors p-1">
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </div>
+                      <div className="flex items-center justify-between mt-2">
+                        <span className="font-extrabold text-blue-600">{formatCLP(item.price)}</span>
+                        <div className="flex items-center bg-slate-100 rounded-lg p-0.5">
+                          <button onClick={() => updateQuantity(item.id, -1)} className="p-1 text-slate-500 hover:bg-white rounded-md transition-colors shadow-sm"><Minus className="h-3 w-3" /></button>
+                          <span className="w-8 text-center text-sm font-bold text-[#2d3e50]">{item.quantity}</span>
+                          <button onClick={() => updateQuantity(item.id, 1)} className="p-1 text-slate-500 hover:bg-white rounded-md transition-colors shadow-sm"><Plus className="h-3 w-3" /></button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+
+            {cartItems.length > 0 && (
+              <div className="p-5 border-t border-slate-100 bg-slate-50">
+                <div className="flex justify-between items-end mb-4">
+                  <span className="text-slate-500 font-medium text-sm">Subtotal</span>
+                  <span className="text-2xl font-black text-[#2d3e50]">{formatCLP(cartTotal)}</span>
+                </div>
+                <button 
+                  onClick={() => { setCartOpen(false); setCheckoutOpen(true); }}
+                  className="w-full bg-blue-600 text-white font-bold py-3.5 rounded-xl hover:bg-blue-700 transition-colors shadow-lg shadow-blue-600/20 flex items-center justify-center gap-2"
                 >
-                  <LogOut className="h-4 w-4" />
-                  Cerrar sesión
+                  Proceder al Pago <span className="text-xl leading-none">›</span>
                 </button>
               </div>
             )}
@@ -131,12 +225,32 @@ export default function ShopLayout() {
         </div>
       )}
 
-      <main className="flex-1 container mx-auto px-4 sm:px-6 py-6 sm:py-8 max-w-7xl">
+      {/* Checkout Modal */}
+      {checkoutOpen && (
+        <CheckoutModal 
+          isOpen={checkoutOpen} 
+          onClose={() => setCheckoutOpen(false)} 
+          total={cartTotal} 
+        />
+      )}
+
+      <main className="flex-1 w-full bg-[#f8f9fa]">
         <Outlet />
       </main>
 
-      <footer className="bg-[#2d3e50] text-slate-400 text-xs text-center py-4 mt-auto">
-        © {new Date().getFullYear()} MatVic Store · Arica, Chile
+      <footer className="bg-[#1a2530] text-slate-400 py-12 mt-auto">
+        <div className="container mx-auto px-4 max-w-7xl flex flex-col md:flex-row justify-between items-center gap-6">
+          <div className="flex items-center gap-2 opacity-50">
+            <div className="bg-slate-700 p-1.5 rounded-lg">
+              <Smartphone className="h-5 w-5 text-white" />
+            </div>
+            <div className="flex flex-col leading-none">
+              <span className="font-extrabold text-lg tracking-tight text-white">MatVic</span>
+              <span className="text-[9px] font-bold text-slate-300 tracking-widest uppercase">STORE</span>
+            </div>
+          </div>
+          <p className="text-sm">© {new Date().getFullYear()} MatVic Store - Arica, Chile. Todos los derechos reservados.</p>
+        </div>
       </footer>
     </div>
   );
