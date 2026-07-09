@@ -1,5 +1,6 @@
 {
   "name": "matvicfront",
+  "version": "0.7.3",
   "private": true,
   "type": "module",
   "scripts": {
