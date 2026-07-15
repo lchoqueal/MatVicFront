@@ -30,8 +30,8 @@ export function useInventory(): InventoryState {
         getProducts(),
         getCategories().catch(() => []) // Fallback in case categories fail initially
       ]);
-      setProducts(prodsData);
-      setCategories(catsData);
+      setProducts(Array.isArray(prodsData) ? prodsData : []);
+      setCategories(Array.isArray(catsData) ? catsData : []);
     } catch (err) {
       setApiError(err instanceof Error ? err.message : "Error al cargar inventario");
     } finally {
