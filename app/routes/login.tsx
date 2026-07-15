@@ -2,22 +2,14 @@ import { useState, type SVGProps } from "react";
 import { useNavigate } from "react-router";
 import { useAuth } from "~/core/auth";
 import { api } from "~/core/api/client";
-import { Loader2 } from "lucide-react";
+import { Loader2, Eye, EyeOff, Smartphone } from "lucide-react";
 
-// ── Iconos ──────────────────────────────────────────────────────────────────
+// ── Iconos sociales ────────────────────────────────────────────────────────────
 
 function FacebookIcon(props: SVGProps<SVGSVGElement>) {
   return (
     <svg viewBox="0 0 24 24" fill="currentColor" {...props}>
       <path d="M24 12.073C24 5.405 18.627 0 12 0S0 5.405 0 12.073C0 18.099 4.388 23.094 10.125 24v-8.437H7.078v-3.49h3.047V9.414c0-3.021 1.792-4.691 4.533-4.691 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.928-1.956 1.88v2.258h3.328l-.532 3.49h-2.796V24C19.612 23.094 24 18.099 24 12.073z" />
-    </svg>
-  );
-}
-
-function LinkedinIcon(props: SVGProps<SVGSVGElement>) {
-  return (
-    <svg viewBox="0 0 24 24" fill="currentColor" {...props}>
-      <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
     </svg>
   );
 }
@@ -30,7 +22,7 @@ function XIcon(props: SVGProps<SVGSVGElement>) {
   );
 }
 
-// ── Tipos ─────────────────────────────────────────────────────────────────────
+// ── Tipos ──────────────────────────────────────────────────────────────────────
 
 interface RegisterResponse {
   token: string;
@@ -43,63 +35,66 @@ interface RegisterResponse {
   };
 }
 
-// ── Componentes UI Neumorfismo ──────────────────────────────────────────────
+// ── Componente Input ───────────────────────────────────────────────────────────
 
-const NeuInput = (props: React.InputHTMLAttributes<HTMLInputElement>) => (
-  <input
-    className="w-full bg-[#f0f2f5] border-none px-5 py-3.5 rounded-2xl outline-none text-[#2d3e50] shadow-[inset_4px_4px_8px_#d1d9e6,inset_-4px_-4px_8px_#ffffff] focus:shadow-[inset_6px_6px_12px_#c2cce0,inset_-6px_-6px_12px_#ffffff] transition-shadow duration-300 placeholder-[#2d3e50]/40 font-semibold text-sm disabled:opacity-50"
-    {...props}
-  />
+const MvInput = ({ label, icon, rightElement, ...props }: React.InputHTMLAttributes<HTMLInputElement> & {
+  label?: string;
+  icon?: React.ReactNode;
+  rightElement?: React.ReactNode;
+}) => (
+  <div className="w-full">
+    {label && <label className="block text-xs font-bold uppercase tracking-wider mb-1.5" style={{ color: 'var(--text-muted)' }}>{label}</label>}
+    <div className="relative">
+      {icon && (
+        <div className="absolute left-3.5 top-1/2 -translate-y-1/2" style={{ color: 'var(--text-muted)' }}>
+          {icon}
+        </div>
+      )}
+      <input
+        className="w-full px-4 py-3 rounded-xl text-sm font-medium outline-none transition-all"
+        style={{
+          background: 'var(--card)',
+          border: '1.5px solid var(--border)',
+          color: 'var(--text)',
+          paddingLeft: icon ? '40px' : undefined,
+          paddingRight: rightElement ? '44px' : undefined,
+        }}
+        onFocus={e => { e.currentTarget.style.borderColor = 'var(--primary)'; }}
+        onBlur={e => { e.currentTarget.style.borderColor = 'var(--border)'; }}
+        {...props}
+      />
+      {rightElement && (
+        <div className="absolute right-3.5 top-1/2 -translate-y-1/2">
+          {rightElement}
+        </div>
+      )}
+    </div>
+  </div>
 );
 
-const NeuSocialBtn = ({ children }: { children: React.ReactNode }) => (
-  <button type="button" className="w-12 h-12 flex items-center justify-center bg-[#f0f2f5] text-[#2d3e50] rounded-full shadow-[5px_5px_10px_#d1d9e6,-5px_-5px_10px_#ffffff] hover:shadow-[inset_4px_4px_8px_#d1d9e6,inset_-4px_-4px_8px_#ffffff] hover:text-[#1877F2] transition-all duration-300">
-    {children}
-  </button>
-);
-
-const NeuButton = ({ children, isLoading, ...props }: React.ButtonHTMLAttributes<HTMLButtonElement> & { isLoading?: boolean }) => (
-  <button
-    className="w-48 bg-[#2d3e50] text-white font-bold tracking-widest uppercase text-sm py-4 rounded-full shadow-[6px_6px_12px_#d1d9e6,-6px_-6px_12px_#ffffff] hover:shadow-[4px_4px_8px_#d1d9e6,-4px_-4px_8px_#ffffff] active:shadow-[inset_4px_4px_8px_rgba(0,0,0,0.4)] transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed mx-auto hover:text-[#1877F2]"
-    {...props}
-  >
-    {isLoading && <Loader2 className="h-4 w-4 animate-spin" />}
-    {children}
-  </button>
-);
-
-const GhostButton = ({ children, ...props }: React.ButtonHTMLAttributes<HTMLButtonElement>) => (
-  <button
-    className="w-48 bg-transparent text-[#e6e9f0] border border-[#e6e9f0] font-bold tracking-widest uppercase text-sm py-3.5 rounded-full hover:bg-[#1877F2] hover:border-[#1877F2] hover:text-white transition-colors duration-300 mx-auto shadow-sm"
-    {...props}
-  >
-    {children}
-  </button>
-);
-
-// ── Componente Principal ────────────────────────────────────────────────────
+// ── Componente principal ────────────────────────────────────────────────────────
 
 export default function Login() {
   const [isSignUp, setIsSignUp] = useState(false);
+  const [showPwd, setShowPwd] = useState(false);
+  const [showRegPwd, setShowRegPwd] = useState(false);
 
-  // Login state
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
+  // Login
+  const [username, setUsername]   = useState("");
+  const [password, setPassword]   = useState("");
 
-  // Register state
-  const [regUsername, setRegUsername] = useState("");
-  const [regPassword, setRegPassword] = useState("");
-  const [regNombre, setRegNombre] = useState("");
+  // Register
+  const [regUsername, setRegUsername]   = useState("");
+  const [regPassword, setRegPassword]   = useState("");
+  const [regNombre, setRegNombre]       = useState("");
   const [regApellidos, setRegApellidos] = useState("");
 
-  const [error, setError] = useState("");
+  const [error, setError]     = useState("");
   const [success, setSuccess] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
   const { login } = useAuth();
   const navigate = useNavigate();
-
-  // ── Handlers ───────────────────────────────────────────────────────────────
 
   const toggleMode = (signup: boolean) => {
     setIsSignUp(signup);
@@ -110,10 +105,7 @@ export default function Login() {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
-    if (!username.trim() || !password.trim()) {
-      setError("Por favor completa todos los campos.");
-      return;
-    }
+    if (!username.trim() || !password.trim()) { setError("Por favor completa todos los campos."); return; }
     setIsLoading(true);
     try {
       await login(username.trim(), password);
@@ -137,12 +129,7 @@ export default function Login() {
     e.preventDefault();
     setError("");
     setSuccess("");
-
-    if (regPassword.length < 6) {
-      setError("La contraseña debe tener al menos 6 caracteres.");
-      return;
-    }
-
+    if (regPassword.length < 6) { setError("La contraseña debe tener al menos 6 caracteres."); return; }
     setIsLoading(true);
     try {
       await api.post<RegisterResponse>("/auth/registro", {
@@ -151,12 +138,11 @@ export default function Login() {
         nombre: regNombre.trim(),
         apellidos: regApellidos.trim(),
       });
-      setSuccess("¡Cuenta creada exitosamente!");
+      setSuccess("¡Cuenta creada exitosamente! Ahora puedes ingresar.");
       setTimeout(() => {
-        setRegUsername(""); setRegPassword("");
-        setRegNombre(""); setRegApellidos("");
+        setRegUsername(""); setRegPassword(""); setRegNombre(""); setRegApellidos("");
         toggleMode(false);
-      }, 2000);
+      }, 2500);
     } catch (err: unknown) {
       const raw = err instanceof Error ? err.message : "";
       if (raw.toLowerCase().includes("unique") || raw.toLowerCase().includes("duplicate")) {
@@ -169,131 +155,226 @@ export default function Login() {
     }
   };
 
-  // ── Render ─────────────────────────────────────────────────────────────────
+  const SocialBtn = ({ children }: { children: React.ReactNode }) => (
+    <button
+      type="button"
+      className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold transition-all"
+      style={{ background: 'var(--card)', border: '1.5px solid var(--border)', color: 'var(--text-muted)' }}
+      onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = 'var(--primary)'; (e.currentTarget as HTMLElement).style.color = 'var(--primary)'; }}
+      onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = 'var(--border)'; (e.currentTarget as HTMLElement).style.color = 'var(--text-muted)'; }}
+    >
+      {children}
+    </button>
+  );
 
   return (
-    <div className="relative flex items-center justify-center min-h-screen bg-[#f0f2f5] p-4 font-sans selection:bg-[#1877F2] selection:text-white overflow-hidden">
+    <div className="min-h-screen flex items-center justify-center p-4" style={{ background: 'var(--bg)' }}>
+      {/* Círculos decorativos de fondo */}
+      <div className="fixed top-[-10%] right-[-10%] w-[500px] h-[500px] rounded-full pointer-events-none" style={{ background: 'radial-gradient(circle, rgba(127,57,67,0.12) 0%, transparent 70%)' }} />
+      <div className="fixed bottom-[-15%] left-[-10%] w-[400px] h-[400px] rounded-full pointer-events-none" style={{ background: 'radial-gradient(circle, rgba(232,99,90,0.08) 0%, transparent 70%)' }} />
 
-      {/* Círculo animado de fondo (sombra muy suave y lenta) */}
-      <style>{`
-        @keyframes floatBg {
-          0% { transform: translate(0px, 0px) scale(1); }
-          33% { transform: translate(15vw, -10vh) scale(1.2); }
-          66% { transform: translate(-10vw, 15vh) scale(0.9); }
-          100% { transform: translate(0px, 0px) scale(1); }
-        }
-        .animate-floatBg {
-          animation: floatBg 25s infinite alternate ease-in-out;
-        }
-      `}</style>
-      <div className="absolute top-[10%] left-[10%] w-[60vw] h-[60vw] max-w-[800px] max-h-[800px] bg-[#1877F2] rounded-full mix-blend-multiply filter blur-[150px] opacity-[0.07] animate-floatBg pointer-events-none" />
-      <div className="absolute bottom-[5%] right-[5%] w-[40vw] h-[40vw] max-w-[600px] max-h-[600px] bg-[#2d3e50] rounded-full mix-blend-multiply filter blur-[120px] opacity-[0.05] animate-floatBg pointer-events-none" style={{ animationDelay: '5s', animationDirection: 'alternate-reverse' }} />
+      {/* Card principal */}
+      <div className="relative w-full max-w-4xl min-h-[600px] bg-white rounded-3xl overflow-hidden flex shadow-2xl" style={{ boxShadow: '0 20px 60px rgba(69,53,48,0.15)' }}>
 
-      {/* Contenedor Neumórfico Principal */}
-      <div className="relative w-full max-w-5xl min-h-[650px] bg-[#f0f2f5] rounded-[40px] shadow-[15px_15px_30px_#d1d9e6,-15px_-15px_30px_#ffffff] overflow-hidden flex flex-col lg:flex-row z-10">
+        {/* ─── Panel lateral izquierdo (vino) — visible en desktop, cambia de contenido ─── */}
+        <div
+          className="hidden lg:flex w-[42%] shrink-0 flex-col items-center justify-center p-10 text-center relative overflow-hidden transition-all duration-500"
+          style={{ background: 'linear-gradient(135deg, #7F3943 0%, #9B4652 100%)' }}
+        >
+          <div className="absolute top-[-20%] left-[-20%] w-64 h-64 rounded-full opacity-10" style={{ background: '#FAF5F0' }} />
+          <div className="absolute bottom-[-10%] right-[-10%] w-48 h-48 rounded-full opacity-10" style={{ background: '#E8635A' }} />
 
-        {/* ========================================================= */}
-        {/* 1. FORMULARIO SIGN UP (Izquierda a Derecha) */}
-        {/* ========================================================= */}
-        <div className={`absolute top-0 left-0 w-full lg:w-1/2 h-full flex flex-col justify-center px-8 sm:px-16 transition-all duration-700 ease-in-out ${isSignUp ? 'translate-x-0 lg:translate-x-full opacity-100 z-20' : '-translate-x-[50%] lg:translate-x-0 opacity-0 z-0 pointer-events-none'}`}>
-          <form onSubmit={handleRegister} className="flex flex-col items-center text-center w-full max-w-sm mx-auto space-y-5">
-            <h2 className="text-3xl sm:text-4xl font-black text-[#2d3e50] mb-2 tracking-tight">Crear Cuenta</h2>
-
-            <div className="flex gap-4 mb-2">
-              <NeuSocialBtn><FacebookIcon className="w-5 h-5" /></NeuSocialBtn>
-              <NeuSocialBtn><LinkedinIcon className="w-5 h-5" /></NeuSocialBtn>
-              <NeuSocialBtn><XIcon className="w-5 h-5" /></NeuSocialBtn>
-            </div>
-
-            <span className="text-[10px] font-bold text-[#2d3e50]/50 tracking-widest uppercase mb-2">O inicia sesión</span>
-
-            {(error && isSignUp) && <p className="text-red-500 text-sm font-bold w-full">{error}</p>}
-            {(success && isSignUp) && <p className="text-emerald-500 text-sm font-bold w-full">{success}</p>}
-
-            <div className="flex gap-4 w-full">
-              <NeuInput placeholder="Nombre" value={regNombre} onChange={(e) => setRegNombre(e.target.value)} required disabled={isLoading} />
-              <NeuInput placeholder="Apellidos" value={regApellidos} onChange={(e) => setRegApellidos(e.target.value)} required disabled={isLoading} />
-            </div>
-            <NeuInput type="text" placeholder="Usuario" value={regUsername} onChange={(e) => setRegUsername(e.target.value)} required disabled={isLoading} />
-            <NeuInput type="password" placeholder="Contraseña" value={regPassword} onChange={(e) => setRegPassword(e.target.value)} required disabled={isLoading} />
-
-            <div className="pt-4">
-              <NeuButton type="submit" disabled={isLoading} isLoading={isLoading}>REGISTRARSE</NeuButton>
-            </div>
-
-            {/* Enlace móvil para cambiar a Login */}
-            <p className="lg:hidden mt-6 text-sm font-medium text-[#2d3e50]/60">
-              ¿Ya tienes cuenta? <button type="button" onClick={() => toggleMode(false)} className="text-[#1877F2] font-bold underline decoration-2 underline-offset-4">Inicia Sesión</button>
-            </p>
-          </form>
-        </div>
-
-        {/* ========================================================= */}
-        {/* 2. FORMULARIO SIGN IN (Izquierda) */}
-        {/* ========================================================= */}
-        <div className={`absolute top-0 left-0 w-full lg:w-1/2 h-full flex flex-col justify-center px-8 sm:px-16 transition-all duration-700 ease-in-out z-10 ${isSignUp ? 'translate-x-[50%] lg:translate-x-full opacity-0 pointer-events-none' : 'translate-x-0 opacity-100'}`}>
-          <form onSubmit={handleLogin} className="flex flex-col items-center text-center w-full max-w-sm mx-auto space-y-5">
-            <h2 className="text-3xl sm:text-4xl font-black text-[#2d3e50] mb-2 tracking-tight">Iniciar Sesión</h2>
-
-            <div className="flex gap-4 mb-2">
-              <NeuSocialBtn><FacebookIcon className="w-5 h-5" /></NeuSocialBtn>
-              <NeuSocialBtn><LinkedinIcon className="w-5 h-5" /></NeuSocialBtn>
-              <NeuSocialBtn><XIcon className="w-5 h-5" /></NeuSocialBtn>
-            </div>
-
-            <span className="text-[10px] font-bold text-[#2d3e50]/50 tracking-widest uppercase mb-2">O registrate por primera vez</span>
-
-            {(error && !isSignUp) && <p className="text-red-500 text-sm font-bold w-full">{error}</p>}
-
-            <NeuInput type="text" placeholder="Usuario" value={username} onChange={(e) => setUsername(e.target.value)} required disabled={isLoading} />
-            <NeuInput type="password" placeholder="Contraseña" value={password} onChange={(e) => setPassword(e.target.value)} required disabled={isLoading} />
-
-            <button type="button" className="text-sm font-semibold text-[#2d3e50]/70 hover:text-[#1877F2] transition-colors border-b-2 border-transparent hover:border-[#1877F2] pb-0.5">
-              ¿Olvidaste tu contraseña?
-            </button>
-
-            <div className="pt-2">
-              <NeuButton type="submit" disabled={isLoading} isLoading={isLoading}>INGRESAR</NeuButton>
-            </div>
-
-            {/* Enlace móvil para cambiar a Registro */}
-            <p className="lg:hidden mt-6 text-sm font-medium text-[#2d3e50]/60">
-              ¿No tienes cuenta? <button type="button" onClick={() => toggleMode(true)} className="text-[#1877F2] font-bold underline decoration-2 underline-offset-4">Regístrate</button>
-            </p>
-          </form>
-        </div>
-
-        {/* ========================================================= */}
-        {/* 3. PANEL SUPERPUESTO (Pickled Bluewood) - Solo visible en Desktop */}
-        {/* ========================================================= */}
-        <div className={`hidden lg:block absolute top-0 left-1/2 w-1/2 h-full overflow-hidden transition-transform duration-700 ease-in-out z-50 ${isSignUp ? '-translate-x-full' : 'translate-x-0'}`}>
-          <div className={`absolute top-0 left-[-100%] w-[200%] h-full bg-[#2d3e50] transition-transform duration-700 ease-in-out ${isSignUp ? 'translate-x-1/2' : 'translate-x-0'} shadow-[inset_10px_0_30px_rgba(0,0,0,0.3)]`}>
-
-            {/* Detalles decorativos en el panel */}
-            <div className="absolute top-[-20%] left-[-10%] w-[500px] h-[500px] rounded-full border-[1px] border-white/5 opacity-50" />
-            <div className="absolute bottom-[-20%] right-[-10%] w-[400px] h-[400px] rounded-full border-[1px] border-white/5 opacity-50" />
-
-            {/* Contenido Izquierdo (Para ir a Login) */}
-            <div className={`absolute top-0 left-0 w-1/2 h-full flex flex-col items-center justify-center p-16 text-center transition-transform duration-700 ease-in-out ${isSignUp ? 'translate-x-0' : '-translate-x-[20%]'}`}>
-              <h2 className="text-4xl font-black text-white mb-6 tracking-tight">¡Bienvenido de Nuevo!</h2>
-              <p className="text-[#e6e9f0]/70 mb-10 font-medium text-lg leading-relaxed">
-                Para mantenerte conectado, por favor inicia sesión con tu cuenta personal.
-              </p>
-              <GhostButton onClick={() => toggleMode(false)}>INGRESAR</GhostButton>
-            </div>
-
-            {/* Contenido Derecho (Para ir a Registro) */}
-            <div className={`absolute top-0 right-0 w-1/2 h-full flex flex-col items-center justify-center p-16 text-center transition-transform duration-700 ease-in-out ${isSignUp ? 'translate-x-[20%]' : 'translate-x-0'}`}>
-              <h2 className="text-4xl font-black text-white mb-6 tracking-tight">¡Hola, Amigo!</h2>
-              <p className="text-[#e6e9f0]/70 mb-10 font-medium text-lg leading-relaxed">
-                Ingresa tus datos personales y comienza tu experiencia con MatVic.
-              </p>
-              <GhostButton onClick={() => toggleMode(true)}>REGISTRARSE</GhostButton>
-            </div>
-
+          {/* Logo */}
+          <div className="mb-6 w-16 h-16 rounded-2xl bg-white/20 flex items-center justify-center">
+            <Smartphone className="h-8 w-8 text-white" />
           </div>
+
+          {!isSignUp ? (
+            <>
+              <h2 className="text-2xl font-extrabold text-white mb-3">¿Primera vez aquí?</h2>
+              <p className="text-white/70 text-sm mb-8 leading-relaxed">Regístrate y accede a precios exclusivos, seguimiento de pedidos y mucho más.</p>
+              <button
+                onClick={() => toggleMode(true)}
+                className="font-bold px-8 py-3 rounded-full border-2 border-white text-white transition-all hover:bg-white text-sm"
+                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = '#7F3943'; }}
+                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = 'white'; }}
+              >
+                Registrarse
+              </button>
+            </>
+          ) : (
+            <>
+              <h2 className="text-2xl font-extrabold text-white mb-3">¿Ya tienes cuenta?</h2>
+              <p className="text-white/70 text-sm mb-8 leading-relaxed">Inicia sesión y retoma donde lo dejaste.</p>
+              <button
+                onClick={() => toggleMode(false)}
+                className="font-bold px-8 py-3 rounded-full border-2 border-white text-white transition-all hover:bg-white text-sm"
+                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = '#7F3943'; }}
+                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = 'white'; }}
+              >
+                Iniciar sesión
+              </button>
+            </>
+          )}
         </div>
 
+        {/* ─── Área de formularios ─────────────────────────────────────── */}
+        <div className="flex-1 flex flex-col justify-center px-8 sm:px-12 py-10 relative overflow-hidden">
+
+          {/* ── LOGIN ── */}
+          <div className={`absolute inset-0 flex flex-col justify-center px-8 sm:px-12 py-10 transition-all duration-500 ${isSignUp ? 'opacity-0 translate-x-8 pointer-events-none' : 'opacity-100 translate-x-0'}`}>
+            <form onSubmit={handleLogin} className="space-y-5 max-w-sm w-full mx-auto">
+              {/* Logo móvil */}
+              <div className="flex flex-col items-center mb-4 lg:hidden">
+                <div className="w-12 h-12 rounded-2xl flex items-center justify-center mb-2" style={{ background: 'var(--primary)' }}>
+                  <Smartphone className="h-6 w-6 text-white" />
+                </div>
+              </div>
+
+              <div className="text-center mb-6">
+                <h2 className="text-2xl font-extrabold mb-1" style={{ color: 'var(--text)' }}>Bienvenido de vuelta</h2>
+                <p className="text-sm" style={{ color: 'var(--text-muted)' }}>Ingresa a tu cuenta MATVIC</p>
+              </div>
+
+              {/* Social */}
+              <div className="flex gap-3">
+                <SocialBtn><FacebookIcon className="w-4 h-4" /> Facebook</SocialBtn>
+                <SocialBtn><XIcon className="w-4 h-4" /> Twitter</SocialBtn>
+              </div>
+
+              <div className="flex items-center gap-3">
+                <div className="flex-1 h-px" style={{ background: 'var(--border)' }} />
+                <span className="text-xs font-medium" style={{ color: 'var(--text-muted)' }}>o continúa con email</span>
+                <div className="flex-1 h-px" style={{ background: 'var(--border)' }} />
+              </div>
+
+              {error && !isSignUp && (
+                <p className="text-sm font-semibold text-center py-2 px-4 rounded-xl" style={{ background: 'rgba(217,83,79,0.08)', color: 'var(--error)' }}>{error}</p>
+              )}
+
+              <MvInput
+                type="text"
+                placeholder="Usuario"
+                value={username}
+                onChange={e => setUsername(e.target.value)}
+                required
+                disabled={isLoading}
+              />
+              <MvInput
+                type={showPwd ? "text" : "password"}
+                placeholder="Contraseña"
+                value={password}
+                onChange={e => setPassword(e.target.value)}
+                required
+                disabled={isLoading}
+                rightElement={
+                  <button type="button" onClick={() => setShowPwd(!showPwd)} style={{ color: 'var(--text-muted)' }}>
+                    {showPwd ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                }
+              />
+
+              <div className="text-right">
+                <button type="button" className="text-sm font-medium transition-colors" style={{ color: 'var(--text-muted)' }}
+                  onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = 'var(--primary)'; }}
+                  onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = 'var(--text-muted)'; }}
+                >
+                  ¿Olvidaste tu contraseña?
+                </button>
+              </div>
+
+              <button
+                type="submit"
+                disabled={isLoading}
+                className="w-full py-3.5 rounded-xl font-bold text-white flex items-center justify-center gap-2 transition-all disabled:opacity-70"
+                style={{ background: 'var(--primary)', boxShadow: '0 4px 16px rgba(232,99,90,0.40)' }}
+                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'var(--primary-hover)'; }}
+                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'var(--primary)'; }}
+              >
+                {isLoading && <Loader2 className="h-4 w-4 animate-spin" />}
+                Ingresar →
+              </button>
+
+              <p className="text-center text-sm lg:hidden" style={{ color: 'var(--text-muted)' }}>
+                ¿No tienes cuenta?{' '}
+                <button type="button" onClick={() => toggleMode(true)} className="font-bold" style={{ color: 'var(--primary)' }}>Regístrate</button>
+              </p>
+            </form>
+          </div>
+
+          {/* ── REGISTRO ── */}
+          <div className={`absolute inset-0 flex flex-col justify-center px-8 sm:px-12 py-10 transition-all duration-500 ${isSignUp ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-8 pointer-events-none'}`}>
+            <form onSubmit={handleRegister} className="space-y-4 max-w-sm w-full mx-auto">
+              {/* Logo móvil */}
+              <div className="flex flex-col items-center mb-2 lg:hidden">
+                <div className="w-12 h-12 rounded-2xl flex items-center justify-center mb-2" style={{ background: 'var(--primary)' }}>
+                  <Smartphone className="h-6 w-6 text-white" />
+                </div>
+              </div>
+
+              <div className="text-center mb-4">
+                <h2 className="text-2xl font-extrabold mb-1" style={{ color: 'var(--text)' }}>Crear cuenta</h2>
+                <p className="text-sm" style={{ color: 'var(--text-muted)' }}>Únete a la familia MATVIC</p>
+              </div>
+
+              {/* Social */}
+              <div className="flex gap-3">
+                <SocialBtn><FacebookIcon className="w-4 h-4" /> Facebook</SocialBtn>
+                <SocialBtn><XIcon className="w-4 h-4" /> Twitter</SocialBtn>
+              </div>
+
+              <div className="flex items-center gap-3">
+                <div className="flex-1 h-px" style={{ background: 'var(--border)' }} />
+                <span className="text-xs font-medium" style={{ color: 'var(--text-muted)' }}>o continúa con email</span>
+                <div className="flex-1 h-px" style={{ background: 'var(--border)' }} />
+              </div>
+
+              {error && isSignUp && (
+                <p className="text-sm font-semibold text-center py-2 px-4 rounded-xl" style={{ background: 'rgba(217,83,79,0.08)', color: 'var(--error)' }}>{error}</p>
+              )}
+              {success && isSignUp && (
+                <p className="text-sm font-semibold text-center py-2 px-4 rounded-xl" style={{ background: 'rgba(60,177,113,0.08)', color: 'var(--success)' }}>{success}</p>
+              )}
+
+              <div className="grid grid-cols-2 gap-3">
+                <MvInput placeholder="Nombre" value={regNombre} onChange={e => setRegNombre(e.target.value)} required disabled={isLoading} />
+                <MvInput placeholder="Apellidos" value={regApellidos} onChange={e => setRegApellidos(e.target.value)} required disabled={isLoading} />
+              </div>
+              <MvInput placeholder="Usuario" value={regUsername} onChange={e => setRegUsername(e.target.value)} required disabled={isLoading} />
+              <MvInput
+                type={showRegPwd ? "text" : "password"}
+                placeholder="Contraseña"
+                value={regPassword}
+                onChange={e => setRegPassword(e.target.value)}
+                required
+                disabled={isLoading}
+                rightElement={
+                  <button type="button" onClick={() => setShowRegPwd(!showRegPwd)} style={{ color: 'var(--text-muted)' }}>
+                    {showRegPwd ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                }
+              />
+
+              <button
+                type="submit"
+                disabled={isLoading}
+                className="w-full py-3.5 rounded-xl font-bold text-white flex items-center justify-center gap-2 transition-all disabled:opacity-70"
+                style={{ background: 'var(--primary)', boxShadow: '0 4px 16px rgba(232,99,90,0.40)' }}
+                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'var(--primary-hover)'; }}
+                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'var(--primary)'; }}
+              >
+                {isLoading && <Loader2 className="h-4 w-4 animate-spin" />}
+                Crear cuenta →
+              </button>
+
+              <p className="text-center text-sm lg:hidden" style={{ color: 'var(--text-muted)' }}>
+                ¿Ya tienes cuenta?{' '}
+                <button type="button" onClick={() => toggleMode(false)} className="font-bold" style={{ color: 'var(--primary)' }}>Inicia sesión</button>
+              </p>
+            </form>
+          </div>
+
+        </div>
       </div>
     </div>
   );

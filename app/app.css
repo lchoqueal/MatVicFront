@@ -1,135 +1,92 @@
 @import "tailwindcss";
 
 /* ══════════════════════════════════════════════════════════════
-   VARIABLES CSS — Modo claro (base) y Modo oscuro
+   PALETA MATVIC — Cálida / Vino / Coral
    ══════════════════════════════════════════════════════════════ */
 :root {
-  /* Fondo */
-  --bg-canvas:      hsl(215, 30%, 96%);
-  --bg-surface:     hsl(0, 0%, 100%);
-  --bg-surface-2:   hsl(215, 30%, 98%);
-  /* Sidebar — FIJO, no cambia con el tema */
-  --bg-sidebar:     hsl(222, 35%, 8%);
-  --bg-sidebar-item:hsl(222, 35%, 14%);
-  --bg-muted:       hsl(215, 25%, 93%);
+  /* Fondos */
+  --bg:              #FAF5F0;
+  --card:            #F0E9DF;
+  --bg-surface:      #FFFFFF;
+
+  /* Marca */
+  --brand:           #B3969A;
+  --sidebar:         #7F3943;
+  --sidebar-item:    rgba(255,255,255,0.10);
+  --sidebar-active:  rgba(232,99,90,0.20);
+
+  /* Botones */
+  --primary:         #E8635A;
+  --primary-hover:   #d45047;
+  --primary-light:   rgba(232,99,90,0.12);
 
   /* Texto */
-  --text-primary:   hsl(208, 43%, 10%);
-  --text-secondary: hsl(210, 15%, 45%);
-  --text-muted:     hsl(210, 12%, 62%);
-  /* Sidebar — FIJO, no cambia con el tema */
-  --text-sidebar:   hsl(215, 22%, 70%);
-  --text-sidebar-active: hsl(0, 0%, 100%);
+  --text:            #453530;
+  --text-muted:      #9A8880;
 
   /* Bordes */
-  --border-main:    hsl(215, 25%, 88%);
-  --border-subtle:  hsl(215, 25%, 94%);
-  /* Sidebar siempre oscuro — borde fijo que no cambia con el tema */
-  --border-sidebar: rgba(255, 255, 255, 0.08);
+  --border:          #DDD4CC;
 
-  /* Acento principal (pickled-bluewood-600) */
-  --accent:         hsl(210, 28%, 37%);
-  --accent-light:   hsl(210, 32%, 55%);
-  --accent-lighter: hsl(214, 47%, 87%);
-  --accent-dark:    hsl(210, 29%, 29%);
+  /* Estados */
+  --success:         #3CB371;
+  --warning:         #F4B740;
+  --error:           #D9534F;
 
   /* Sombras */
-  --shadow-card:    0 1px 3px 0 rgba(0,0,0,.06), 0 1px 2px -1px rgba(0,0,0,.04);
-  --shadow-lg:      0 10px 25px -5px rgba(0,0,0,.08), 0 4px 10px -5px rgba(0,0,0,.06);
+  --shadow-sm:       0 1px 3px rgba(69,53,48,.08);
+  --shadow-md:       0 4px 12px rgba(69,53,48,.10);
+  --shadow-lg:       0 10px 30px rgba(69,53,48,.12);
 }
 
-html.dark {
-  /* Fondo */
-  --bg-canvas:      hsl(222, 25%, 9%);
-  --bg-surface:     hsl(220, 25%, 13%);
-  --bg-surface-2:   hsl(220, 25%, 17%);
-  /* Sidebar — FIJO, idéntico al modo claro */
-  --bg-sidebar:     hsl(222, 35%, 8%);
-  --bg-sidebar-item:hsl(222, 35%, 14%);
-  --bg-muted:       hsl(220, 25%, 20%);
-
-  /* Texto */
-  --text-primary:   hsl(215, 30%, 93%);
-  --text-secondary: hsl(215, 15%, 65%);
-  --text-muted:     hsl(215, 12%, 45%);
-  /* Sidebar — FIJO, idéntico al modo claro */
-  --text-sidebar:   hsl(215, 22%, 70%);
-  --text-sidebar-active: hsl(0, 0%, 100%);
-
-  /* Bordes */
-  --border-main:    hsl(220, 20%, 22%);
-  --border-subtle:  hsl(220, 20%, 18%);
-  --border-sidebar: rgba(255, 255, 255, 0.08);
-
-  /* Sombras oscuras */
-  --shadow-card:    0 1px 3px 0 rgba(0,0,0,.3), 0 1px 2px -1px rgba(0,0,0,.2);
-  --shadow-lg:      0 10px 25px -5px rgba(0,0,0,.4), 0 4px 10px -5px rgba(0,0,0,.3);
-}
-
-/* ══════════════════════════════════════════════════════════════
-   PALETA PICKLED-BLUEWOOD (sin cambios)
-   ══════════════════════════════════════════════════════════════ */
+/* ── Utilidades de paleta ─────────────────────────────────────── */
 @layer utilities {
-  /* ── BACKGROUND ─────────────────────────────────────────────── */
-  .bg-pickled-bluewood-50  { background-color: hsl(215, 46%, 95%); }
-  .bg-pickled-bluewood-100 { background-color: hsl(214, 47%, 87%); }
-  .bg-pickled-bluewood-200 { background-color: hsl(212, 48%, 76%); }
-  .bg-pickled-bluewood-300 { background-color: hsl(210, 48%, 65%); }
-  .bg-pickled-bluewood-400 { background-color: hsl(210, 32%, 55%); }
-  .bg-pickled-bluewood-500 { background-color: hsl(210, 27%, 45%); }
-  .bg-pickled-bluewood-600 { background-color: hsl(210, 28%, 37%); }
-  .bg-pickled-bluewood-700 { background-color: hsl(210, 29%, 29%); }
-  .bg-pickled-bluewood-800 { background-color: hsl(208, 43%,  7%); }
-  .bg-pickled-bluewood-900 { background-color: hsl(208, 50%,  4%); }
+  /* Backgrounds */
+  .bg-mv-bg        { background-color: var(--bg); }
+  .bg-mv-card      { background-color: var(--card); }
+  .bg-mv-sidebar   { background-color: var(--sidebar); }
+  .bg-mv-primary   { background-color: var(--primary); }
+  .bg-mv-primary-light { background-color: var(--primary-light); }
+  .bg-mv-success   { background-color: var(--success); }
+  .bg-mv-warning   { background-color: var(--warning); }
+  .bg-mv-error     { background-color: var(--error); }
 
-  /* Hover backgrounds */
-  .hover\:bg-pickled-bluewood-50:hover  { background-color: hsl(215, 46%, 95%); }
-  .hover\:bg-pickled-bluewood-100:hover { background-color: hsl(214, 47%, 87%); }
-  .hover\:bg-pickled-bluewood-700:hover { background-color: hsl(210, 29%, 29%); }
+  /* Text */
+  .text-mv-text    { color: var(--text); }
+  .text-mv-muted   { color: var(--text-muted); }
+  .text-mv-primary { color: var(--primary); }
+  .text-mv-sidebar { color: var(--sidebar); }
+  .text-mv-brand   { color: var(--brand); }
+  .text-mv-success { color: var(--success); }
+  .text-mv-warning { color: var(--warning); }
+  .text-mv-error   { color: var(--error); }
 
-  /* ── TEXT ────────────────────────────────────────────────────── */
-  .text-pickled-bluewood-400 { color: hsl(210, 32%, 55%); }
-  .text-pickled-bluewood-500 { color: hsl(210, 27%, 45%); }
-  .text-pickled-bluewood-600 { color: hsl(210, 28%, 37%); }
-  .text-pickled-bluewood-700 { color: hsl(210, 29%, 29%); }
-  .text-pickled-bluewood-800 { color: hsl(208, 43%,  7%); }
+  /* Border */
+  .border-mv       { border-color: var(--border); }
+  .border-mv-primary { border-color: var(--primary); }
+  .border-mv-sidebar { border-color: var(--sidebar); }
 
-  /* ── BORDER ──────────────────────────────────────────────────── */
-  .border-pickled-bluewood-100 { border-color: hsl(214, 47%, 87%); }
-  .border-pickled-bluewood-200 { border-color: hsl(212, 48%, 76%); }
-  .border-pickled-bluewood-700 { border-color: hsl(210, 29%, 29%); }
+  /* Hover overrides */
+  .hover\:bg-mv-primary:hover { background-color: var(--primary-hover); }
 
-  /* ── RING / FOCUS ────────────────────────────────────────────── */
-  .ring-pickled-bluewood-600       { --tw-ring-color: hsl(210, 28%, 37%); }
-  .focus\:ring-pickled-bluewood-600:focus { --tw-ring-color: hsl(210, 28%, 37%); }
+  /* Shadows */
+  .shadow-mv-sm    { box-shadow: var(--shadow-sm); }
+  .shadow-mv-md    { box-shadow: var(--shadow-md); }
+  .shadow-mv-lg    { box-shadow: var(--shadow-lg); }
+}
 
-  /* ── DIVIDE ──────────────────────────────────────────────────── */
-  .divide-pickled-bluewood-100 > * + * { border-color: hsl(214, 47%, 87%); }
+/* ── Estilos globales base ────────────────────────────────────── */
+body {
+  background-color: var(--bg);
+  color: var(--text);
+  font-family: 'Inter', system-ui, sans-serif;
+}
 
-  /* ── GRADIENT stops ─────────────────────────────────────────── */
-  .from-pickled-bluewood-900\/50 { --tw-gradient-from: hsl(208, 50%, 4% / 0.5); }
-  .via-pickled-bluewood-800\/40  { --tw-gradient-via:  hsl(208, 43%, 7% / 0.4); }
-  .to-pickled-bluewood-900\/50   { --tw-gradient-to:   hsl(208, 50%, 4% / 0.5); }
-  .to-pickled-bluewood-600       { --tw-gradient-to:   hsl(210, 28%, 37%); }
-  .hover\:to-pickled-bluewood-700:hover { --tw-gradient-to: hsl(210, 29%, 29%); }
+/* Scrollbar oculta para carruseles de filtros */
+.hide-scrollbar::-webkit-scrollbar { display: none; }
+.hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-  /* ── TOKENS DINÁMICOS (CSS vars) ────────────────────────────── */
-  .bg-canvas    { background-color: var(--bg-canvas); }
-  .bg-surface   { background-color: var(--bg-surface); }
-  .bg-surface-2 { background-color: var(--bg-surface-2); }
-  .bg-sidebar   { background-color: var(--bg-sidebar); }
-  .bg-sidebar-item { background-color: var(--bg-sidebar-item); }
-  .bg-muted     { background-color: var(--bg-muted); }
-
-  .text-primary   { color: var(--text-primary); }
-  .text-secondary { color: var(--text-secondary); }
-  .text-muted-token { color: var(--text-muted); }
-  .text-sidebar-t { color: var(--text-sidebar); }
-  .text-sidebar-active { color: var(--text-sidebar-active); }
-
-  .border-main   { border-color: var(--border-main); }
-  .border-subtle { border-color: var(--border-subtle); }
-
-  .shadow-card { box-shadow: var(--shadow-card); }
-  .shadow-lg-token { box-shadow: var(--shadow-lg); }
+/* Input focus ring con paleta nueva */
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(232,99,90,0.25);
 }
