@@ -11,6 +11,7 @@ import {
   Sun,
   Moon,
   Users,
+  UserCog,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Link, Outlet, useLocation, useNavigate, Navigate } from "react-router";
@@ -24,6 +25,7 @@ const adminMenuItems = [
   { id: "inventory", label: "Inventario", icon: Package,       path: "/admin/inventory" },
   { id: "sales",     label: "Ventas",     icon: ShoppingCart,  path: "/admin/sales" },
   { id: "clientes",  label: "Clientes",   icon: Users,         path: "/admin/clientes" },
+  { id: "empleados", label: "Personal",   icon: UserCog,       path: "/admin/empleados" },
 ];
 
 // Menú limitado para empleado
