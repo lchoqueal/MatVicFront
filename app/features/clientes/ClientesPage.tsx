@@ -1,5 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Package, ShoppingCart, Clock, CheckCircle, XCircle, Truck, Search, Eye } from "lucide-react";
+import { getSalesReport } from "~/core/api/reports.api";
+import type { Boleta } from "~/features/dashboard/types";
 
 // ── Tipos ──────────────────────────────────────────────────────────────────────
 interface Pedido {
@@ -13,18 +15,6 @@ interface Pedido {
   fecha: string;
 }
 
-// ── Datos de ejemplo (se reemplazarán con la API cuando esté disponible) ───────
-const PEDIDOS_DEMO: Pedido[] = [
-  { id: "#ORD-2401", cliente: "María García",    email: "maria@email.com",  producto: "iPhone 15 Pro",          monto: 3299, metodo: "Yape",    estado: "En camino",  fecha: "12 Jul" },
-  { id: "#ORD-2400", cliente: "Carlos López",    email: "carlos@email.com", producto: "Samsung Galaxy S24",      monto: 2799, metodo: "Tarjeta", estado: "Pendiente",  fecha: "12 Jul" },
-  { id: "#ORD-2399", cliente: "Ana Torres",      email: "ana@email.com",    producto: "Auriculares BT Pro",      monto: 199,  metodo: "Efectivo",estado: "Entregado",  fecha: "11 Jul" },
-  { id: "#ORD-2398", cliente: "Luis Méndez",     email: "luis@email.com",   producto: "Xiaomi 14 Ultra",         monto: 2199, metodo: "Plin",    estado: "Cancelado",  fecha: "11 Jul" },
-  { id: "#ORD-2397", cliente: "Rosa Sánchez",    email: "rosa@email.com",   producto: "Cargador USB-C 65W",      monto: 89,   metodo: "Yape",    estado: "Entregado",  fecha: "10 Jul" },
-  { id: "#ORD-2396", cliente: "Jorge Ramírez",   email: "jorge@email.com",  producto: "Funda Premium iPhone 15", monto: 49,   metodo: "Tarjeta", estado: "Entregado",  fecha: "10 Jul" },
-  { id: "#ORD-2395", cliente: "Lucia Flores",    email: "lucia@email.com",  producto: "Samsung Galaxy A55",      monto: 1299, metodo: "Efectivo",estado: "En camino",  fecha: "9 Jul"  },
-  { id: "#ORD-2394", cliente: "Tomás Herrera",   email: "tomas@email.com",  producto: "Power Bank 20000mAh",     monto: 149,  metodo: "Yape",    estado: "Pendiente",  fecha: "9 Jul"  },
-];
-
 type EstadoFilter = "Todos" | "En camino" | "Entregado" | "Pendiente" | "Cancelado";
 
 const ESTADO_CONFIG = {
@@ -34,7 +24,28 @@ const ESTADO_CONFIG = {
   "Cancelado":  { color: '#D9534F', bg: 'rgba(217,83,79,0.12)',  icon: XCircle },
 };
 
-const KPI = ({ label, value, icon: Icon, color }: { label: string; value: number; icon: React.ElementType; color: string }) => (
+function mapEstado(estado: string): "En camino" | "Entregado" | "Pendiente" | "Cancelado" {
+  const e = estado?.toLowerCase() || "";
+  if (e.includes("pagada") || e.includes("entregado") || e.includes("completada")) return "Entregado";
+  if (e.includes("anulada") || e.includes("cancelado")) return "Cancelado";
+  if (e.includes("camino")) return "En camino";
+  return "Pendiente";
+}
+
+function boletaToPedido(b: Boleta): Pedido {
+  return {
+    id: `#ORD-${b.id_boleta}`,
+    cliente: `Cliente Local ${b.id_local || "Web"}`,
+    email: "-",
+    producto: "Venta General",
+    monto: Number(b.total),
+    metodo: b.metodo_pago || "Otro",
+    estado: mapEstado(b.estado_boleta),
+    fecha: new Date(b.fecha_emision).toLocaleDateString("es-CL", { day: "2-digit", month: "short", year: "numeric" })
+  };
+}
+
+const KPI = ({ label, value, icon: Icon, color }: { label: string; value: number | string; icon: React.ElementType; color: string }) => (
   <div className="bg-white rounded-2xl p-5" style={{ border: '1px solid var(--border)', boxShadow: 'var(--shadow-sm)' }}>
     <div className="flex items-start justify-between mb-3">
       <p className="text-[10px] font-bold uppercase tracking-widest" style={{ color: 'var(--text-muted)' }}>{label}</p>
@@ -50,8 +61,29 @@ export function ClientesPage() {
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<EstadoFilter>("Todos");
   const [selected, setSelected] = useState<Pedido | null>(null);
+  const [pedidos, setPedidos] = useState<Pedido[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const filtered = PEDIDOS_DEMO.filter(p => {
+  useEffect(() => {
+    async function load() {
+      setIsLoading(true);
+      try {
+        const hoy = new Date();
+        const inicio = new Date(hoy.getFullYear(), hoy.getMonth() - 3, 1).toISOString().split("T")[0];
+        const fin = new Date(hoy.getFullYear(), hoy.getMonth() + 1, 0).toISOString().split("T")[0];
+        const res = await getSalesReport(inicio, fin);
+        const mapped = (res.boletas || []).map(boletaToPedido).sort((a, b) => b.id.localeCompare(a.id));
+        setPedidos(mapped);
+      } catch (err) {
+        console.error("Error al cargar ventas", err);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    load();
+  }, []);
+
+  const filtered = pedidos.filter(p => {
     const matchSearch = p.cliente.toLowerCase().includes(search.toLowerCase()) ||
       p.id.toLowerCase().includes(search.toLowerCase()) ||
       p.producto.toLowerCase().includes(search.toLowerCase());
@@ -62,10 +94,10 @@ export function ClientesPage() {
   const filters: EstadoFilter[] = ["Todos", "En camino", "Pendiente", "Entregado", "Cancelado"];
 
   const totales = {
-    total:     PEDIDOS_DEMO.length,
-    enCamino:  PEDIDOS_DEMO.filter(p => p.estado === "En camino").length,
-    pendiente: PEDIDOS_DEMO.filter(p => p.estado === "Pendiente").length,
-    entregado: PEDIDOS_DEMO.filter(p => p.estado === "Entregado").length,
+    total:     pedidos.length,
+    enCamino:  pedidos.filter(p => p.estado === "En camino").length,
+    pendiente: pedidos.filter(p => p.estado === "Pendiente").length,
+    entregado: pedidos.filter(p => p.estado === "Entregado").length,
   };
 
   return (
@@ -195,10 +227,9 @@ export function ClientesPage() {
           )}
         </div>
 
-        {/* Paginación */}
         <div className="px-4 py-3 border-t flex items-center justify-between" style={{ borderColor: 'var(--border)' }}>
           <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
-            Mostrando <span className="font-bold" style={{ color: 'var(--text)' }}>{filtered.length}</span> de {PEDIDOS_DEMO.length} pedidos
+            Mostrando <span className="font-bold" style={{ color: 'var(--text)' }}>{filtered.length}</span> de {pedidos.length} pedidos
           </p>
           <div className="flex items-center gap-1">
             <button className="px-3 py-1.5 rounded-lg text-sm font-bold" style={{ background: 'var(--primary)', color: 'white' }}>1</button>
