@@ -41,7 +41,8 @@ interface FormState {
   dni: string;
   rol: "empleado" | "administrador";
   fechaIngreso: string;
-  horario: string;
+  horarioInicio: string;
+  horarioFin: string;
 }
 
 const EMPTY_FORM: FormState = {
@@ -51,8 +52,9 @@ const EMPTY_FORM: FormState = {
   password: "",
   dni: "",
   rol: "empleado",
-  fechaIngreso: new Date().toISOString().split('T')[0], // Hoy por defecto
-  horario: "Turno Completo",
+  fechaIngreso: new Date().toISOString().split('T')[0],
+  horarioInicio: "09:00",
+  horarioFin: "18:00",
 };
 
 // ── Componente principal ────────────────────────────────────────────────────────
@@ -98,7 +100,7 @@ export function EmpleadosPage() {
         dni:       form.dni.replace(/\./g, ""), // Enviar sin puntos al backend
         rol:       form.rol,
         fechaIngreso: form.fechaIngreso,
-        horario:   form.horario,
+        horario:   `${form.horarioInicio} a ${form.horarioFin}`,
       };
       await createEmpleado(payload);
       setSuccessMsg(`¡${form.rol === "empleado" ? "Empleado" : "Administrador"} creado exitosamente! Ya puede iniciar sesión.`);
@@ -326,18 +328,30 @@ export function EmpleadosPage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider mb-1.5" style={{ color: "var(--text-muted)" }}>Horario *</label>
-                  <input
-                    type="text"
-                    placeholder="Ej. 09:00 a 18:00"
-                    value={form.horario}
-                    onChange={e => set("horario", e.target.value)}
-                    required
-                    disabled={isSaving}
-                    style={inputStyle}
-                    onFocus={e => (e.currentTarget.style.borderColor = "var(--primary)")}
-                    onBlur={e => (e.currentTarget.style.borderColor = "var(--border)")}
-                  />
+                  <label className="block text-xs font-bold uppercase tracking-wider mb-1.5" style={{ color: "var(--text-muted)" }}>Horario de Trabajo *</label>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="time"
+                      value={form.horarioInicio}
+                      onChange={e => set("horarioInicio", e.target.value)}
+                      required
+                      disabled={isSaving}
+                      style={inputStyle}
+                      onFocus={e => (e.currentTarget.style.borderColor = "var(--primary)")}
+                      onBlur={e => (e.currentTarget.style.borderColor = "var(--border)")}
+                    />
+                    <span className="text-sm font-medium" style={{ color: "var(--text-muted)" }}>a</span>
+                    <input
+                      type="time"
+                      value={form.horarioFin}
+                      onChange={e => set("horarioFin", e.target.value)}
+                      required
+                      disabled={isSaving}
+                      style={inputStyle}
+                      onFocus={e => (e.currentTarget.style.borderColor = "var(--primary)")}
+                      onBlur={e => (e.currentTarget.style.borderColor = "var(--border)")}
+                    />
+                  </div>
                 </div>
               </div>
 
