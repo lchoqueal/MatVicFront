@@ -14,6 +14,7 @@ interface UpdateProductPayload {
   descripcion?: string;
   imagenUrl?: string;
   idCategoria: number | null;
+  idLocal: number;
 }
 
 /** Obtiene todos los productos del inventario */

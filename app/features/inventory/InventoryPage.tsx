@@ -134,7 +134,7 @@ export function InventoryPage() {
           categories={categories}
           onClose={() => setIsDialogOpen(false)}
           onSave={async (id, data, isNewCat, newCatName) => { 
-            await save(id, data, isNewCat, newCatName); 
+            await save(id, data, currentStore.id, isNewCat, newCatName); 
             setIsDialogOpen(false); 
           }}
           isSaving={isSaving}

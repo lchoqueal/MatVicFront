@@ -10,7 +10,7 @@ export interface InventoryState {
   apiError: string | null;
   isSaving: boolean;
   reload: () => Promise<void>;
-  save: (id: number | null, data: ProductFormData, isNewCategory?: boolean, newCategoryName?: string) => Promise<void>;
+  save: (id: number | null, data: ProductFormData, idLocal: number, isNewCategory?: boolean, newCategoryName?: string) => Promise<void>;
   remove: (id: number) => Promise<void>;
 }
 
@@ -39,7 +39,7 @@ export function useInventory(): InventoryState {
     }
   }, []);
 
-  const save = useCallback(async (id: number | null, data: ProductFormData, isNewCategory?: boolean, newCategoryName?: string) => {
+  const save = useCallback(async (id: number | null, data: ProductFormData, idLocal: number, isNewCategory?: boolean, newCategoryName?: string) => {
     setIsSaving(true);
     try {
       let idCatToUse = data.id_categoria ?? null;
@@ -58,6 +58,7 @@ export function useInventory(): InventoryState {
         descripcion: data.descripcion,
         imagenUrl:   data.imagen_url,
         idCategoria: idCatToUse,
+        idLocal:     idLocal,
       };
 
       if (id) {
