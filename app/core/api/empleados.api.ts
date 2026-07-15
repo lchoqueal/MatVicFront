@@ -7,6 +7,8 @@ export interface CreateEmpleadoPayload {
   password: string;
   dni: string;        // RUT chileno (enviado como 'dni' al backend)
   rol: "empleado" | "administrador";
+  fechaIngreso: string;
+  horario: string;
 }
 
 export interface EmpleadoCreado {

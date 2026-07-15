@@ -40,6 +40,8 @@ interface FormState {
   password: string;
   dni: string;
   rol: "empleado" | "administrador";
+  fechaIngreso: string;
+  horario: string;
 }
 
 const EMPTY_FORM: FormState = {
@@ -49,6 +51,8 @@ const EMPTY_FORM: FormState = {
   password: "",
   dni: "",
   rol: "empleado",
+  fechaIngreso: new Date().toISOString().split('T')[0], // Hoy por defecto
+  horario: "Turno Completo",
 };
 
 // ── Componente principal ────────────────────────────────────────────────────────
@@ -93,6 +97,8 @@ export function EmpleadosPage() {
         password:  form.password,
         dni:       form.dni.replace(/\./g, ""), // Enviar sin puntos al backend
         rol:       form.rol,
+        fechaIngreso: form.fechaIngreso,
+        horario:   form.horario,
       };
       await createEmpleado(payload);
       setSuccessMsg(`¡${form.rol === "empleado" ? "Empleado" : "Administrador"} creado exitosamente! Ya puede iniciar sesión.`);
@@ -302,6 +308,37 @@ export function EmpleadosPage() {
                   </button>
                 </div>
                 <p className="text-[11px] mt-1" style={{ color: "var(--text-muted)" }}>El empleado deberá cambiarla en su primer ingreso.</p>
+              </div>
+
+              {/* Fecha Ingreso y Horario */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider mb-1.5" style={{ color: "var(--text-muted)" }}>Fecha de Ingreso *</label>
+                  <input
+                    type="date"
+                    value={form.fechaIngreso}
+                    onChange={e => set("fechaIngreso", e.target.value)}
+                    required
+                    disabled={isSaving}
+                    style={inputStyle}
+                    onFocus={e => (e.currentTarget.style.borderColor = "var(--primary)")}
+                    onBlur={e => (e.currentTarget.style.borderColor = "var(--border)")}
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider mb-1.5" style={{ color: "var(--text-muted)" }}>Horario *</label>
+                  <input
+                    type="text"
+                    placeholder="Ej. 09:00 a 18:00"
+                    value={form.horario}
+                    onChange={e => set("horario", e.target.value)}
+                    required
+                    disabled={isSaving}
+                    style={inputStyle}
+                    onFocus={e => (e.currentTarget.style.borderColor = "var(--primary)")}
+                    onBlur={e => (e.currentTarget.style.borderColor = "var(--border)")}
+                  />
+                </div>
               </div>
 
               {/* Botón */}
