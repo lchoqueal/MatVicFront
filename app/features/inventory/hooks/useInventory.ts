@@ -53,6 +53,7 @@ export function useInventory(): InventoryState {
       const payload = {
         nombre:      data.nombre,
         precio:      data.precio_unit,
+        stock:       data.stock,
         minStock:    data.min_stock,
         descripcion: data.descripcion,
         imagenUrl:   data.imagen_url,

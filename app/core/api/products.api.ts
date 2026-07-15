@@ -9,6 +9,7 @@ interface ProductosResponse {
 interface UpdateProductPayload {
   nombre: string;
   precio: number;
+  stock: number;
   minStock: number;
   descripcion?: string;
   imagenUrl?: string;
