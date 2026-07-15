@@ -10,6 +10,8 @@ export default [
   layout("layouts/ShopLayout.tsx", [
     index("routes/home.tsx"), // El primer vistazo al entrar a la web
     route("producto/:id", "routes/_shop.product.tsx"),
+    route("pago-exitoso", "routes/pago-exitoso.tsx"),
+    route("pago-fallido", "routes/pago-fallido.tsx"),
   ]),
 
   // 3. SECCIÓN PRIVADA (Administración y Ventas Físicas)

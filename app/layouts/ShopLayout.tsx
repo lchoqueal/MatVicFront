@@ -4,6 +4,7 @@ import { ShoppingCart, User, Smartphone, LogOut, LayoutDashboard, Menu, X, Plus,
 import { useAuth } from "~/core/auth";
 import CheckoutModal from "~/components/ui/CheckoutModal";
 import { formatCLP } from "~/lib/utils";
+import { useCart } from "~/context/CartContext";
 
 export default function ShopLayout() {
   const { user, isAuthenticated, isAdmin, logout } = useAuth();
@@ -33,29 +34,7 @@ export default function ShopLayout() {
     navigate("/");
   };
 
-  // MOCK CART ITEMS FOR PREVIEW
-  const [cartItems, setCartItems] = useState([
-    { id: 1, name: "Auriculares Bluetooth Pro", price: 199990, quantity: 1, image: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500&q=80" },
-    { id: 2, name: "Cargador USB-C 65W", price: 89990, quantity: 1, image: "https://images.unsplash.com/photo-1583863788434-e58a36330cf0?w=500&q=80" },
-    { id: 3, name: "Funda Premium iPhone 15", price: 49990, quantity: 1, image: "https://images.unsplash.com/photo-1603313011101-320f26a4f6f6?w=500&q=80" }
-  ]);
-
-  const updateQuantity = (id: number, delta: number) => {
-    setCartItems(items => items.map(item => {
-      if (item.id === id) {
-        const newQ = Math.max(1, item.quantity + delta);
-        return { ...item, quantity: newQ };
-      }
-      return item;
-    }));
-  };
-
-  const removeItem = (id: number) => {
-    setCartItems(items => items.filter(item => item.id !== id));
-  };
-
-  const cartTotal = cartItems.reduce((acc, item) => acc + (item.price * item.quantity), 0);
-  const cartCount = cartItems.reduce((acc, item) => acc + item.quantity, 0);
+  const { cartItems, cartCount, cartTotal, updateQuantity, removeItem } = useCart();
 
   return (
     <div className="min-h-screen flex flex-col bg-[#f8f9fa]">

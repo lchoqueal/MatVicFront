@@ -10,6 +10,7 @@ import {
 import type { Route } from "./+types/root";
 import "./app.css";
 import { AuthProvider } from "./context/auth";
+import { CartProvider } from "./context/CartContext";
 
 export const links: Route.LinksFunction = () => [
   { rel: "icon", type: "image/png", href: "/favicon.png" },
@@ -52,7 +53,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
 export default function App() {
   return (
     <AuthProvider>
-      <Outlet />
+      <CartProvider>
+        <Outlet />
+      </CartProvider>
     </AuthProvider>
   );
 }
