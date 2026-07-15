@@ -2,6 +2,7 @@ import { api } from "~/core/api/client";
 
 export interface CreateEmpleadoPayload {
   username: string;
+  user_name?: string;
   nombre: string;
   apellidos: string;
   password: string;

@@ -94,6 +94,7 @@ export function EmpleadosPage() {
     try {
       const payload: CreateEmpleadoPayload = {
         username:  form.username.trim(),
+        user_name: form.username.trim(), // Enviamos ambos por si el backend espera user_name
         nombre:    form.nombre.trim(),
         apellidos: form.apellidos.trim(),
         password:  form.password,
