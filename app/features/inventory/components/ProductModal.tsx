@@ -1,28 +1,38 @@
 import { useState } from "react";
 import { X, Package, Loader2 } from "lucide-react";
 import type { Product, ProductFormData } from "~/features/inventory/types";
+import type { Categoria } from "~/core/api/categories.api";
 
 interface ProductModalProps {
   product: Product | null;
-  categories: string[];
+  categories: Categoria[];
   onClose: () => void;
-  onSave: (id: number, data: ProductFormData) => Promise<void>;
+  onSave: (id: number | null, data: ProductFormData, isNewCat?: boolean, newCatName?: string) => Promise<void>;
   isSaving: boolean;
 }
 
 export function ProductModal({ product, categories, onClose, onSave, isSaving }: ProductModalProps) {
+  // Encontramos el idCategoria si el producto ya tiene categoría
+  const initialCat = product?.categoria 
+    ? categories.find(c => c.nombre === product.categoria)?.id_categoria 
+    : undefined;
+
   const [formData, setFormData] = useState<ProductFormData>({
     nombre:      product?.nombre      ?? "",
     descripcion: product?.descripcion ?? "",
     categoria:   product?.categoria   ?? "",
+    id_categoria: initialCat,
     precio_unit: product?.precio_unit ?? 0,
     stock:       product?.stock       ?? 0,
     min_stock:   product?.min_stock   ?? 5,
     imagen_url:  product?.imagen_url  ?? undefined,
   });
+  
+  // Usamos categoria_select como estado local para manejar el selector
+  const [selectedCatId, setSelectedCatId] = useState<string>(initialCat ? String(initialCat) : "");
   const [newCategoryName, setNewCategoryName] = useState("");
   const [imagePreview, setImagePreview] = useState<string | undefined>(product?.imagen_url);
-  const isNewCategory = formData.categoria === "__nueva__";
+  const isNewCategory = selectedCatId === "__nueva__";
 
   const set = <K extends keyof ProductFormData>(key: K, value: ProductFormData[K]) =>
     setFormData((prev) => ({ ...prev, [key]: value }));
@@ -33,14 +43,12 @@ export function ProductModal({ product, categories, onClose, onSave, isSaving }:
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Mostrar previsualización local temporalmente
     const localReader = new FileReader();
     localReader.onloadend = () => {
       setImagePreview(localReader.result as string);
     };
     localReader.readAsDataURL(file);
 
-    // Iniciar subida a Cloudinary
     setIsUploadingImage(true);
     try {
       const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
@@ -67,13 +75,10 @@ export function ProductModal({ product, categories, onClose, onSave, isSaving }:
         throw new Error(data.error?.message || "Error al subir la imagen a Cloudinary");
       }
 
-      // Guardar la URL final en el formulario
       set("imagen_url", data.secure_url);
       setImagePreview(data.secure_url);
-      console.log("Imagen subida con éxito a Cloudinary:", data.secure_url);
     } catch (err) {
       alert(err instanceof Error ? err.message : "Error al procesar la imagen.");
-      // Limpiar preview si falla
       setImagePreview(product?.imagen_url);
     } finally {
       setIsUploadingImage(false);
@@ -82,10 +87,14 @@ export function ProductModal({ product, categories, onClose, onSave, isSaving }:
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!product) return;
-    const dataToSave = isNewCategory ? { ...formData, categoria: newCategoryName.trim() } : formData;
     if (isNewCategory && !newCategoryName.trim()) return;
-    onSave(product.id_producto, dataToSave);
+    
+    const dataToSave = { 
+      ...formData, 
+      id_categoria: isNewCategory ? undefined : Number(selectedCatId)
+    };
+    
+    onSave(product ? product.id_producto : null, dataToSave, isNewCategory, newCategoryName.trim());
   };
 
   return (
@@ -115,25 +124,25 @@ export function ProductModal({ product, categories, onClose, onSave, isSaving }:
             <label className="block text-sm font-medium mb-1.5" style={{ color: "var(--text-secondary)" }}>Nombre del producto *</label>
             <input type="text" value={formData.nombre} onChange={(e) => set("nombre", e.target.value)} required
               className="w-full px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-pickled-bluewood-600 text-sm transition-colors"
-              style={{ background: "var(--bg-surface-2)", border: "1px solid var(--border-main)", color: "var(--text-primary)" }}
+              style={{ background: "var(--card)", border: "1.5px solid var(--border)", color: "var(--text)" }}
               placeholder="Ej: Funda Silicona iPhone 15" />
           </div>
 
           {/* Categoría */}
           <div>
             <label className="block text-sm font-medium mb-1.5" style={{ color: "var(--text-secondary)" }}>Categoría *</label>
-            <select value={formData.categoria} onChange={(e) => { set("categoria", e.target.value); if (e.target.value !== "__nueva__") setNewCategoryName(""); }}
+            <select value={selectedCatId} onChange={(e) => { setSelectedCatId(e.target.value); if (e.target.value !== "__nueva__") setNewCategoryName(""); }}
               required={!isNewCategory}
               className="w-full px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-pickled-bluewood-600 text-sm transition-colors"
-              style={{ background: "var(--bg-surface-2)", border: "1px solid var(--border-main)", color: "var(--text-primary)" }}>
+              style={{ background: "var(--card)", border: "1.5px solid var(--border)", color: "var(--text)" }}>
               <option value="">Selecciona una categoría</option>
-              {categories.map((c) => <option key={c} value={c}>{c}</option>)}
+              {categories.map((c) => <option key={c.id_categoria} value={c.id_categoria}>{c.nombre}</option>)}
               <option value="__nueva__">+ Nueva categoría</option>
             </select>
             {isNewCategory && (
               <input type="text" value={newCategoryName} onChange={(e) => setNewCategoryName(e.target.value)}
                 className="w-full mt-2 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-pickled-bluewood-600 text-sm"
-                style={{ background: "var(--bg-surface-2)", border: "1px solid var(--border-main)", color: "var(--text-primary)" }}
+                style={{ background: "var(--card)", border: "1.5px solid var(--border)", color: "var(--text)" }}
                 placeholder="Nombre de la nueva categoría" required autoFocus />
             )}
           </div>
@@ -144,13 +153,13 @@ export function ProductModal({ product, categories, onClose, onSave, isSaving }:
               <label className="block text-sm font-medium mb-1.5" style={{ color: "var(--text-secondary)" }}>Precio ($) *</label>
               <input type="number" min={0} step={1} value={formData.precio_unit} onChange={(e) => set("precio_unit", Number(e.target.value))} required
                 className="w-full px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-pickled-bluewood-600 text-sm"
-                style={{ background: "var(--bg-surface-2)", border: "1px solid var(--border-main)", color: "var(--text-primary)" }} placeholder="0" />
+                style={{ background: "var(--card)", border: "1.5px solid var(--border)", color: "var(--text)" }} placeholder="0" />
             </div>
             <div>
               <label className="block text-sm font-medium mb-1.5" style={{ color: "var(--text-secondary)" }}>Stock actual *</label>
               <input type="number" min={0} value={formData.stock} onChange={(e) => set("stock", Number(e.target.value))} required
                 className="w-full px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-pickled-bluewood-600 text-sm"
-                style={{ background: "var(--bg-surface-2)", border: "1px solid var(--border-main)", color: "var(--text-primary)" }} />
+                style={{ background: "var(--card)", border: "1.5px solid var(--border)", color: "var(--text)" }} />
             </div>
           </div>
 
@@ -159,7 +168,7 @@ export function ProductModal({ product, categories, onClose, onSave, isSaving }:
             <label className="block text-sm font-medium mb-1.5" style={{ color: "var(--text-secondary)" }}>Stock mínimo *</label>
             <input type="number" min={0} value={formData.min_stock} onChange={(e) => set("min_stock", Number(e.target.value))} required
               className="w-full px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-pickled-bluewood-600 text-sm"
-              style={{ background: "var(--bg-surface-2)", border: "1px solid var(--border-main)", color: "var(--text-primary)" }} />
+              style={{ background: "var(--card)", border: "1.5px solid var(--border)", color: "var(--text)" }} />
           </div>
 
           {/* Descripción */}
@@ -167,7 +176,7 @@ export function ProductModal({ product, categories, onClose, onSave, isSaving }:
             <label className="block text-sm font-medium mb-1.5" style={{ color: "var(--text-secondary)" }}>Descripción</label>
             <textarea value={formData.descripcion ?? ""} onChange={(e) => set("descripcion", e.target.value)} rows={2}
               className="w-full px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-pickled-bluewood-600 text-sm resize-none"
-              style={{ background: "var(--bg-surface-2)", border: "1px solid var(--border-main)", color: "var(--text-primary)" }}
+              style={{ background: "var(--card)", border: "1.5px solid var(--border)", color: "var(--text)" }}
               placeholder="Descripción breve del producto..." />
           </div>
 
@@ -184,7 +193,7 @@ export function ProductModal({ product, categories, onClose, onSave, isSaving }:
                 {imagePreview ? (
                   <img src={imagePreview} alt="Preview" className="w-20 h-20 object-cover rounded-xl" style={{ border: "1px solid var(--border-main)" }} />
                 ) : (
-                  <div className="w-20 h-20 rounded-xl border-2 border-dashed flex items-center justify-center" style={{ borderColor: "var(--border-main)", background: "var(--bg-muted)" }}>
+                  <div className="w-20 h-20 rounded-xl border-2 border-dashed flex items-center justify-center" style={{ borderColor: "var(--border)", background: "var(--card)" }}>
                     <Package className="w-6 h-6" style={{ color: "var(--text-muted)" }} />
                   </div>
                 )}
@@ -196,13 +205,14 @@ export function ProductModal({ product, categories, onClose, onSave, isSaving }:
           <div className="flex justify-end gap-3 pt-2">
             <button type="button" onClick={onClose}
               className="px-4 py-2 rounded-xl text-sm font-medium transition-colors"
-              style={{ border: "1px solid var(--border-main)", color: "var(--text-secondary)" }}
-              onMouseEnter={(e) => (e.currentTarget.style.background = "var(--bg-muted)")}
-              onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}>
+              style={{ border: "1px solid var(--border)", color: "var(--text-muted)" }}
+              onMouseEnter={(e) => (e.currentTarget.style.color = "var(--text)")}
+              onMouseLeave={(e) => (e.currentTarget.style.color = "var(--text-muted)")}>
               Cancelar
             </button>
             <button type="submit" disabled={isSaving || isUploadingImage}
-              className="flex items-center gap-2 px-4 py-2 bg-pickled-bluewood-600 text-white rounded-xl hover:bg-pickled-bluewood-700 transition-colors text-sm font-bold disabled:opacity-60">
+              className="flex items-center gap-2 px-5 py-2 text-white rounded-xl transition-colors text-sm font-bold disabled:opacity-60"
+              style={{ background: "var(--primary)" }}>
               {(isSaving || isUploadingImage) && <Loader2 className="h-4 w-4 animate-spin" />}
               {isUploadingImage ? "Subiendo Imagen..." : product ? "Actualizar" : "Agregar"} Producto
             </button>

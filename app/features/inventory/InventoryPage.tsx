@@ -33,7 +33,7 @@ function InventoryStat({ title, value, subtitle, critical = false }: {
 export function InventoryPage() {
   const { currentStore } = useOutletContext<{ currentStore: Store }>();
   const { isAdmin } = useAuth();
-  const { products, isLoading, apiError, isSaving, reload, save, remove } = useInventory();
+  const { products, categories, isLoading, apiError, isSaving, reload, save, remove } = useInventory();
 
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
@@ -42,7 +42,6 @@ export function InventoryPage() {
 
   useEffect(() => { reload(); }, [reload]);
 
-  const categories = [...new Set(products.map((p) => p.categoria).filter(Boolean))];
   const lowStockCount = products.filter((p) => p.stock <= p.min_stock).length;
   const totalStock    = products.reduce((s, p) => s + p.stock, 0);
   const valorizacion  = products.reduce((s, p) => s + Number(p.precio_unit) * p.stock, 0);
@@ -114,7 +113,7 @@ export function InventoryPage() {
               style={{ background: "var(--card)", border: "1.5px solid var(--border)", color: "var(--text)" }}
               value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
           </div>
-          <CategoryFilter categories={categories} selected={selectedCategory} onChange={setSelectedCategory} />
+          <CategoryFilter categories={categories.map(c => c.nombre)} selected={selectedCategory} onChange={setSelectedCategory} />
         </div>
       </div>
 
@@ -134,7 +133,10 @@ export function InventoryPage() {
           product={editingProduct}
           categories={categories}
           onClose={() => setIsDialogOpen(false)}
-          onSave={async (id, data) => { await save(id, data); setIsDialogOpen(false); }}
+          onSave={async (id, data, isNewCat, newCatName) => { 
+            await save(id, data, isNewCat, newCatName); 
+            setIsDialogOpen(false); 
+          }}
           isSaving={isSaving}
         />
       )}

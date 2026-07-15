@@ -29,6 +29,13 @@ export async function updateProduct(
   await api.put(`/productos/${id}`, payload);
 }
 
+/** Crea un producto */
+export async function createProduct(
+  payload: UpdateProductPayload
+): Promise<void> {
+  await api.post(`/productos`, payload);
+}
+
 /** Desactiva (elimina lógicamente) un producto */
 export async function deleteProduct(id: number): Promise<void> {
   await api.del(`/productos/${id}`);
