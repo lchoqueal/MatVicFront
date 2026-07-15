@@ -27,16 +27,57 @@ export function ProductModal({ product, categories, onClose, onSave, isSaving }:
   const set = <K extends keyof ProductFormData>(key: K, value: ProductFormData[K]) =>
     setFormData((prev) => ({ ...prev, [key]: value }));
 
-  const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
+
+  const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      const result = reader.result as string;
-      setImagePreview(result);
-      set("imagen_url", result);
+
+    // Mostrar previsualización local temporalmente
+    const localReader = new FileReader();
+    localReader.onloadend = () => {
+      setImagePreview(localReader.result as string);
     };
-    reader.readAsDataURL(file);
+    localReader.readAsDataURL(file);
+
+    // Iniciar subida a Cloudinary
+    setIsUploadingImage(true);
+    try {
+      const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
+      const uploadPreset = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET;
+
+      if (!cloudName || !uploadPreset) {
+        throw new Error("Variables VITE_CLOUDINARY_CLOUD_NAME o VITE_CLOUDINARY_UPLOAD_PRESET ausentes en el .env");
+      }
+
+      const formDataUpload = new FormData();
+      formDataUpload.append("file", file);
+      formDataUpload.append("upload_preset", uploadPreset);
+
+      const response = await fetch(
+        `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
+        {
+          method: "POST",
+          body: formDataUpload,
+        }
+      );
+
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error?.message || "Error al subir la imagen a Cloudinary");
+      }
+
+      // Guardar la URL final en el formulario
+      set("imagen_url", data.secure_url);
+      setImagePreview(data.secure_url);
+      console.log("Imagen subida con éxito a Cloudinary:", data.secure_url);
+    } catch (err) {
+      alert(err instanceof Error ? err.message : "Error al procesar la imagen.");
+      // Limpiar preview si falla
+      setImagePreview(product?.imagen_url);
+    } finally {
+      setIsUploadingImage(false);
+    }
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -160,10 +201,10 @@ export function ProductModal({ product, categories, onClose, onSave, isSaving }:
               onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}>
               Cancelar
             </button>
-            <button type="submit" disabled={isSaving}
+            <button type="submit" disabled={isSaving || isUploadingImage}
               className="flex items-center gap-2 px-4 py-2 bg-pickled-bluewood-600 text-white rounded-xl hover:bg-pickled-bluewood-700 transition-colors text-sm font-bold disabled:opacity-60">
-              {isSaving && <Loader2 className="h-4 w-4 animate-spin" />}
-              {product ? "Actualizar" : "Agregar"} Producto
+              {(isSaving || isUploadingImage) && <Loader2 className="h-4 w-4 animate-spin" />}
+              {isUploadingImage ? "Subiendo Imagen..." : product ? "Actualizar" : "Agregar"} Producto
             </button>
           </div>
         </form>

@@ -4,6 +4,7 @@ import { ShoppingCart, Eye, Star, Smartphone, Search, Loader2, AlertCircle, Shie
 import { api } from "~/core/api/client";
 import type { Product } from "~/features/inventory/types";
 import { formatCLP } from "~/lib/utils";
+import { useCart } from "~/context/CartContext";
 
 interface ProductosResponse {
   cantidad: number;
@@ -14,6 +15,7 @@ type FilterCategory = 'Todos' | 'Smartphones' | 'Accesorios';
 
 export default function ShopIndex() {
   const navigate = useNavigate();
+  const { addItem } = useCart();
 
   const [productos, setProductos] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -45,8 +47,14 @@ export default function ShopIndex() {
   };
 
   const handleAgregarCarrito = (producto: Product) => {
-    // Aquí idealmente llamaríamos a un contexto o store para agregar al carrito real
-    // Por ahora, solo abrimos el modal o navegamos. (El carrito está mockeado en ShopLayout)
+    addItem({
+      id: producto.id_producto,
+      name: producto.nombre,
+      price: Number(producto.precio_unit),
+      image: producto.imagen_url ?? undefined,
+      categoria: producto.categoria ?? undefined,
+    });
+    // Abrir drawer del carrito automáticamente
     const event = new CustomEvent('openCart');
     window.dispatchEvent(event);
   };
