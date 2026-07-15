@@ -87,7 +87,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const login = async (username: string, password: string): Promise<void> => {
     const data = await api.post<LoginResponse>("/auth/login", {
-      username,
+      username: username,
+      user_name: username, // Respaldo por si el backend busca con guión bajo
       password,
     });
     persist(data.usuario, data.token);
