@@ -7,7 +7,7 @@ import { formatCLP } from "~/lib/utils";
 import { useCart } from "~/context/CartContext";
 
 export default function ShopLayout() {
-  const { user, isAuthenticated, isAdmin, logout } = useAuth();
+  const { user, isAuthenticated, isAdmin, isEmpleado, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [mounted, setMounted] = useState(false);
@@ -107,14 +107,14 @@ export default function ShopLayout() {
 
         {/* Acciones derecha */}
         <div className="hidden sm:flex items-center gap-3">
-          {isAuthenticated && isAdmin && (
+          {isAuthenticated && (isAdmin || isEmpleado) && (
             <Link
               to="/admin"
               className="flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-full transition-colors"
               style={{ background: 'var(--card)', color: 'var(--text)' }}
             >
               <LayoutDashboard className="h-3.5 w-3.5" />
-              Admin
+              Panel
             </Link>
           )}
 
@@ -195,6 +195,11 @@ export default function ShopLayout() {
           ) : (
             <div className="pt-2">
               <p className="font-bold mb-3" style={{ color: 'var(--primary)' }}>{user?.nombre ?? user?.username}</p>
+              {(isAdmin || isEmpleado) && (
+                <Link to="/admin" onClick={() => setMenuOpen(false)} className="flex items-center gap-2 font-bold mb-4" style={{ color: 'var(--text)' }}>
+                  <LayoutDashboard className="h-5 w-5" /> Ir al Panel
+                </Link>
+              )}
               <button onClick={handleLogout} className="flex items-center gap-2 font-bold" style={{ color: 'var(--error)' }}>
                 <LogOut className="h-5 w-5" /> Cerrar Sesión
               </button>
