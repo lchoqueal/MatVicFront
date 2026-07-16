@@ -275,7 +275,7 @@ export function EmpleadosPage() {
                   type="text"
                   placeholder="maria.gonzalez"
                   value={form.username}
-                  onChange={e => set("username", e.target.value.toLowerCase().replace(/\s/g, "."))}
+                  onChange={e => set("username", e.target.value.replace(/\s/g, "."))}
                   required
                   disabled={isSaving}
                   style={inputStyle}
