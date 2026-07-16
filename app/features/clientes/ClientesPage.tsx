@@ -47,7 +47,7 @@ function boletaToPedido(b: Boleta): Pedido {
 }
 
 const KPI = ({ label, value, icon: Icon, color }: { label: string; value: number | string; icon: React.ElementType; color: string }) => (
-  <div className="bg-white rounded-2xl p-5" style={{ border: '1px solid var(--border)', boxShadow: 'var(--shadow-sm)' }}>
+  <div className="rounded-2xl p-5" style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', boxShadow: 'var(--shadow-sm)' }}>
     <div className="flex items-start justify-between mb-3">
       <p className="text-[10px] font-bold uppercase tracking-widest" style={{ color: 'var(--text-muted)' }}>{label}</p>
       <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: `${color}18` }}>
@@ -121,7 +121,7 @@ export function ClientesPage() {
       </div>
 
       {/* Tabla */}
-      <div className="bg-white rounded-2xl overflow-hidden" style={{ border: '1px solid var(--border)', boxShadow: 'var(--shadow-sm)' }}>
+      <div className="rounded-2xl overflow-hidden" style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', boxShadow: 'var(--shadow-sm)' }}>
         {/* Toolbar */}
         <div className="p-4 border-b flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between" style={{ borderColor: 'var(--border)' }}>
           <div className="relative flex-1 max-w-xs">
@@ -245,7 +245,7 @@ export function ClientesPage() {
       {/* Modal detalle pedido */}
       {selected && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm" onClick={() => setSelected(null)}>
-          <div className="bg-white rounded-2xl w-full max-w-md" style={{ boxShadow: 'var(--shadow-lg)' }} onClick={e => e.stopPropagation()}>
+          <div className="rounded-2xl w-full max-w-md" style={{ background: 'var(--bg-surface)', boxShadow: 'var(--shadow-lg)' }} onClick={e => e.stopPropagation()}>
             <div className="p-5 border-b flex items-center justify-between" style={{ borderColor: 'var(--border)' }}>
               <div>
                 <h3 className="font-bold text-lg" style={{ color: 'var(--text)' }}>Detalle del Pedido</h3>

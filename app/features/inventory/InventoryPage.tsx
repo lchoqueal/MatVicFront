@@ -16,7 +16,7 @@ function InventoryStat({ title, value, subtitle, critical = false }: {
 }) {
   return (
     <div className="p-5 rounded-2xl" style={{
-      background: critical ? "rgba(217,83,79,0.06)" : "white",
+      background: critical ? "rgba(217,83,79,0.06)" : "var(--bg-surface)",
       border: `1px solid ${critical ? "rgba(217,83,79,0.25)" : "var(--border)"}`,
       boxShadow: "var(--shadow-sm)",
     }}>
@@ -104,7 +104,7 @@ export function InventoryPage() {
 
       {/* Filtros */}
       <div className="flex flex-col md:flex-row gap-4 justify-between items-center p-4 rounded-2xl"
-        style={{ background: "white", border: "1px solid var(--border)", boxShadow: "var(--shadow-sm)" }}>
+        style={{ background: "var(--bg-surface)", border: "1px solid var(--border)", boxShadow: "var(--shadow-sm)" }}>
         <div className="flex gap-3 w-full md:w-auto flex-1">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4" style={{ color: "var(--text-muted)" }} />

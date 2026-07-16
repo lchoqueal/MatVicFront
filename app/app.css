@@ -47,6 +47,53 @@
   --bg-surface-2:    #F7F1EB;
 }
 
+/* ══════════════════════════════════════════════════════════════
+   MODO OSCURO — se activa con la clase `dark` en <html>
+   ══════════════════════════════════════════════════════════════ */
+.dark {
+  /* Fondos */
+  --bg:              #1A1310;
+  --card:            #241C18;
+  --bg-surface:      #2C211C;
+
+  /* Marca (se mantiene) */
+  --brand:           #C4A0A5;
+  --sidebar:         #5E2830;
+  --sidebar-item:    rgba(255,255,255,0.07);
+  --sidebar-active:  rgba(232,99,90,0.18);
+
+  /* Botones (se mantienen) */
+  --primary:         #E8635A;
+  --primary-hover:   #d45047;
+  --primary-light:   rgba(232,99,90,0.18);
+
+  /* Texto */
+  --text:            #F0E6DF;
+  --text-muted:      #8A7A74;
+
+  /* Bordes */
+  --border:          #3D2E28;
+
+  /* Estados (se mantienen) */
+  --success:         #3CB371;
+  --warning:         #F4B740;
+  --error:           #D9534F;
+
+  /* Sombras */
+  --shadow-sm:       0 1px 3px rgba(0,0,0,0.30);
+  --shadow-md:       0 4px 12px rgba(0,0,0,0.40);
+  --shadow-lg:       0 10px 30px rgba(0,0,0,0.50);
+  --shadow-card:     0 2px 8px rgba(0,0,0,0.30);
+
+  /* Aliases */
+  --border-main:     var(--border);
+  --border-subtle:   #332520;
+  --text-primary:    var(--text);
+  --text-secondary:  var(--text-muted);
+  --bg-muted:        var(--card);
+  --bg-surface-2:    #251C18;
+}
+
 /* ── Utilidades de paleta ─────────────────────────────────────── */
 @layer utilities {
   /* Backgrounds */

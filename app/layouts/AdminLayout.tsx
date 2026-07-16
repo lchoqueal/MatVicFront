@@ -163,7 +163,7 @@ export default function AdminLayout() {
           {dark ? "Modo Día" : "Modo Noche"}
           {/* Toggle pill */}
           <div className="ml-auto w-9 h-5 rounded-full relative transition-colors duration-300" style={{ background: dark ? 'var(--primary)' : 'rgba(255,255,255,0.20)' }}>
-            <div className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform duration-300 ${dark ? 'translate-x-4' : 'translate-x-0.5'}`} />
+            <div className={`absolute top-0.5 w-4 h-4 rounded-full shadow transition-transform duration-300 ${dark ? 'translate-x-4' : 'translate-x-0.5'}`} style={{ background: 'rgba(255,255,255,0.95)' }} />
           </div>
         </button>
 
@@ -232,8 +232,8 @@ export default function AdminLayout() {
 
         {/* Top bar */}
         <header
-          className="h-[64px] px-4 lg:px-6 flex items-center justify-between shrink-0 gap-3 bg-white border-b"
-          style={{ borderColor: 'var(--border)', boxShadow: 'var(--shadow-sm)' }}
+          className="h-[64px] px-4 lg:px-6 flex items-center justify-between shrink-0 gap-3 border-b"
+          style={{ background: 'var(--bg-surface)', borderColor: 'var(--border)', boxShadow: 'var(--shadow-sm)' }}
         >
           <div className="flex items-center gap-3 min-w-0">
             <button
