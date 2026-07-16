@@ -33,8 +33,23 @@ export async function getSalesReport(
 
 /** Alertas de productos con stock bajo o agotado */
 export async function getStockAlerts(): Promise<AlertaStock[]> {
-  const data = await api.get<AlertasResponse>("/productos/alertas/stock-bajo");
-  return data.alertas;
+  try {
+    // Usa el endpoint existente /productos/stock-bajo
+    const data = await api.get<{ cantidad: number; productos: Array<{
+      id_producto: number; nombre: string; stock: number; min_stock: number; precio_unit: number;
+    }> }>("/productos/stock-bajo");
+    return (data.productos ?? []).map(p => ({
+      idProducto: p.id_producto,
+      nombre: p.nombre,
+      stockActual: p.stock,
+      stockMinimo: p.min_stock,
+      diferencia: p.min_stock - p.stock,
+      precio: p.precio_unit,
+      urgencia: p.stock === 0 ? 5 : Math.ceil((p.min_stock - p.stock) / p.min_stock * 5),
+    }));
+  } catch {
+    return [];
+  }
 }
 
 /** Resumen del inventario (totales, valorización, bajo stock) */
