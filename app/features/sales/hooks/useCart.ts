@@ -88,7 +88,7 @@ export function useCart(onSuccess?: () => void): CartState {
         await createBoleta({
           idCarrito,
           tipoVenta: "fisica",
-          metodoPago: paymentMethod as PaymentMethod,
+          metodoPago: paymentMethod.toLowerCase() as PaymentMethod,
           idEmpleado: empleadoId,
           idLocal: storeId,
         });
