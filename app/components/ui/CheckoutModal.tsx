@@ -43,6 +43,12 @@ export default function CheckoutModal({ isOpen, onClose, total }: CheckoutModalP
         return;
       }
 
+      if (user?.rol === 'administrador' || user?.rol === 'empleado') {
+        setError("Estás usando una cuenta de administrador/empleado. Para probar la tienda virtual, regístrate con una cuenta de cliente normal.");
+        setIsProcessing(false);
+        return;
+      }
+
       // Paso 1: Crear un registro de carrito en la base de datos
       const resCrearCarrito = await fetch(`${BASE_URL}/carrito`, {
         method: "POST",
