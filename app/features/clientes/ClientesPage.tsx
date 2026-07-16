@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { formatCLP } from "~/lib/utils";
 import { Package, ShoppingCart, Clock, CheckCircle, XCircle, Truck, Search, Eye } from "lucide-react";
 import { getSalesReport } from "~/core/api/reports.api";
 import type { Boleta } from "~/features/dashboard/types";
@@ -186,7 +187,7 @@ export function ClientesPage() {
                       <p className="text-sm" style={{ color: 'var(--text)' }}>{pedido.producto}</p>
                     </td>
                     <td className="px-4 py-3.5">
-                      <p className="text-sm font-bold" style={{ color: 'var(--text)' }}>S/ {pedido.monto.toLocaleString()}</p>
+                      <p className="text-sm font-bold" style={{ color: 'var(--text)' }}>{formatCLP(pedido.monto)}</p>
                     </td>
                     <td className="px-4 py-3.5">
                       <span className="text-xs px-2 py-1 rounded-lg font-semibold" style={{ background: 'var(--card)', color: 'var(--text-muted)', border: '1px solid var(--border)' }}>
@@ -257,7 +258,7 @@ export function ClientesPage() {
                 { label: 'Cliente',  value: selected.cliente },
                 { label: 'Email',    value: selected.email },
                 { label: 'Producto', value: selected.producto },
-                { label: 'Monto',    value: `S/ ${selected.monto.toLocaleString()}` },
+                { label: 'Monto',    value: formatCLP(selected.monto) },
                 { label: 'Método',   value: selected.metodo },
                 { label: 'Fecha',    value: selected.fecha },
               ].map(({ label, value }) => (

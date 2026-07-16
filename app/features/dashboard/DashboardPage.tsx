@@ -55,7 +55,7 @@ export function DashboardPage() {
           iconBg="bg-mv-primary-light" iconText="text-mv-primary"
           badge={inventario && inventario.productosBajo > 0 ? `−${inventario.productosBajo}` : null}
           badgeColor="text-mv-error" isLoading={isLoading} delay={75} />
-        <MetricCard title="CLIENTES" value={isLoading ? "—" : String(inventario?.totalProductos ?? 0)}
+        <MetricCard title="PRODUCTOS" value={isLoading ? "—" : String(inventario?.totalProductos ?? 0)}
           sub="vs mes ant." icon={<Package className="h-5 w-5" />}
           iconBg="bg-mv-primary-light" iconText="text-mv-primary" badge={null} badgeColor=""
           isLoading={isLoading} delay={150} />

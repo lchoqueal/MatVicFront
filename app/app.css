@@ -36,6 +36,15 @@
   --shadow-sm:       0 1px 3px rgba(69,53,48,.08);
   --shadow-md:       0 4px 12px rgba(69,53,48,.10);
   --shadow-lg:       0 10px 30px rgba(69,53,48,.12);
+  --shadow-card:     0 2px 8px rgba(69,53,48,.08);
+
+  /* Aliases para componentes (ProductModal, RecentTransactions, etc.) */
+  --border-main:     var(--border);
+  --border-subtle:   #E8E0D8;
+  --text-primary:    var(--text);
+  --text-secondary:  var(--text-muted);
+  --bg-muted:        var(--card);
+  --bg-surface-2:    #F7F1EB;
 }
 
 /* ── Utilidades de paleta ─────────────────────────────────────── */

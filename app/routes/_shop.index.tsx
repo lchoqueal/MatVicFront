@@ -85,7 +85,7 @@ export default function ShopIndex() {
             className="inline-flex items-center gap-2 border border-white/30 px-4 py-1.5 rounded-full text-xs font-bold tracking-widest uppercase text-white"
             style={{ background: 'rgba(255,255,255,0.12)' }}
           >
-            ✦ TEMPORADA 2025
+            ✦ TEMPORADA 2026
           </span>
           <h1 className="text-5xl sm:text-6xl lg:text-7xl font-extrabold text-white leading-[1.05] tracking-tight">
             Tecnología que<br />
@@ -356,7 +356,7 @@ export default function ShopIndex() {
           </div>
         </div>
         <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
-          © 2025 MATVIC Celulares · Arica, Chile · Todos los derechos reservados
+          © 2026 MATVIC Celulares · Arica, Chile · Todos los derechos reservados
         </p>
       </footer>
     </div>
