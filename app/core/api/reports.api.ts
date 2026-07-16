@@ -26,9 +26,23 @@ export async function getSalesReport(
   fechaInicio: string,
   fechaFin: string
 ): Promise<ReporteVentas> {
-  return api.get<ReporteVentas>(
+  const data = await api.get<any>(
     `/reportes/ventas?fechaInicio=${fechaInicio}&fechaFin=${fechaFin}`
   );
+  
+  // Mapear la respuesta del backend (camelCase) al tipo del frontend (snake_case)
+  if (data && data.boletas) {
+    data.boletas = data.boletas.map((b: any) => ({
+      id_boleta: b.id,
+      total: b.total,
+      fecha_emision: b.fechaEmision,
+      metodo_pago: b.metodoPago,
+      estado_boleta: b.estado,
+      id_local: b.idLocal
+    }));
+  }
+  
+  return data;
 }
 
 /** Alertas de productos con stock bajo o agotado */
