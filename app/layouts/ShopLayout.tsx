@@ -10,10 +10,14 @@ export default function ShopLayout() {
   const { user, isAuthenticated, isAdmin, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const [mounted, setMounted] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [cartOpen, setCartOpen] = useState(false);
   const [checkoutOpen, setCheckoutOpen] = useState(false);
   const [activeNav, setActiveNav] = useState<'inicio' | 'catalogo'>('inicio');
+
+  // Solo renderizar badge del carrito en el cliente (evita hydration mismatch)
+  useEffect(() => { setMounted(true); }, []);
 
   // Detecta qué sección está visible
   useEffect(() => {
@@ -155,7 +159,7 @@ export default function ShopLayout() {
           >
             <ShoppingCart className="h-4 w-4" />
             Carrito
-            {cartCount > 0 && (
+            {mounted && cartCount > 0 && (
               <span className="text-[10px] font-black px-1.5 py-0.5 rounded-full leading-none" style={{ background: 'white', color: 'var(--primary)' }}>
                 {cartCount}
               </span>
@@ -167,7 +171,7 @@ export default function ShopLayout() {
         <div className="flex sm:hidden items-center gap-3">
           <button onClick={() => setCartOpen(true)} className="p-2 relative" style={{ color: 'var(--text)' }}>
             <ShoppingCart className="h-6 w-6" />
-            {cartCount > 0 && (
+            {mounted && cartCount > 0 && (
               <span className="absolute top-0 right-0 text-white text-[10px] font-bold h-4 w-4 rounded-full flex items-center justify-center" style={{ background: 'var(--primary)' }}>
                 {cartCount}
               </span>
