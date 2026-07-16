@@ -27,7 +27,7 @@ interface CreateBoletaPayload {
   tipoVenta: "fisica" | "online";
   metodoPago: PaymentMethod;
   idEmpleado: number;
-  idLocal: number;
+  idLocal?: number | null;
 }
 
 /** Crea un nuevo carrito de venta */

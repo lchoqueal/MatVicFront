@@ -90,7 +90,7 @@ export function useCart(onSuccess?: () => void): CartState {
           tipoVenta: "fisica",
           metodoPago: paymentMethod.toLowerCase() as PaymentMethod,
           idEmpleado: empleadoId,
-          idLocal: storeId,
+          idLocal: null, // Evitar FK constraint ya que no hay locales creados en la DB real aún
         });
 
         const formatted = new Intl.NumberFormat("es-CL", {
