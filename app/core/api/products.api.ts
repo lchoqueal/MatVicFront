@@ -9,10 +9,12 @@ interface ProductosResponse {
 interface UpdateProductPayload {
   nombre: string;
   precio: number;
+  stock: number;
   minStock: number;
   descripcion?: string;
   imagenUrl?: string;
   idCategoria: number | null;
+  idLocal: number;
 }
 
 /** Obtiene todos los productos del inventario */
@@ -27,6 +29,13 @@ export async function updateProduct(
   payload: UpdateProductPayload
 ): Promise<void> {
   await api.put(`/productos/${id}`, payload);
+}
+
+/** Crea un producto */
+export async function createProduct(
+  payload: UpdateProductPayload
+): Promise<void> {
+  await api.post(`/productos`, payload);
 }
 
 /** Desactiva (elimina lógicamente) un producto */

@@ -31,7 +31,7 @@ export function RecentTransactions({ boletas, storeName, isLoading }: RecentTran
         {isLoading ? (
           <div className="p-4 space-y-3">
             {[...Array(4)].map((_, i) => (
-              <div key={i} className="flex items-center gap-3">
+              <div key={`skeleton-${i}`} className="flex items-center gap-3">
                 <div className="w-8 h-8 rounded-full animate-pulse shrink-0" style={{ background: "var(--bg-muted)" }} />
                 <div className="flex-1 space-y-1.5">
                   <div className="h-3 rounded animate-pulse w-2/3" style={{ background: "var(--bg-muted)" }} />

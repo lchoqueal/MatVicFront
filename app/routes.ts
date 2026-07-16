@@ -20,5 +20,7 @@ export default [
     route("admin", "routes/admin.dashboard.tsx"),
     route("admin/sales", "routes/admin.sales.tsx"),
     route("admin/inventory", "routes/admin.inventory.tsx"),
+    route("admin/clientes", "routes/admin.clientes.tsx"),
+    route("admin/empleados", "routes/admin.empleados.tsx"),
   ]),
 ] satisfies RouteConfig;

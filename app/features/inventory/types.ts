@@ -11,4 +11,6 @@ export interface Product {
   imagen_url?: string;
 }
 
-export type ProductFormData = Omit<Product, "id_producto">;
+export type ProductFormData = Omit<Product, "id_producto"> & {
+  id_categoria?: number;
+};
