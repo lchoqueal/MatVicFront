@@ -37,14 +37,14 @@ export function SalesPage() {
         <div className="flex items-center p-1 rounded-xl gap-1"
           style={{ background: "var(--bg-surface)", border: "1px solid var(--border-main)", boxShadow: "var(--shadow-card)" }}>
           <button type="button" onClick={() => setViewMode("tabla")}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 ${viewMode === "tabla" ? "bg-pickled-bluewood-600 text-white shadow-sm" : "hover:bg-pickled-bluewood-500/10"}`}
-            style={viewMode !== "tabla" ? { color: "var(--text-secondary)" } : {}}>
+            className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200"
+            style={viewMode === "tabla" ? { background: "var(--primary)", color: "white", boxShadow: "var(--shadow-sm)" } : { color: "var(--text-secondary)", background: "transparent" }}>
             <LayoutList className="h-4 w-4" />
             <span className="hidden sm:inline">Vista Ventas</span>
           </button>
           <button type="button" onClick={() => setViewMode("pos")}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 ${viewMode === "pos" ? "bg-pickled-bluewood-600 text-white shadow-sm" : "hover:bg-pickled-bluewood-500/10"}`}
-            style={viewMode !== "pos" ? { color: "var(--text-secondary)" } : {}}>
+            className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200"
+            style={viewMode === "pos" ? { background: "var(--primary)", color: "white", boxShadow: "var(--shadow-sm)" } : { color: "var(--text-secondary)", background: "transparent" }}>
             <CreditCard className="h-4 w-4" />
             <span className="hidden sm:inline">Modo Caja</span>
           </button>

@@ -40,8 +40,8 @@ export default function AdminLayout() {
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [currentStore, setCurrentStore] = useState<Store>({
-    id: 22,
-    name: "Local N° 22",
+    id: 1,
+    name: "Local Central",
     manager: "Ana García",
   });
 

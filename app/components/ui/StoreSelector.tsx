@@ -8,8 +8,8 @@ export interface Store {
 }
 
 const stores: Store[] = [
-  { id: 22,  name: "Local N° 22",  manager: "Ana García"   },
-  { id: 106, name: "Local N° 106", manager: "Carlos López" },
+  { id: 1,  name: "Local Central",  manager: "Ana García"   },
+  { id: 2, name: "Sucursal Norte", manager: "Carlos López" },
 ];
 
 interface StoreSelectorProps {
