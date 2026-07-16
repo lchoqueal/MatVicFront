@@ -62,9 +62,10 @@ export default function CheckoutModal({ isOpen, onClose, total }: CheckoutModalP
         }),
       });
 
-      const dataCarrito = await resCrearCarrito.json();
-      if (!resCrearCarrito.ok || !dataCarrito.success) {
-        throw new Error(dataCarrito.mensaje || "Error al inicializar el carrito en la base de datos.");
+      const isJsonCarrito = resCrearCarrito.headers.get("content-type")?.includes("application/json");
+      const dataCarrito = isJsonCarrito ? await resCrearCarrito.json() : null;
+      if (!resCrearCarrito.ok || !dataCarrito?.success) {
+        throw new Error(dataCarrito?.mensaje || "Error al inicializar el carrito en el servidor (Posible caída del backend).");
       }
 
       const idCarritoReal = dataCarrito.data.idCarrito;
@@ -83,9 +84,10 @@ export default function CheckoutModal({ isOpen, onClose, total }: CheckoutModalP
           }),
         });
 
-        const dataItem = await resAgregarItem.json();
-        if (!resAgregarItem.ok || !dataItem.success) {
-          throw new Error(dataItem.mensaje || `Error al guardar el producto "${item.name}" en el carrito.`);
+        const isJsonItem = resAgregarItem.headers.get("content-type")?.includes("application/json");
+        const dataItem = isJsonItem ? await resAgregarItem.json() : null;
+        if (!resAgregarItem.ok || !dataItem?.success) {
+          throw new Error(dataItem?.mensaje || `Error al guardar el producto "${item.name}" en el carrito (Posible caída del backend).`);
         }
       }
 
@@ -104,10 +106,11 @@ export default function CheckoutModal({ isOpen, onClose, total }: CheckoutModalP
         }),
       });
 
-      const boletaData = await boletaResponse.json();
+      const isJsonBoleta = boletaResponse.headers.get("content-type")?.includes("application/json");
+      const boletaData = isJsonBoleta ? await boletaResponse.json() : null;
 
-      if (!boletaResponse.ok || !boletaData.success) {
-        throw new Error(boletaData.mensaje ?? "Error al crear la boleta.");
+      if (!boletaResponse.ok || !boletaData?.success) {
+        throw new Error(boletaData?.mensaje ?? "Error al crear la boleta (Posible caída del backend).");
       }
 
       const idBoleta = boletaData.data?.idBoleta;
@@ -121,10 +124,11 @@ export default function CheckoutModal({ isOpen, onClose, total }: CheckoutModalP
         },
       });
 
-      const pagoData = await pagoResponse.json();
+      const isJsonPago = pagoResponse.headers.get("content-type")?.includes("application/json");
+      const pagoData = isJsonPago ? await pagoResponse.json() : null;
 
-      if (!pagoResponse.ok || !pagoData.success) {
-        throw new Error(pagoData.mensaje ?? "Error al conectar con la pasarela de pago.");
+      if (!pagoResponse.ok || !pagoData?.success) {
+        throw new Error(pagoData?.mensaje ?? "Error al conectar con la pasarela de pago (El servicio podría estar caído).");
       }
 
       const { redirectUrl } = pagoData.data;
