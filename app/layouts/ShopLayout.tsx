@@ -7,7 +7,7 @@ import { formatCLP } from "~/lib/utils";
 import { useCart } from "~/context/CartContext";
 
 export default function ShopLayout() {
-  const { user, isAuthenticated, isAdmin, isEmpleado, logout } = useAuth();
+  const { user, isAuthenticated, isAdmin, isEmpleado, isCliente, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [mounted, setMounted] = useState(false);
@@ -129,7 +129,11 @@ export default function ShopLayout() {
             </Link>
           ) : (
             <div className="flex items-center gap-3">
-              <div className="flex items-center gap-2 px-3 py-1.5 rounded-full" style={{ background: 'var(--card)' }}>
+              <Link 
+                to={isEmpleado || isAdmin ? "/admin" : "/perfil"}
+                className="flex items-center gap-2 px-3 py-1.5 rounded-full hover:opacity-80 transition-opacity" 
+                style={{ background: 'var(--card)' }}
+              >
                 <div className="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold text-white" style={{ background: 'var(--brand)' }}>
                   {(user?.nombre ?? user?.username ?? 'U')[0].toUpperCase()}
                 </div>
@@ -139,7 +143,7 @@ export default function ShopLayout() {
                 <span className="text-xs px-1.5 py-0.5 rounded-full" style={{ background: 'var(--primary-light)', color: 'var(--primary)' }}>
                   {user?.rol}
                 </span>
-              </div>
+              </Link>
               <button onClick={handleLogout} className="p-2 rounded-full transition-colors" style={{ color: 'var(--text-muted)' }}
                 onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = 'var(--error)'; }}
                 onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = 'var(--text-muted)'; }}
@@ -195,9 +199,13 @@ export default function ShopLayout() {
           ) : (
             <div className="pt-2">
               <p className="font-bold mb-3" style={{ color: 'var(--primary)' }}>{user?.nombre ?? user?.username}</p>
-              {(isAdmin || isEmpleado) && (
+              {(isAdmin || isEmpleado) ? (
                 <Link to="/admin" onClick={() => setMenuOpen(false)} className="flex items-center gap-2 font-bold mb-4" style={{ color: 'var(--text)' }}>
                   <LayoutDashboard className="h-5 w-5" /> Ir al Panel
+                </Link>
+              ) : (
+                <Link to="/perfil" onClick={() => setMenuOpen(false)} className="flex items-center gap-2 font-bold mb-4" style={{ color: 'var(--text)' }}>
+                  <User className="h-5 w-5" /> Mi Perfil
                 </Link>
               )}
               <button onClick={handleLogout} className="flex items-center gap-2 font-bold" style={{ color: 'var(--error)' }}>

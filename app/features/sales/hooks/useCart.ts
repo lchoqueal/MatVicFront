@@ -14,7 +14,7 @@ export interface CartState {
   removeItem: (id: number) => void;
   updateQty: (id: number, qty: number) => void;
   clearCart: () => void;
-  checkout: (storeId: number, empleadoId: number) => Promise<void>;
+  checkout: (storeId: number, empleadoId: number | null) => Promise<void>;
   totalSale: number;
   totalItems: number;
 }
@@ -65,7 +65,7 @@ export function useCart(onSuccess?: () => void): CartState {
   const totalItems = cart.reduce((s, i) => s + i.cantidad, 0);
 
   const checkout = useCallback(
-    async (storeId: number, empleadoId: number) => {
+    async (storeId: number, empleadoId: number | null) => {
       if (cart.length === 0 || !paymentMethod) {
         setSubmitError("Agrega al menos un producto y selecciona el método de pago.");
         return;
@@ -75,7 +75,7 @@ export function useCart(onSuccess?: () => void): CartState {
       try {
         const idCarrito = await createCart({
           tipoCarrito: "venta_fisica",
-          idEmpleado: empleadoId,
+          ...(empleadoId ? { idEmpleado: empleadoId } : {}),
         });
 
         for (const item of cart) {
@@ -89,7 +89,7 @@ export function useCart(onSuccess?: () => void): CartState {
           idCarrito,
           tipoVenta: "fisica",
           metodoPago: paymentMethod.toLowerCase() as PaymentMethod,
-          idEmpleado: empleadoId,
+          ...(empleadoId ? { idEmpleado: empleadoId } : {}),
           idLocal: null, // Evitar FK constraint ya que no hay locales creados en la DB real aún
         });
 

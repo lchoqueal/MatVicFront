@@ -9,7 +9,7 @@ function formatRut(raw: string): string {
   const clean = raw.replace(/[^0-9kK]/g, "").toUpperCase();
   if (clean.length < 2) return clean;
   const body = clean.slice(0, -1);
-  const dv   = clean.slice(-1);
+  const dv = clean.slice(-1);
   // Formatear con puntos
   const formatted = body.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
   return `${formatted}-${dv}`;
@@ -18,7 +18,7 @@ function formatRut(raw: string): string {
 function validateRut(rut: string): boolean {
   const clean = rut.replace(/[^0-9kK]/g, "").toUpperCase();
   if (clean.length < 7) return false;
-  const body  = clean.slice(0, -1);
+  const body = clean.slice(0, -1);
   const dvStr = clean.slice(-1);
   let sum = 0;
   let mult = 2;
@@ -93,15 +93,15 @@ export function EmpleadosPage() {
     setIsSaving(true);
     try {
       const payload: CreateEmpleadoPayload = {
-        username:  form.username.trim(),
+        username: form.username.trim(),
         user_name: form.username.trim(), // Enviamos ambos por si el backend espera user_name
-        nombre:    form.nombre.trim(),
+        nombre: form.nombre.trim(),
         apellidos: form.apellidos.trim(),
-        password:  form.password,
-        dni:       form.dni.replace(/\./g, ""), // Enviar sin puntos al backend
-        rol:       form.rol,
+        password: form.password,
+        dni: form.dni.replace(/\./g, ""), // Enviar sin puntos al backend
+        rol: form.rol,
         fechaIngreso: form.fechaIngreso,
-        horario:   `${form.horarioInicio} a ${form.horarioFin}`,
+        horario: `${form.horarioInicio} a ${form.horarioFin}`,
       };
       await createEmpleado(payload);
       setSuccessMsg(`¡${form.rol === "empleado" ? "Empleado" : "Administrador"} creado exitosamente! Ya puede iniciar sesión.`);
@@ -191,7 +191,7 @@ export function EmpleadosPage() {
                     const isSelected = form.rol === r;
                     const Icon = r === "empleado" ? Briefcase : ShieldCheck;
                     const label = r === "empleado" ? "Empleado / Cajero" : "Administrador";
-                    const desc  = r === "empleado" ? "Acceso a Caja e Inventario" : "Acceso total al sistema";
+                    const desc = r === "empleado" ? "Acceso a Caja e Inventario" : "Acceso total al sistema";
                     return (
                       <button
                         key={r}
@@ -223,7 +223,7 @@ export function EmpleadosPage() {
                   <label className="block text-xs font-bold uppercase tracking-wider mb-1.5" style={{ color: "var(--text-muted)" }}>Nombre *</label>
                   <input
                     type="text"
-                    placeholder="María"
+                    placeholder="Primer nombre"
                     value={form.nombre}
                     onChange={e => set("nombre", e.target.value)}
                     required
@@ -237,7 +237,7 @@ export function EmpleadosPage() {
                   <label className="block text-xs font-bold uppercase tracking-wider mb-1.5" style={{ color: "var(--text-muted)" }}>Apellidos *</label>
                   <input
                     type="text"
-                    placeholder="González Rojas"
+                    placeholder="Primer apellido"
                     value={form.apellidos}
                     onChange={e => set("apellidos", e.target.value)}
                     required
@@ -273,9 +273,9 @@ export function EmpleadosPage() {
                 <label className="block text-xs font-bold uppercase tracking-wider mb-1.5" style={{ color: "var(--text-muted)" }}>Nombre de usuario *</label>
                 <input
                   type="text"
-                  placeholder="maria.gonzalez"
+                  placeholder="Nombre"
                   value={form.username}
-                  onChange={e => set("username", e.target.value.toLowerCase().replace(/\s/g, "."))}
+                  onChange={e => set("username", e.target.value.replace(/\s/g, "."))}
                   required
                   disabled={isSaving}
                   style={inputStyle}
@@ -287,7 +287,7 @@ export function EmpleadosPage() {
 
               {/* Password */}
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider mb-1.5" style={{ color: "var(--text-muted)" }}>Contraseña temporal *</label>
+                <label className="block text-xs font-bold uppercase tracking-wider mb-1.5" style={{ color: "var(--text-muted)" }}>Contraseña *</label>
                 <div className="relative">
                   <input
                     type={showPwd ? "text" : "password"}

@@ -80,7 +80,7 @@ export function InventoryPage() {
               onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'var(--primary-hover)'; }}
               onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'var(--primary)'; }}
             >
-              <Plus className="h-4 w-4" /> + Agregar Producto
+              <Plus className="h-4 w-4" /> Agregar Producto
             </button>
           )}
         </div>

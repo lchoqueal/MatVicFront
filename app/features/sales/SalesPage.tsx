@@ -68,7 +68,7 @@ export function SalesPage() {
         <POSView
           storeName={currentStore.name}
           storeId={currentStore.id}
-          empleadoId={user?.id ?? null}
+          empleadoId={isAdmin ? null : (user?.id ?? null)}
           empleadoNombre={user ? `${user.nombre} ${user.apellidos}` : "—"}
           onVentaCompletada={handleVentaCompletada}
         />

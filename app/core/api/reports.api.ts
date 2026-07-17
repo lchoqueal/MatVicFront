@@ -38,7 +38,8 @@ export async function getSalesReport(
       fecha_emision: b.fechaEmision,
       metodo_pago: b.metodoPago,
       estado_boleta: b.estado,
-      id_local: b.idLocal
+      id_local: b.idLocal,
+      detalles: b.detalles
     }));
   }
   

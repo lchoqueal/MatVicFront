@@ -97,9 +97,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const logout = () => clearAuth();
 
   const isAuthenticated = !!user && !!token;
-  const isAdmin     = isAuthenticated && user?.rol === "administrador";
-  const isEmpleado  = isAuthenticated && user?.rol === "empleado";
-  const isCliente   = isAuthenticated && user?.rol === "cliente";
+  const isAdmin     = isAuthenticated && user?.rol?.toLowerCase() === "administrador";
+  const isEmpleado  = isAuthenticated && user?.rol?.toLowerCase() === "empleado";
+  const isCliente   = isAuthenticated && user?.rol?.toLowerCase() === "cliente";
 
   return (
     <AuthContext.Provider

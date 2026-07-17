@@ -11,8 +11,11 @@ interface CategoryBtnProps {
 function CategoryBtn({ label, active, onClick }: CategoryBtnProps) {
   return (
     <button type="button" onClick={onClick}
-      className={`px-3 py-1 text-xs rounded-full font-semibold transition-all duration-200 ${active ? "bg-pickled-bluewood-600 text-white shadow-sm" : "hover:bg-pickled-bluewood-500/10"}`}
-      style={!active ? { background: "var(--bg-surface-2)", border: "1px solid var(--border-subtle)", color: "var(--text-secondary)" } : {}}>
+      className={`px-3 py-1 text-xs rounded-full font-semibold transition-all duration-200 ${active ? "shadow-sm" : "hover:bg-black/5"}`}
+      style={active 
+        ? { background: "var(--primary)", color: "white", border: "1px solid var(--primary)" } 
+        : { background: "var(--bg-surface-2)", border: "1px solid var(--border-subtle)", color: "var(--text-secondary)" }
+      }>
       {label}
     </button>
   );
@@ -42,8 +45,8 @@ export function ProductGrid({
         <div className="relative">
           <input type="text" placeholder="Buscar producto rápido..." value={searchTerm}
             onChange={(e) => onSearchChange(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 rounded-xl text-sm outline-none focus:ring-2 focus:ring-pickled-bluewood-600 transition-colors"
-            style={{ background: "var(--bg-surface-2)", border: "1px solid var(--border-main)", color: "var(--text-primary)" }} />
+            className="w-full pl-10 pr-4 py-2.5 rounded-xl text-sm outline-none focus:ring-2 transition-colors"
+            style={{ background: "var(--bg-surface-2)", border: "1px solid var(--border-main)", color: "var(--text-primary)", "--tw-ring-color": "var(--primary)" } as React.CSSProperties} />
           <svg className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4" style={{ color: "var(--text-muted)" }}
             fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -80,7 +83,8 @@ export function ProductGrid({
                   className={`relative flex flex-col items-start text-left p-3 rounded-xl border transition-all duration-200 ${sinStock ? "opacity-40 cursor-not-allowed" : "hover:shadow-md hover:-translate-y-0.5 active:scale-[0.98] cursor-pointer"}`}
                   style={{ background: "var(--bg-surface-2)", borderColor: inCart ? "hsl(210, 28%, 37%)" : "var(--border-subtle)" }}>
                   {inCart && (
-                    <span className="absolute top-2 right-2 w-5 h-5 rounded-full bg-pickled-bluewood-600 text-white text-[10px] font-black flex items-center justify-center">
+                    <span className="absolute top-2 right-2 w-5 h-5 rounded-full text-white text-[10px] font-black flex items-center justify-center shadow-sm"
+                      style={{ background: "var(--primary)" }}>
                       {inCart.cantidad}
                     </span>
                   )}

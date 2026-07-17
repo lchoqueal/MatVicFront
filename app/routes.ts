@@ -4,6 +4,7 @@ export default [
   // 1. EL PORTAL (Página de Login independiente)
   // Esta página no tiene Sidebar ni Navbar de tienda, es a pantalla completa.
   route("login", "routes/login.tsx"),
+  route("perfil", "routes/perfil.tsx"),
 
   // 2. SECCIÓN PÚBLICA (Tienda Virtual)
   // Cualquier usuario (cliente, admin o empleado) puede ver esto sin loguearse.

@@ -67,9 +67,14 @@ export function RecentTransactions({ boletas, storeName, isLoading }: RecentTran
                 #{boleta.id_boleta}
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold truncate" style={{ color: "var(--text-primary)" }}>
+                <p className="text-sm font-semibold truncate capitalize" style={{ color: "var(--text-primary)" }}>
                   {boleta.metodo_pago}
                 </p>
+                {boleta.detalles && boleta.detalles.length > 0 && (
+                  <p className="text-xs truncate" style={{ color: "var(--text-primary)", opacity: 0.8 }}>
+                    {boleta.detalles.map(d => `${d.cantidad}x ${d.nombre}`).join(", ")}
+                  </p>
+                )}
                 <p className="text-xs truncate" style={{ color: "var(--text-muted)" }}>
                   {new Date(boleta.fecha_emision).toLocaleDateString("es-CL")}
                 </p>
