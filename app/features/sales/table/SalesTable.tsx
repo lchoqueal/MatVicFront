@@ -22,7 +22,7 @@ export function SalesTable({
   const filtered = boletas.filter((b) => {
     const matchSearch = String(b.id_boleta).includes(searchTerm) ||
       b.metodo_pago.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchPay = filterPayment === "all" || b.metodo_pago === filterPayment;
+    const matchPay = filterPayment === "all" || b.metodo_pago.toLowerCase() === filterPayment.toLowerCase();
     return matchSearch && matchPay;
   });
 
