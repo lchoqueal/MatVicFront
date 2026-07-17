@@ -75,7 +75,7 @@ export default function PerfilPage() {
       try {
         setIsLoading(true);
         // Cargar boletas del cliente
-        const boletasData = await api.get<BoletasResponse>(`/boletas/cliente/${user.id}`);
+        const boletasData = await api.get<BoletasResponse>(`/boleta/cliente/${user.id}`);
         setBoletas(boletasData.boletas || []);
         
         // Cargar productos recomendados (aleatorios o primeros 4)

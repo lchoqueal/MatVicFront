@@ -63,10 +63,10 @@ export default function ShopLayout() {
     <div className="min-h-screen flex flex-col" style={{ background: 'var(--bg)' }}>
 
       {/* ── HEADER ────────────────────────────────────────────── */}
-      <header className="bg-white sticky top-0 z-40 px-4 sm:px-6 h-[72px] flex items-center justify-between" style={{ borderBottom: '1px solid var(--border)', boxShadow: 'var(--shadow-sm)' }}>
+      <header className="glass-panel sticky top-0 z-40 px-4 sm:px-6 h-[72px] flex items-center justify-between" style={{ borderBottom: '1px solid var(--border)', boxShadow: 'var(--shadow-sm)' }}>
         
         {/* Logo */}
-        <Link to="/" className="flex items-center gap-2.5 hover:opacity-80 transition-opacity shrink-0">
+        <Link to="/" className="flex items-center gap-2.5 interactive-element hover:opacity-80 transition-opacity shrink-0">
           <div className="w-9 h-9 rounded-full flex items-center justify-center" style={{ background: 'var(--primary)' }}>
             <Smartphone className="h-5 w-5 text-white" />
           </div>
@@ -82,6 +82,7 @@ export default function ShopLayout() {
             to="/"
             onClick={() => setActiveNav('inicio')}
             style={navLinkStyle(activeNav === 'inicio' && location.pathname === '/')}
+            className="interactive-element"
           >
             Inicio
           </Link>
@@ -100,6 +101,7 @@ export default function ShopLayout() {
               }
             }}
             style={navLinkStyle(activeNav === 'catalogo' && location.pathname === '/')}
+            className="interactive-element"
           >
             Catálogo
           </a>
@@ -110,7 +112,7 @@ export default function ShopLayout() {
           {isAuthenticated && (isAdmin || isEmpleado) && (
             <Link
               to="/admin"
-              className="flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-full transition-colors"
+              className="flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-full transition-colors interactive-element"
               style={{ background: 'var(--card)', color: 'var(--text)' }}
             >
               <LayoutDashboard className="h-3.5 w-3.5" />
@@ -121,7 +123,7 @@ export default function ShopLayout() {
           {!isAuthenticated ? (
             <Link
               to="/login"
-              className="flex items-center gap-2 font-bold text-sm px-4 py-2 rounded-full border transition-all"
+              className="flex items-center gap-2 font-bold text-sm px-4 py-2 rounded-full border transition-all interactive-element"
               style={{ color: 'var(--text)', borderColor: 'var(--border)' }}
             >
               <User className="h-4 w-4" />
@@ -131,7 +133,7 @@ export default function ShopLayout() {
             <div className="flex items-center gap-3">
               <Link 
                 to={isEmpleado || isAdmin ? "/admin" : "/perfil"}
-                className="flex items-center gap-2 px-3 py-1.5 rounded-full hover:opacity-80 transition-opacity" 
+                className="flex items-center gap-2 px-3 py-1.5 rounded-full hover:opacity-80 transition-opacity interactive-element" 
                 style={{ background: 'var(--card)' }}
               >
                 <div className="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold text-white" style={{ background: 'var(--brand)' }}>
@@ -144,7 +146,7 @@ export default function ShopLayout() {
                   {user?.rol}
                 </span>
               </Link>
-              <button onClick={handleLogout} className="p-2 rounded-full transition-colors" style={{ color: 'var(--text-muted)' }}
+              <button onClick={handleLogout} className="p-2 rounded-full transition-colors interactive-element" style={{ color: 'var(--text-muted)' }}
                 onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = 'var(--error)'; }}
                 onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = 'var(--text-muted)'; }}
               >
@@ -156,7 +158,7 @@ export default function ShopLayout() {
           {/* Botón Carrito */}
           <button
             onClick={() => setCartOpen(true)}
-            className="flex items-center gap-2 text-white font-bold text-sm px-4 py-2.5 rounded-full transition-all"
+            className="flex items-center gap-2 text-white font-bold text-sm px-4 py-2.5 rounded-full transition-all interactive-element"
             style={{ background: 'var(--primary)', boxShadow: '0 4px 12px rgba(232,99,90,0.35)' }}
             onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'var(--primary-hover)'; }}
             onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'var(--primary)'; }}

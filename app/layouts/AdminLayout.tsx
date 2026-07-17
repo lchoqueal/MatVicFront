@@ -232,8 +232,8 @@ export default function AdminLayout() {
 
         {/* Top bar */}
         <header
-          className="h-[64px] px-4 lg:px-6 flex items-center justify-between shrink-0 gap-3 border-b"
-          style={{ background: 'var(--bg-surface)', borderColor: 'var(--border)', boxShadow: 'var(--shadow-sm)' }}
+          className="h-[64px] px-4 lg:px-6 flex items-center justify-between shrink-0 gap-3 border-b glass-panel sticky top-0 z-30"
+          style={{ borderColor: 'var(--border)' }}
         >
           <div className="flex items-center gap-3 min-w-0">
             <button
