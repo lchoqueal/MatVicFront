@@ -18,3 +18,14 @@ export function getStockStatus(
     return { label: "Stock Medio", color: "bg-yellow-100 text-yellow-700" };
   return { label: "Stock OK", color: "bg-green-100 text-green-700" };
 }
+
+/** Formatea una fecha en formato local (es-CL) */
+export function formatDate(dateString: string): string {
+  if (!dateString) return "";
+  const d = new Date(dateString);
+  return new Intl.DateTimeFormat("es-CL", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric"
+  }).format(d);
+}
