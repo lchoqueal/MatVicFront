@@ -102,7 +102,7 @@ export function SalesTable({
                       {new Date(boleta.fecha_emision).toLocaleDateString("es-CL")}
                     </td>
                     <td className="px-6 py-4">
-                      <span className="px-2 py-1 rounded-lg text-xs font-medium"
+                      <span className="px-2 py-1 rounded-lg text-xs font-medium capitalize"
                         style={{ background: "var(--bg-muted)", color: "var(--text-secondary)", border: "1px solid var(--border-subtle)" }}>
                         {boleta.metodo_pago}
                       </span>
