@@ -51,7 +51,7 @@ interface ProductosResponse {
 export default function PerfilPage() {
   const navigate = useNavigate();
   const { user, isAuthenticated, isCliente, logout } = useAuth();
-  const { items, total } = useCart();
+  const { cartItems, cartTotal, removeItem } = useCart();
   
   const [boletas, setBoletas] = useState<BoletaCliente[]>([]);
   const [productosRecomendados, setProductosRecomendados] = useState<Product[]>([]);
@@ -199,26 +199,26 @@ export default function PerfilPage() {
                   <Package className="w-5 h-5" />
                 </div>
                 <div>
-                  <p className="text-2xl font-black leading-none">{items.length}</p>
+                  <p className="text-2xl font-black leading-none">{cartItems.length}</p>
                   <p className="text-xs text-slate-500 font-medium">productos</p>
                 </div>
               </div>
               <div className="text-right">
                 <p className="text-xs text-slate-500 font-medium mb-1">Total</p>
-                <p className="text-2xl font-black text-mv-primary">{formatCLP(total)}</p>
+                <p className="text-2xl font-black text-mv-primary">{formatCLP(cartTotal)}</p>
               </div>
             </div>
             
             <div className="space-y-3 mb-6 flex-1">
-              {items.slice(0, 2).map((item, idx) => (
+              {cartItems.slice(0, 2).map((item, idx) => (
                 <div key={idx} className="flex justify-between items-center text-xs">
-                  <span className="font-medium text-slate-700 truncate pr-4">{item.producto.nombre}</span>
-                  <span className="text-slate-400 whitespace-nowrap">×{item.cantidad} · {formatCLP(item.producto.precio_unit)}</span>
+                  <span className="font-medium text-slate-700 truncate pr-4">{item.name}</span>
+                  <span className="text-slate-400 whitespace-nowrap">×{item.quantity} · {formatCLP(item.price)}</span>
                 </div>
               ))}
-              {items.length > 2 && (
+              {cartItems.length > 2 && (
                 <p className="text-xs text-slate-400 text-center font-medium pt-2">
-                  y {items.length - 2} más...
+                  y {cartItems.length - 2} más...
                 </p>
               )}
             </div>
@@ -484,9 +484,9 @@ export default function PerfilPage() {
               <div className="flex items-center gap-2">
                 <ShoppingCart className="h-5 w-5 text-mv-primary" />
                 <h2 className="font-bold text-lg text-slate-800">Mi Carrito</h2>
-                {items.length > 0 && (
+                {cartItems.length > 0 && (
                   <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-mv-primary text-white">
-                    {items.length}
+                    {cartItems.length}
                   </span>
                 )}
               </div>
@@ -497,27 +497,30 @@ export default function PerfilPage() {
 
             {/* Items */}
             <div className="flex-1 overflow-y-auto p-4 space-y-3">
-              {items.length === 0 ? (
+              {cartItems.length === 0 ? (
                 <div className="h-full flex flex-col items-center justify-center text-center space-y-3 py-20">
                   <ShoppingCart className="h-14 w-14 text-slate-200" />
                   <p className="font-medium text-slate-500">Tu carrito está vacío</p>
                   <p className="text-sm text-slate-400">Agrega productos desde el catálogo</p>
                 </div>
               ) : (
-                items.map(item => (
-                  <div key={item.producto.id_producto} className="flex gap-3 p-3 rounded-2xl bg-white border border-slate-200">
+                cartItems.map(item => (
+                  <div key={item.id} className="flex gap-3 p-3 rounded-2xl bg-white border border-slate-200">
                     <div className="w-16 h-16 rounded-xl overflow-hidden shrink-0 bg-slate-100">
-                      {item.producto.imagen_url && <img src={item.producto.imagen_url} alt={item.producto.nombre} className="w-full h-full object-cover" />}
+                      {item.image && <img src={item.image} alt={item.name} className="w-full h-full object-cover" />}
                     </div>
                     <div className="flex-1 flex flex-col justify-between min-w-0">
                       <div className="flex justify-between items-start gap-1">
-                        <h4 className="font-bold text-sm leading-tight line-clamp-2 text-slate-800">{item.producto.nombre}</h4>
+                        <h4 className="font-bold text-sm leading-tight line-clamp-2 text-slate-800">{item.name}</h4>
+                        <button onClick={() => removeItem(item.id)} className="p-1 shrink-0 transition-colors text-slate-400 hover:text-red-500">
+                          <X className="h-4 w-4" />
+                        </button>
                       </div>
                       <div className="flex items-end justify-between mt-2">
                         <div className="flex items-center gap-2 bg-slate-50 rounded-lg p-1 border border-slate-200">
-                          <span className="w-6 h-6 flex items-center justify-center text-xs font-bold">{item.cantidad}</span>
+                          <span className="w-6 h-6 flex items-center justify-center text-xs font-bold">{item.quantity}</span>
                         </div>
-                        <span className="font-black text-sm text-mv-primary">{formatCLP(item.producto.precio_unit)}</span>
+                        <span className="font-black text-sm text-mv-primary">{formatCLP(item.price)}</span>
                       </div>
                     </div>
                   </div>
@@ -526,11 +529,11 @@ export default function PerfilPage() {
             </div>
 
             {/* Footer drawer */}
-            {items.length > 0 && (
+            {cartItems.length > 0 && (
               <div className="p-5 border-t border-slate-200 bg-white">
                 <div className="flex justify-between items-center mb-4">
                   <span className="text-slate-500 font-bold">Total</span>
-                  <span className="text-xl font-black text-slate-800">{formatCLP(total)}</span>
+                  <span className="text-xl font-black text-slate-800">{formatCLP(cartTotal)}</span>
                 </div>
                 <button
                   onClick={() => {
@@ -551,14 +554,8 @@ export default function PerfilPage() {
       <CheckoutModal
         isOpen={checkoutOpen}
         onClose={() => setCheckoutOpen(false)}
-        items={items.map(i => ({
-          id: i.producto.id_producto,
-          name: i.producto.nombre,
-          price: Number(i.producto.precio_unit),
-          quantity: i.cantidad,
-          image: i.producto.imagen_url
-        }))}
-        total={Number(total)}
+        items={cartItems}
+        total={Number(cartTotal)}
       />
     </div>
   );
