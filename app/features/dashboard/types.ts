@@ -7,6 +7,7 @@ export interface Boleta {
   metodo_pago: string;
   estado_boleta: string;
   id_local?: number;
+  detalles?: { nombre: string; cantidad: number }[];
 }
 
 export interface AlertaStock {
