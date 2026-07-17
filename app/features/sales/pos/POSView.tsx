@@ -38,9 +38,6 @@ export function POSView({ storeName, storeId, empleadoId, empleadoNombre, onVent
 
   const handleCheckout = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!empleadoId) {
-      return;
-    }
     await cart.checkout(storeId, empleadoId);
   };
 
