@@ -61,8 +61,18 @@ export default function ShopIndex() {
 
   const productosFiltrados = useMemo(() => {
     if (activeFilter === 'Todos') return productos;
-    if (activeFilter === 'Smartphones') return productos.filter(p => p.categoria?.toLowerCase() === 'smartphone');
-    if (activeFilter === 'Accesorios') return productos.filter(p => p.categoria?.toLowerCase() !== 'smartphone');
+    if (activeFilter === 'Smartphones') {
+      return productos.filter(p => {
+        const cat = p.categoria?.toLowerCase() || '';
+        return cat.includes('smartphone') || cat.includes('celular') || cat.includes('teléfono') || cat.includes('telefono');
+      });
+    }
+    if (activeFilter === 'Accesorios') {
+      return productos.filter(p => {
+        const cat = p.categoria?.toLowerCase() || '';
+        return !cat.includes('smartphone') && !cat.includes('celular') && !cat.includes('teléfono') && !cat.includes('telefono');
+      });
+    }
     return productos;
   }, [productos, activeFilter]);
 
